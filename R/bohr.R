@@ -146,9 +146,9 @@ bohr <- function(formula, data, test = NULL, type = c("auto", "dosage", "binary"
   R <- fit_rules(fit)
   if (n_na > 0) R <- rbind(rule_df("na_action", sprintf("%s with missing values left out by na.action (%s).",
                                                          plural(n_na, "observation"), class(attr(mf, "na.action"))[1])), R)
-  T <- test_rules(tc$row, fit$family, control$firth)
+  TR <- test_rules(tc$row, fit$family, control$firth)
   note_codes <- c("complete_separation", "separation_p0", "separation_p1", "separation_mu", "not_converged_mu", "not_converged_p0", "not_converged_p1")
-  rules <- rbind(R, T[!T$rule %in% note_codes, , drop = FALSE]); notes <- T[T$rule %in% note_codes, , drop = FALSE]
+  rules <- rbind(R, TR[!TR$rule %in% note_codes, , drop = FALSE]); notes <- TR[TR$rule %in% note_codes, , drop = FALSE]
   rownames(rules) <- NULL; rownames(notes) <- NULL
 
   structure(list(call = cl, formula = formula, terms = tt, cov_terms = cov_terms, contrasts = ctr,
