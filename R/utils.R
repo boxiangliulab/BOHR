@@ -56,17 +56,20 @@ TEST_COLS <- c("log_p_mu", "log_p_p0", "log_p_p1", "p_mu", "p_p0", "p_p1",
 ## snp_tests gives no statistics and no Firth fit; a failed Firth fit gives NA Firth columns with
 ## nu/tau_firth_conv = FALSE), followed by the F correction of run_muF.R. Returns a named list of the
 ## engine columns plus `error` (character) and `firth_error` (logical). control: bohr_control().
-engine_one <- function(fit, g, control) {
+## keep_fits = TRUE (bohr()) also returns `fits`: the full beta fit (`beta`), the full unpenalised categorical
+## fit (`cat`) and the full Firth-penalised categorical fit (`firth`), each NULL when not fitted.
+engine_one <- function(fit, g, control, keep_fits = FALSE) {
   out <- stats::setNames(rep(list(NA), length(ENGINE_COLS)), ENGINE_COLS)
   out$error <- NA_character_; out$firth_error <- FALSE
-  r <- tryCatch(snp_tests(fit$y, fit$design, g, fit$null, maxit = control$maxit), error = function(e) e)
+  r <- tryCatch(snp_tests(fit$y, fit$design, g, fit$null, maxit = control$maxit, keep_fits = keep_fits), error = function(e) e)
   if (inherits(r, "error")) { out$error <- conditionMessage(r); return(out) }
   out[SNP_COLS] <- r[SNP_COLS]
+  if (keep_fits) out$fits <- list(beta = r$fits$beta, cat = r$fits$cat, firth = NULL)
   if (isTRUE(control$firth) && fit$family != "BE") {
     ff <- tryCatch(firth_snp_tests(fit$y, fit$design, g, fit$null, maxround = control$max_rounds, maxit = control$maxit,
-                                   bfgs_maxit = control$bfgs_maxit), error = function(e) e)
+                                   bfgs_maxit = control$bfgs_maxit, keep_fits = keep_fits), error = function(e) e)
     if (inherits(ff, "error")) { out$firth_error <- TRUE; out$nu_firth_conv <- FALSE; out$tau_firth_conv <- FALSE }
-    else out[FIRTH_COLS] <- ff[FIRTH_COLS]
+    else { out[FIRTH_COLS] <- ff[FIRTH_COLS]; if (keep_fits) out$fits$firth <- ff$fits$cat }
   }
   out$mu_F_logp <- mu_F_logp(out$mu_stat, fit$n_mid, fit$p_mean)
   out

@@ -10,18 +10,26 @@
 #'
 #' General regression:
 #' \itemize{
+#'   \item [bohr()]: formula interface, `y ~ x + covariates`, with the
+#'     methods `print`, `summary`, `coef`, `vcov`, `logLik`, `nobs` and
+#'     `predict`;
 #'   \item [bohr_fit()]: fit of one response without the tested predictor;
 #'   \item [bohr_test()]: association of one response with any numeric
 #'     predictor (allele dosage, binary or continuous), with effects for a
 #'     chosen contrast;
 #'   \item [bohr_control()]: fitting rules and optimiser limits (defaults are
 #'     the values of the BOHR paper);
-#'   \item [simulate_bohr()]: simulated predictor and response.
+#'   \item [simulate_response()]: one simulated predictor and response.
 #' }
 #' Genomics (high-throughput) layer:
 #' \itemize{
-#'   \item [bohr_cis()]: cis mapping of promoter-usage QTLs in one tissue, with
-#'     [bohr_combine()] to merge per-chromosome runs;
+#'   \item [bohr_cis()]: cis mapping of promoter-usage QTLs, in one tissue or
+#'     looping over tissues, from R objects or files, with [bohr_combine()] to
+#'     merge per-chromosome runs and [read_vcf_dosage()] to read genotypes
+#'     from a VCF;
+#'   \item [simulate_bohr()]: a complete synthetic input set (tissues,
+#'     promoters, absolute and relative activity, genotypes, covariates, traits
+#'     and the true effects), in memory or written to files;
 #'   \item [mirror_pairs()]: two features of one group whose proportions sum
 #'     to 1;
 #'   \item [acat()], [simes()], [bb_select()]: P-value combination and
@@ -39,5 +47,5 @@
 #' Firth D (1993). Bias reduction of maximum likelihood estimates.
 #' *Biometrika* 80, 27-38. \doi{10.1093/biomet/80.1.27}
 #' @keywords internal
-#' @importFrom stats optim p.adjust pcauchy pchisq pf plogis pnorm qlogis rbeta rbinom runif sd setNames var
+#' @importFrom stats coef logLik nobs optim p.adjust pcauchy pchisq pf plogis pnorm predict qlogis rbeta rbinom runif sd setNames var vcov
 "_PACKAGE"

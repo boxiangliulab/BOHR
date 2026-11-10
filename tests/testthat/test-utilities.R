@@ -1,4 +1,4 @@
-## Behaviour of the small utilities and of simulate_bohr(), mirror_pairs() and bohr_cis() output.
+## Behaviour of the small utilities and of simulate_response(), mirror_pairs() and bohr_cis() output.
 
 test_that("acat() follows its definition", {
   expect_equal(acat(0.3), 0.3)
@@ -24,8 +24,8 @@ test_that("simes() and bb_select() follow their definitions", {
   expect_identical(b$selected, c(TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE))
 })
 
-test_that("simulate_bohr() draws the intended distribution", {
-  d <- with_seed(1, simulate_bohr(20000, freq = 0.3, mu = 0.4, sigma = 0.3, p0 = 0.2, p1 = 0.1, effect_p0 = 0.05))
+test_that("simulate_response() draws the intended distribution", {
+  d <- with_seed(1, simulate_response(20000, freq = 0.3, mu = 0.4, sigma = 0.3, p0 = 0.2, p1 = 0.1, effect_p0 = 0.05))
   expect_named(d, c("x", "y"))
   expect_equal(mean(d$x) / 2, 0.3, tolerance = 0.02)
   expect_equal(mean(d$y[d$x == 0] == 0), 0.2, tolerance = 0.05)
@@ -35,9 +35,9 @@ test_that("simulate_bohr() draws the intended distribution", {
   expect_true(all(d$y[mid] >= 0.005 & d$y[mid] <= 0.995))
   expect_equal(mean(d$y[mid & d$x == 0]), 0.4, tolerance = 0.03)
   expect_equal(attr(d, "effects")[["effect_p0"]], 0.05)
-  d2 <- simulate_bohr(10, x = rep(0:1, 5))
+  d2 <- simulate_response(10, x = rep(0:1, 5))
   expect_identical(d2$x, rep(0:1, 5))
-  d3 <- with_seed(2, simulate_bohr(5000, x = stats::runif(5000), p0 = 0.1, p1 = 0, effect_mu = 0.3))
+  d3 <- with_seed(2, simulate_response(5000, x = stats::runif(5000), p0 = 0.1, p1 = 0, effect_mu = 0.3))
   expect_gt(stats::cor(d3$x, d3$y), 0.2)
 })
 
@@ -86,7 +86,7 @@ test_that("bohr_cis() warns about many covariates and keeps the genotype-count r
   G <- with_seed(41, rbind(v1 = stats::rbinom(n, 2, 0.4), v2 = c(1, 1, rep(0, n - 2)), v3 = stats::rbinom(n, 2, 0.3)))
   colnames(G) <- s
   V <- data.frame(id = rownames(G), chr = "c1", pos = c(1000, 2000, 3000))
-  y <- with_seed(42, simulate_bohr(n, x = G[1, ], p0 = 0.2, p1 = 0.1)$y)
+  y <- with_seed(42, simulate_response(n, x = G[1, ], p0 = 0.2, p1 = 0.1)$y)
   ph <- matrix(y, 1, n, dimnames = list("F1", s)); pr <- data.frame(id = "F1", chr = "c1", pos = 2000)
   r <- bohr_cis(ph, G, V, pr, window = 5000)
   expect_identical(r$promoters$n_variants_window, 3L)

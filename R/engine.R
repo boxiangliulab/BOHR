@@ -8,7 +8,12 @@
 ## promoter_null() and snp_tests() gain an argument `maxit = 200L` that is passed
 ## to every beta_fit / logit_fit / mnl3_fit call in their bodies (the original
 ## calls used those functions' default, maxit = 200L). With the default the
-## arithmetic is unchanged. Original header (lines 1-14):
+## arithmetic is unchanged. Stage 2b (2026-11-10): snp_tests() gains
+## `keep_fits = FALSE`; when TRUE it also returns the full fits it has already
+## computed (element `fits`: `beta`, the beta fit with the predictor; `cat`, the
+## categorical fit with the predictor, after the nesting guard), for the
+## coefficients of bohr(). No computation changes; with the default the
+## returned list is the original one. Original header (lines 1-14):
 ##
 ##   BEINF : l = l_mnl3( 0 / mid / 1 ; nu, tau )  +  l_beta( 0<y<1 ; mu, sigma )
 ##   BEZI  : l = l_logit( y==0 vs >0 ; nu )        +  l_beta( 0<y<1 ; mu, sigma )
@@ -156,8 +161,8 @@ promoter_null <- function(y, C, family, maxit = 200L) {
 
 ## ---------------------------------------------------------------------------------------------
 ## All tests for one SNP. g = dosage (0/1/2) aligned with y and C. nul = promoter_null(...).
-snp_tests <- function(y, C, g, nul, maxit = 200L) {
-  fam <- nul$family; mid <- y > 0 & y < 1; pC <- ncol(C)
+snp_tests <- function(y, C, g, nul, maxit = 200L, keep_fits = FALSE) {
+  fam <- nul$family; mid <- y > 0 & y < 1; pC <- ncol(C); fits <- list()
   r <- list(mu_stat = NA_real_, mu_est = NA_real_, mu_se = NA_real_, mu_conv = NA, mu_sep = NA,
             nu_stat = NA_real_, nu_est = NA_real_, nu_se = NA_real_, nu_conv = NA, nu_sep = NA,
             tau_stat = NA_real_, tau_est = NA_real_, tau_se = NA_real_, tau_conv = NA, tau_sep = NA,
@@ -168,6 +173,7 @@ snp_tests <- function(y, C, g, nul, maxit = 200L) {
     Xm <- cbind(C[mid, , drop = FALSE], g = g[mid])
     st <- c(nul$beta$coef[1:pC], 0, nul$beta$coef[pC + 1])
     f <- beta_fit(y[mid], Xm, start = st, maxit = maxit)
+    if (keep_fits) fits$beta <- f
     r$ll_beta_full <- f$ll; r$mu_stat <- 2 * (f$ll - nul$beta$ll); r$mu_conv <- f$converged
     r$mu_est <- f$coef[pC + 1]; r$mu_se <- if (!is.null(f$vcov)) sqrt(f$vcov[pC + 1, pC + 1]) else NA_real_
     r$mu_sep <- sep_flag(r$mu_est, r$mu_se, f$converged)
@@ -186,6 +192,7 @@ snp_tests <- function(y, C, g, nul, maxit = 200L) {
   } else if (fam == "BEZI" || fam == "BEOI") {
     z <- as.numeric(if (fam == "BEZI") y == 0 else y == 1)
     f <- logit_fit(z, Cg, start = c(na0(nul$cat$coef), 0), maxit = maxit); r$cat_iter <- f$iter
+    if (keep_fits) fits$cat <- f
     st <- 2 * (f$ll - nul$cat$ll); est <- f$coef[pC + 1]
     se <- if (!is.null(f$vcov)) sqrt(f$vcov[pC + 1, pC + 1]) else NA_real_
     eta <- drop(C %*% f$coef[1:pC]); pe <- mean(plogis(eta + 2 * est) - plogis(eta))
@@ -207,6 +214,7 @@ snp_tests <- function(y, C, g, nul, maxit = 200L) {
       f2 <- mnl3_fit(y0, y1, Cg, Cg, start = stt, maxit = maxit); if (f2$ll > full$ll) full <- f2
     }
     r$ll_cat_full <- full$ll; r$cat_iter <- full$iter
+    if (keep_fits) fits$cat <- full
     r$cat_joint_stat <- 2 * (full$ll - nul$cat$ll); r$cat_df <- 2L
     V <- full$vcov
     r$nu_stat <- 2 * (full$ll - dnu$ll);  r$nu_est <- full$coef[pC + 1]
@@ -226,9 +234,11 @@ snp_tests <- function(y, C, g, nul, maxit = 200L) {
   mu_df <- if (is.finite(r$mu_stat)) 1L else 0L
   joint <- sum(c(if (is.finite(r$mu_stat)) r$mu_stat, if (is.finite(r$cat_joint_stat)) r$cat_joint_stat))
   jdf <- if (isTRUE(r$cat_complete_sep)) 0L else mu_df + r$cat_df
-  c(r, list(joint_stat = if (jdf > 0) joint else NA_real_, joint_df = jdf,
+  res <- c(r, list(joint_stat = if (jdf > 0) joint else NA_real_, joint_df = jdf,
             mu_lrt_logp = lrt_logp(r$mu_stat, 1), nu_lrt_logp = lrt_logp(r$nu_stat, 1), tau_lrt_logp = lrt_logp(r$tau_stat, 1),
             joint_logp = if (jdf > 0) lrt_logp(joint, jdf) else NA_real_,
             mu_wald_logp = wald_logp(r$mu_est, r$mu_se), nu_wald_logp = wald_logp(r$nu_est, r$nu_se),
             tau_wald_logp = wald_logp(r$tau_est, r$tau_se)))
+  if (keep_fits) res$fits <- fits
+  res
 }

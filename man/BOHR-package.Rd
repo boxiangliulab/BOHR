@@ -17,18 +17,26 @@ in between. Alternative promoter usage is its first application.
 \details{
 General regression:
 \itemize{
+\item \code{\link[=bohr]{bohr()}}: formula interface, \code{y ~ x + covariates}, with the
+methods \code{print}, \code{summary}, \code{coef}, \code{vcov}, \code{logLik}, \code{nobs} and
+\code{predict};
 \item \code{\link[=bohr_fit]{bohr_fit()}}: fit of one response without the tested predictor;
 \item \code{\link[=bohr_test]{bohr_test()}}: association of one response with any numeric
 predictor (allele dosage, binary or continuous), with effects for a
 chosen contrast;
 \item \code{\link[=bohr_control]{bohr_control()}}: fitting rules and optimiser limits (defaults are
 the values of the BOHR paper);
-\item \code{\link[=simulate_bohr]{simulate_bohr()}}: simulated predictor and response.
+\item \code{\link[=simulate_response]{simulate_response()}}: one simulated predictor and response.
 }
 Genomics (high-throughput) layer:
 \itemize{
-\item \code{\link[=bohr_cis]{bohr_cis()}}: cis mapping of promoter-usage QTLs in one tissue, with
-\code{\link[=bohr_combine]{bohr_combine()}} to merge per-chromosome runs;
+\item \code{\link[=bohr_cis]{bohr_cis()}}: cis mapping of promoter-usage QTLs, in one tissue or
+looping over tissues, from R objects or files, with \code{\link[=bohr_combine]{bohr_combine()}} to
+merge per-chromosome runs and \code{\link[=read_vcf_dosage]{read_vcf_dosage()}} to read genotypes
+from a VCF;
+\item \code{\link[=simulate_bohr]{simulate_bohr()}}: a complete synthetic input set (tissues,
+promoters, absolute and relative activity, genotypes, covariates, traits
+and the true effects), in memory or written to files;
 \item \code{\link[=mirror_pairs]{mirror_pairs()}}: two features of one group whose proportions sum
 to 1;
 \item \code{\link[=acat]{acat()}}, \code{\link[=simes]{simes()}}, \code{\link[=bb_select]{bb_select()}}: P-value combination and

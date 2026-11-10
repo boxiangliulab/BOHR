@@ -86,12 +86,16 @@ fit_promoter <- function(yv, C_all, control) {
 #'       when not fitted) and `null$cat` (categorical part; `NULL` for `"BE"`),
 #'       each with `ll` (log-likelihood), `coef`, `vcov`, `converged`, `iter`
 #'       and `maxgrad`.}
+#'     \item{`input`}{Counts before the fitting rules (observations given,
+#'       missing, at 0 and at 1, standard deviation, covariate names and
+#'       scaling), from which `print()` reports every rule that changed the
+#'       data or the model.}
 #'   }
-#' @seealso [bohr_test()] for association tests, [bohr_control()] for the
-#'   settings.
+#' @seealso [bohr_test()] for association tests, [bohr()] for the formula
+#'   interface, [bohr_control()] for the settings.
 #' @examples
 #' set.seed(1)
-#' d <- simulate_bohr(200, mu = 0.4, p0 = 0.2, p1 = 0.1)
+#' d <- simulate_response(200, mu = 0.4, p0 = 0.2, p1 = 0.1)
 #' fit <- bohr_fit(d$y)
 #' fit
 #' fit$null$beta$coef
@@ -105,21 +109,34 @@ bohr_fit <- function(y, covariates = NULL, control = bohr_control()) {
   rownames(Z) <- nm; yv <- stats::setNames(y, nm)
   fit <- fit_promoter(yv, make_design(Z), control)
   fit$control <- control
+  fit$input <- input_summary(y, Z)
   structure(fit, class = "bohr_fit")
+}
+
+## counts before the fitting rules (for the rule messages) and the covariate scaling of cov_matrix()
+## (for mapping coefficients back to the covariates' own scale in bohr())
+input_summary <- function(y, Z) {
+  ok <- !is.na(y)
+  sc <- if (ncol(Z)) scale(Z) else NULL
+  list(n_input = length(y), n_missing = sum(!ok), n_at0 = sum(y[ok] == 0), n_at1 = sum(y[ok] == 1),
+       sd = if (sum(ok) > 1L) stats::sd(y[ok]) else NA_real_, covariates = colnames(Z),
+       center = if (is.null(sc)) numeric(0) else attr(sc, "scaled:center"),
+       scale = if (is.null(sc)) numeric(0) else attr(sc, "scaled:scale"))
 }
 
 #' @export
 print.bohr_fit <- function(x, ...) {
   if (!is.na(x$skip)) {
     cat("BOHR null fit: skipped (", x$skip, ")\n", sep = "")
-    return(invisible(x))
+  } else {
+    cat("BOHR null fit, family ", x$family, "\n", sep = "")
+    cat(sprintf("  samples %d: %d at 0, %d at 1, %d in between\n", x$n, x$n0, x$n1, x$n_mid))
+    cat(sprintf("  covariates in the design: %d (%d dropped as collinear)\n", x$n_cov, x$n_cov_dropped))
+    b <- x$null$beta; k <- x$null$cat
+    if (!is.null(b)) cat(sprintf("  beta part: log-likelihood %.4f, converged %s\n", b$ll, b$converged))
+    else cat("  beta part: not fitted (too few intermediate samples)\n")
+    if (!is.null(k)) cat(sprintf("  categorical part: log-likelihood %.4f, converged %s\n", k$ll, k$converged))
   }
-  cat("BOHR null fit, family ", x$family, "\n", sep = "")
-  cat(sprintf("  samples %d: %d at 0, %d at 1, %d in between\n", x$n, x$n0, x$n1, x$n_mid))
-  cat(sprintf("  covariates in the design: %d (%d dropped as collinear)\n", x$n_cov, x$n_cov_dropped))
-  b <- x$null$beta; k <- x$null$cat
-  if (!is.null(b)) cat(sprintf("  beta part: log-likelihood %.4f, converged %s\n", b$ll, b$converged))
-  else cat("  beta part: not fitted (too few intermediate samples)\n")
-  if (!is.null(k)) cat(sprintf("  categorical part: log-likelihood %.4f, converged %s\n", k$ll, k$converged))
+  print_rules(fit_rules(x))
   invisible(x)
 }

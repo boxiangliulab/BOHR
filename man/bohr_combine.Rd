@@ -28,7 +28,7 @@ n <- 100; s <- paste0("S", 1:n)
 geno <- matrix(rbinom(20 * n, 2, 0.4), 20, n, dimnames = list(paste0("v", 1:20), s))
 vars <- data.frame(id = rownames(geno), chr = rep(c("chr1", "chr2"), each = 10),
                    pos = rep(seq(1000, 10000, 1000), 2))
-ph <- rbind(P1 = simulate_bohr(n, p1 = 0)$y, P2 = simulate_bohr(n, p0 = 0)$y)
+ph <- rbind(P1 = simulate_response(n, p1 = 0)$y, P2 = simulate_response(n, p0 = 0)$y)
 colnames(ph) <- s
 proms <- data.frame(id = c("P1", "P2"), chr = c("chr1", "chr2"), pos = 5000)
 r1 <- bohr_cis(ph, geno, vars, proms, window = 2000, chromosomes = "chr1")

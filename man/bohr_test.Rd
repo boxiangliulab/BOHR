@@ -30,8 +30,10 @@ element of \code{y} and no intercept column.}
 \item{fit}{Optional fit from \code{\link[=bohr_fit]{bohr_fit()}} on the same \code{y} and \code{covariates},
 to reuse it across many predictors.}
 
-\item{type}{How \code{x} is treated for the effect contrast: \code{"auto"} (default),
-\code{"dosage"}, \code{"binary"} or \code{"continuous"} (see Details).}
+\item{type}{How \code{x} is treated for the effect contrast: \code{"auto"} (default;
+\code{"binary"} for exactly two distinct values, otherwise \code{"continuous"}),
+\code{"dosage"}, \code{"binary"} or \code{"continuous"} (see Details). Set \code{"dosage"} for
+allele dosages; it is never chosen automatically.}
 
 \item{contrast}{Optional length-2 numeric vector \code{c(from, to)} on the scale of
 \code{x}; the effects compare \code{x = to} with \code{x = from}. Overrides the default of
@@ -116,20 +118,34 @@ covariates, and the difference is averaged over observations. For mu it is
 the change in the mean among intermediate values; for p0 and p1 it is the
 change in probability, from the unpenalised fit. The default contrast
 depends on \code{type} (as in the BOHR paper): \code{"dosage"}, 2 versus 0 (two
-copies of an allele versus none); \code{"binary"}, 1 versus 0; \code{"continuous"},
-one standard deviation above the mean versus the mean (mean and standard
-deviation over the observations with a non-missing \code{x}). With
-\code{type = "auto"}, a predictor with values in \{0, 1\} is binary, one with
-values in \{0, 1, 2\} is a dosage, and any other is continuous. Internally
-the predictor is coded as \eqn{x' = 2(x - from)/(to - from)}, so that the
-contrast is \eqn{x'} from 0 to 2; P values do not depend on the contrast.
+copies of an allele versus none); \code{"binary"}, the larger of the two values
+versus the smaller (1 versus 0 for a 0/1 predictor); \code{"continuous"}, one
+standard deviation above the mean versus the mean (mean and standard
+deviation over the observations with a non-missing \code{x}). A \code{contrast}
+overrides the default of any type.
+
+\strong{Predictor type.} \code{type = "auto"} (the default) chooses only between two
+types: a predictor with exactly two distinct values is \code{"binary"}, any other
+is \code{"continuous"}. An allele dosage is never detected automatically, because
+a dosage vector without one of the three values would look like another
+type: set \code{type = "dosage"} for allele dosages. \code{\link[=bohr_cis]{bohr_cis()}} always codes
+its variants as dosages. Internally the predictor is coded as
+\eqn{x' = 2(x - from)/(to - from)}, so that the contrast is \eqn{x'} from 0
+to 2; for a dosage (contrast 0 to 2) \eqn{x' = x}, the coding of the paper's
+cis mapping.
+
+\strong{Scales.} Coefficients and standard errors (\verb{est_*}, \verb{se_*}) are reported
+per unit of \code{x}, as in \code{\link[stats:glm]{stats::glm()}}, whatever the type and contrast.
+Effects (\verb{effect_*}) are for the contrast. P values do not depend on the
+type or the contrast.
 }
 \examples{
 set.seed(2)
-d <- simulate_bohr(200, mu = 0.4, p0 = 0.25, p1 = 0.1,
-                   effect_mu = 0.05, effect_p0 = -0.08)
-bohr_test(d$y, d$x)[, c("type", "family", "p_mu", "p_p0", "p_p1",
-                        "effect_mu", "effect_p0", "effect_p1")]
+d <- simulate_response(200, mu = 0.4, p0 = 0.25, p1 = 0.1,
+                       effect_mu = 0.05, effect_p0 = -0.08)
+## an allele dosage: set the type (effects for 2 copies versus 0)
+bohr_test(d$y, d$x, type = "dosage")[, c("type", "family", "p_mu", "p_p0",
+                                         "p_p1", "effect_mu", "effect_p0")]
 ## a continuous predictor: effects for +1 standard deviation
 z <- rnorm(200)
 bohr_test(d$y, z)[, c("type", "contrast_from", "contrast_to", "p_mu", "effect_mu")]

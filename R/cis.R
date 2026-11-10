@@ -136,9 +136,9 @@
 #' geno <- matrix(rbinom(30 * n, 2, 0.35), 30, n,
 #'                dimnames = list(paste0("v", 1:30), samples))
 #' vars <- data.frame(id = rownames(geno), chr = "chr1", pos = seq(1000, 30000, 1000))
-#' y1 <- simulate_bohr(n, x = geno[5, ], mu = 0.4, p0 = 0.3, p1 = 0,
+#' y1 <- simulate_response(n, x = geno[5, ], mu = 0.4, p0 = 0.3, p1 = 0,
 #'                     effect_p0 = 0.15)$y
-#' y2 <- simulate_bohr(n, x = geno[20, ], mu = 0.6, p0 = 0, p1 = 0.2,
+#' y2 <- simulate_response(n, x = geno[20, ], mu = 0.6, p0 = 0, p1 = 0.2,
 #'                     effect_mu = 0.08)$y
 #' ph <- rbind(P1 = y1, P2 = y2); colnames(ph) <- samples
 #' proms <- data.frame(id = c("P1", "P2"), chr = "chr1", pos = c(5000, 20000),
@@ -352,7 +352,7 @@ unit_threshold <- function(U, fdr) if (is.null(U) || !any(U$significant)) NA_rea
 #' geno <- matrix(rbinom(20 * n, 2, 0.4), 20, n, dimnames = list(paste0("v", 1:20), s))
 #' vars <- data.frame(id = rownames(geno), chr = rep(c("chr1", "chr2"), each = 10),
 #'                    pos = rep(seq(1000, 10000, 1000), 2))
-#' ph <- rbind(P1 = simulate_bohr(n, p1 = 0)$y, P2 = simulate_bohr(n, p0 = 0)$y)
+#' ph <- rbind(P1 = simulate_response(n, p1 = 0)$y, P2 = simulate_response(n, p0 = 0)$y)
 #' colnames(ph) <- s
 #' proms <- data.frame(id = c("P1", "P2"), chr = c("chr1", "chr2"), pos = 5000)
 #' r1 <- bohr_cis(ph, geno, vars, proms, window = 2000, chromosomes = "chr1")

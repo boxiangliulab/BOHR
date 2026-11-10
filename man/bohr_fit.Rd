@@ -37,6 +37,10 @@ used.}
 when not fitted) and \code{null$cat} (categorical part; \code{NULL} for \code{"BE"}),
 each with \code{ll} (log-likelihood), \code{coef}, \code{vcov}, \code{converged}, \code{iter}
 and \code{maxgrad}.}
+\item{\code{input}}{Counts before the fitting rules (observations given,
+missing, at 0 and at 1, standard deviation, covariate names and
+scaling), from which \code{print()} reports every rule that changed the
+data or the model.}
 }
 }
 \description{
@@ -81,12 +85,12 @@ damping, at most \code{maxit} (200) iterations.
 }
 \examples{
 set.seed(1)
-d <- simulate_bohr(200, mu = 0.4, p0 = 0.2, p1 = 0.1)
+d <- simulate_response(200, mu = 0.4, p0 = 0.2, p1 = 0.1)
 fit <- bohr_fit(d$y)
 fit
 fit$null$beta$coef
 }
 \seealso{
-\code{\link[=bohr_test]{bohr_test()}} for association tests, \code{\link[=bohr_control]{bohr_control()}} for the
-settings.
+\code{\link[=bohr_test]{bohr_test()}} for association tests, \code{\link[=bohr]{bohr()}} for the formula
+interface, \code{\link[=bohr_control]{bohr_control()}} for the settings.
 }

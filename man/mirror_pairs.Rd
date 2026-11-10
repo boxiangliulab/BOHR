@@ -61,7 +61,7 @@ canonical member decides only which of the two mu tests of an
 }
 \examples{
 set.seed(3)
-a <- simulate_bohr(60, p0 = 0.2, p1 = 0.2)$y
+a <- simulate_response(60, p0 = 0.2, p1 = 0.2)$y
 b <- runif(60)
 ph <- rbind(P1 = a, P2 = 1 - a, P3 = b, P4 = 1 - b, P5 = runif(60))
 colnames(ph) <- paste0("S", 1:60)

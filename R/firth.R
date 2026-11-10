@@ -12,7 +12,10 @@
 ## firth_mnl3() gain `bfgs_maxit = 1000L` and pass it to firth_max();
 ## firth_snp_tests() gains `maxit = 200L, bfgs_maxit = 1000L` and passes both to
 ## every firth_logit / firth_mnl3 call (maxround = 6L was already an argument).
-## With the defaults the arithmetic is unchanged. Not ported: the
+## With the defaults the arithmetic is unchanged. Stage 2b (2026-11-10):
+## firth_snp_tests() gains `keep_fits = FALSE`; when TRUE it also returns the
+## final full penalised fit it has already computed (element `fits$cat`), for
+## the coefficients of bohr(); no computation changes. Not ported: the
 ## variable-precision beta fit, sandwich variances and addon_snp_tests()
 ## (lines 8-64 and 141-210), which were sensitivity analyses and do not enter
 ## any published P value. Requires engine.R (nr_max, vcov_of, log1pexp,
@@ -135,7 +138,7 @@ simulate_null <- function(C, nul, phi_mult = 1, y_obs = NULL) {
 ## again from every restricted solution. At exit the full fit is at least as high as a full fit started
 ## at the restricted optimum, and the restricted fit at least as high as one started from the final full
 ## solution (the review counter-example of 2026-10-01).
-firth_snp_tests <- function(y, C, g, nul, maxround = 6L, maxit = 200L, bfgs_maxit = 1000L) {
+firth_snp_tests <- function(y, C, g, nul, maxround = 6L, maxit = 200L, bfgs_maxit = 1000L, keep_fits = FALSE) {
   fam <- nul$family; pC <- ncol(C); Cg <- cbind(C, g = g); gi <- pC + 1L; eps <- 1e-9
   r <- list(nu_firth_stat = NA_real_, nu_firth_logp = NA_real_, nu_firth_est = NA_real_, nu_firth_se = NA_real_, nu_firth_conv = NA,
             tau_firth_stat = NA_real_, tau_firth_logp = NA_real_, tau_firth_est = NA_real_, tau_firth_se = NA_real_, tau_firth_conv = NA,
@@ -157,6 +160,7 @@ firth_snp_tests <- function(y, C, g, nul, maxround = 6L, maxit = 200L, bfgs_maxi
     r[[paste0(pre, "_firth_stat")]] <- st; r[[paste0(pre, "_firth_logp")]] <- lrt_logp(st, 1)
     r[[paste0(pre, "_firth_est")]] <- ff$coef[gi]; r[[paste0(pre, "_firth_se")]] <- se
     r[[paste0(pre, "_firth_conv")]] <- isTRUE(ff$converged) && isTRUE(fr$converged); r$firth_rounds <- k
+    if (keep_fits) r$fits <- list(cat = ff)
   } else if (fam == "BEINF") {
     y0 <- as.numeric(y == 0); y1 <- as.numeric(y == 1); inu <- gi; itau <- 2L * gi
     ff <- better(if (isTRUE(nul$cat$converged)) firth_mnl3(y0, y1, Cg, Cg, start = c(na0(nul$cat$coef[1:pC]), 0, na0(nul$cat$coef[pC + 1:pC]), 0), maxit = maxit, bfgs_maxit = bfgs_maxit) else NULL,
@@ -177,6 +181,7 @@ firth_snp_tests <- function(y, C, g, nul, maxround = 6L, maxit = 200L, bfgs_maxi
     if (!is.null(V)) { if (V[inu, inu] > 0) r$nu_firth_se <- sqrt(V[inu, inu]); if (V[itau, itau] > 0) r$tau_firth_se <- sqrt(V[itau, itau]) }
     r$nu_firth_conv <- isTRUE(ff$converged) && isTRUE(fn$converged); r$tau_firth_conv <- isTRUE(ff$converged) && isTRUE(ft$converged)
     r$firth_rounds <- k
+    if (keep_fits) r$fits <- list(cat = ff)
   }
   r
 }

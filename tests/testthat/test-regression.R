@@ -11,7 +11,7 @@ close_vec <- function(a, b, tol = 1e-6) {
 test_that("bohr_test() matches the frozen engine output (four families, separation)", {
   for (nm in names(fx$single)) {
     cs <- fx$single[[nm]]; e <- cs$engine
-    r <- bohr_test(cs$input$y, cs$input$g, cs$input$Z)
+    r <- bohr_test(cs$input$y, cs$input$g, cs$input$Z, type = "dosage")
     expect_identical(r$family, cs$family, info = nm)
     map <- BOHR:::CLEAR_MAP
     for (k in setdiff(names(map), c("conv_mu", "conv_p0", "conv_p1", "sep_mu", "sep_p0", "sep_p1", "complete_sep"))) {

@@ -1,8 +1,9 @@
-#' Simulate a proportion response with exact 0s and 1s
+#' Simulate one proportion response with exact 0s and 1s
 #'
 #' Draws a predictor and a response from a zero-and-one-inflated beta
 #' distribution whose three components depend on the predictor. Uses base R
-#' only.
+#' only. For a complete synthetic input set of the genomics layer (tissues,
+#' promoters, genotypes, covariates and traits), see [simulate_bohr()].
 #'
 #' For an observation with predictor value \eqn{x}, the components are
 #' \eqn{\mu(x) = \mu + x\,\delta_\mu}, \eqn{p_0(x) = p_0 + x\,\delta_0} and
@@ -41,14 +42,14 @@
 #' @seealso [bohr_test()], [bohr_fit()].
 #' @examples
 #' set.seed(1)
-#' d <- simulate_bohr(300, mu = 0.5, p0 = 0.2, p1 = 0.1, effect_p0 = 0.1)
+#' d <- simulate_response(300, mu = 0.5, p0 = 0.2, p1 = 0.1, effect_p0 = 0.1)
 #' table(x = d$x, at_zero = d$y == 0)
 #' attr(d, "effects")
 #' ## a continuous predictor
-#' d2 <- simulate_bohr(300, x = runif(300), p0 = 0.1, effect_mu = 0.2)
+#' d2 <- simulate_response(300, x = runif(300), p0 = 0.1, effect_mu = 0.2)
 #' summary(d2$y)
 #' @export
-simulate_bohr <- function(n, x = NULL, mu = 0.5, sigma = 0.3, p0 = 0.2, p1 = 0.1,
+simulate_response <- function(n, x = NULL, mu = 0.5, sigma = 0.3, p0 = 0.2, p1 = 0.1,
                           effect_mu = 0, effect_p0 = 0, effect_p1 = 0,
                           freq = 0.3, range = c(0.005, 0.995)) {
   n <- check_count(n, "n", min = 1)
