@@ -270,6 +270,9 @@ test_that("note: separation of an unpenalised boundary fit", {
   expect_output(print(m), "p0: the unpenalised fit shows separation .* the reported test is Firth-penalised")
   m2 <- bohr(y ~ g + c1 + c2, data = d, type = "dosage", control = bohr_control(firth = FALSE))
   expect_output(print(m2), "its unpenalised test \\(firth = FALSE\\) is unreliable")
+  R <- BOHR:::test_rules(list(error = NA_character_, firth_error = FALSE, complete_sep = FALSE, sep_p0 = FALSE, sep_p1 = TRUE,
+                              sep_mu = FALSE, conv_mu = TRUE, conv_p0 = TRUE, conv_p1 = TRUE), "BEOI")
+  expect_identical(R$rule, "separation_p1"); expect_match(R$message, "p1: the unpenalised fit shows separation")
 })
 
 test_that("note: extreme mu estimate and non-convergence", {
