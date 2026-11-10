@@ -5,15 +5,19 @@
 ##   which is what bohr_combine() gives when every chromosome is run with the package.
 ## Usage: Rscript 05_run_conditional.R stored <inputs.rds> <out.rds> <ncores> [lib]
 ##        Rscript 05_run_conditional.R cis <inputs.rds> <cis.rds> <out.rds> <ncores> [lib]
+## Environment (stage 3b-1): BOHR_FIRTH_NULL_START=FALSE runs the paper's engine exactly in mode "stored" (default TRUE; in mode
+##   "cis" the setting of the bohr_cis() run is used); BOHR_SAVE_SCANS=1 also saves every conditional scan (each variant's
+##   conditional est, SE and log P in every forward round and leave-one-out scan) as `scans`, by tracing the internal cond_pass().
 a <- commandArgs(TRUE); MODE <- a[1]
 if (MODE == "stored") { IN <- a[2]; OUT <- a[3]; NC <- as.integer(a[4]); LIB <- if (length(a) > 4) a[5] else "" } else {
   IN <- a[2]; CIS <- a[3]; OUT <- a[4]; NC <- as.integer(a[5]); LIB <- if (length(a) > 5) a[6] else "" }
 if (nzchar(LIB)) library(BOHR, lib.loc = LIB) else library(BOHR)
 x <- readRDS(IN)
+NS <- as.logical(Sys.getenv("BOHR_FIRTH_NULL_START", "TRUE"))
 if (MODE == "stored") {
   cis <- structure(list(snp = x$snp, units = x$units, promoters = NULL, mirror = NULL, threshold = x$threshold,
                         settings = list(window = 5e5, min_genotype_count = 5L, min_n_mid = 80L, boundary_share = c(0.1, 0.9), fdr = 0.05,
-                                        acat_cap = TRUE, mirror = TRUE, mirror_tol = 1e-6, control = bohr_control())), class = "bohr_cis")
+                                        acat_cap = TRUE, mirror = TRUE, mirror_tol = 1e-6, control = bohr_control(firth_null_start = NS))), class = "bohr_cis")
 } else {
   cis <- readRDS(CIS)
   V2 <- "/projects/group/bliu/e1327989/GTEx/QTL_figure/rerun_v2"
@@ -28,11 +32,17 @@ if (MODE == "stored") {
   cis$threshold <- max(allu$p[!is.na(q) & q <= 0.05])
   cat(sprintf("tissue-wide BH: %d units, threshold %.6g; significant units on this chromosome: %d\n", nrow(allu), cis$threshold, sum(cis$units$significant)))
 }
+SCANS <- new.env(); SCANS$passes <- list()
+if (Sys.getenv("BOHR_SAVE_SCANS") == "1")
+  trace("cond_pass", where = asNamespace("BOHR"), print = FALSE, exit = quote({ .rv <- returnValue()
+    SCANS$passes[[length(SCANS$passes) + 1L]] <- lapply(seq_along(jobs), function(b) list(key = jobs[[b]]$key, type = jobs[[b]]$type,
+      cs = jobs[[b]]$cs, res = .rv$res[[b]])) }))
 t0 <- proc.time()[["elapsed"]]; c0 <- sum(proc.time()[c("user.self", "sys.self", "user.child", "sys.child")], na.rm = TRUE)
 res <- bohr_conditional(cis, x$phenotype, x$genotype, x$variants, x$promoters, covariates = x$covariates, ncores = NC,
                         absolute = if (!is.null(x$absolute)) x$absolute else NULL)
 res$wall <- proc.time()[["elapsed"]] - t0
 res$cpu <- sum(proc.time()[c("user.self", "sys.self", "user.child", "sys.child")], na.rm = TRUE) - c0
-res$cis_threshold <- cis$threshold; res$tissue <- x$tissue
+res$cis_threshold <- cis$threshold; res$tissue <- x$tissue; res$firth_null_start <- isTRUE(cis$settings$control$firth_null_start)
+if (length(SCANS$passes)) res$scans <- SCANS$passes
 saveRDS(res, OUT)
-print(res); cat(sprintf("wall %.1f s on %d cores; CPU %.0f s\n", res$wall, NC, res$cpu))
+print(res); cat(sprintf("wall %.1f s on %d cores; CPU %.0f s; firth_null_start %s\n", res$wall, NC, res$cpu, res$firth_null_start))

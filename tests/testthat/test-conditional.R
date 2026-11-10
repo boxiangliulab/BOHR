@@ -14,7 +14,7 @@ test_that("bohr_conditional() equals the original conditional analysis (run_cond
   eng <- load_engine()
   for (f in names(ref_conditional_lines)) for (l in ref_conditional_lines[[f]]) expect_code_line(f, l)
   x <- sim_cond()
-  cis <- run_cis(x)
+  cis <- run_cis(x, control = engine_control())
   cond <- run_cond(cis, x)
   R <- ref_conditional(eng, x, ref_units(cis), cis$threshold)
   S <- cond$signals; RS <- R$signals
@@ -48,7 +48,7 @@ test_that("absolute-activity labels follow mirror_abs_labels.R and rename only O
   skip_if_no_engine()
   eng <- load_engine()
   for (f in names(ref_abs_lines)) for (l in ref_abs_lines[[f]]) expect_code_line(f, l)
-  x <- sim_cond(); cis <- run_cis(x)
+  x <- sim_cond(); cis <- run_cis(x, control = engine_control())
   plain <- run_cond(cis, x)
   cond <- run_cond(cis, x, absolute = x$absolute)
   L <- cond$labels
@@ -124,7 +124,7 @@ test_that("bohr_conditional() with tissues equals one call per tissue; out_dir w
 
 test_that("bohr_conditional() matches the frozen output of the original pipeline", {
   fx <- readRDS(test_path("fixtures", "conditional_fixture.rds"))
-  x <- sim_cond(); cis <- run_cis(x)
+  x <- sim_cond(); cis <- run_cis(x, control = engine_control())
   cond <- run_cond(cis, x)
   S <- cond$signals; R <- fx$signals
   expect_identical(paste(S$promoter, S$component, S$k, S$variant), paste(R$promoter, R$type, R$k, R$snp))

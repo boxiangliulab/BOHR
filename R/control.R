@@ -31,20 +31,34 @@
 #'   Default `TRUE` (SI Section 2). With `FALSE`, the unpenalised
 #'   likelihood-ratio tests (and estimates) are reported for p0 and p1
 #'   instead; these are not finite under separation.
+#' @param firth_null_start Also start each restricted penalised fit (the
+#'   tested coefficient held at 0) from the fit without the predictor, when
+#'   that fit converged, and keep the start that reaches the highest
+#'   penalised log-likelihood. The penalised likelihood can have more than one
+#'   local maximum. Near separation, the other two starts (the full fit with
+#'   the tested coefficient set to 0, and the default start) can stop at a
+#'   lower maximum of the restricted fit, which makes the likelihood-ratio
+#'   statistic too large. `TRUE` (the default) finds the higher maximum.
+#'   `FALSE` reproduces the analysis engine of the BOHR paper exactly. The
+#'   paper's published conditional results include one refit that reached the
+#'   higher maximum, Brain_Putamen PromoterID_47842 p0 (one signal); with
+#'   `TRUE` the package reproduces it.
 #' @return A list of class `"bohr_control"`.
 #' @seealso [bohr_fit()], [bohr_test()], [bohr_cis()].
 #' @examples
 #' bohr_control()
 #' bohr_control(maxit = 500)
+#' bohr_control(firth_null_start = FALSE)   # the paper's engine exactly
 #' @export
 bohr_control <- function(min_samples = 20L, max_boundary = 0.95, min_sd = 0.05, endpoint = 0.05,
-                         maxit = 200L, bfgs_maxit = 1000L, max_rounds = 6L, firth = TRUE) {
+                         maxit = 200L, bfgs_maxit = 1000L, max_rounds = 6L, firth = TRUE, firth_null_start = TRUE) {
   share <- function(v, what) if (!is.numeric(v) || length(v) != 1L || is.na(v) || v < 0 || v > 1) stop("`", what, "` must be a single number in [0, 1].", call. = FALSE)
   share(max_boundary, "max_boundary"); share(endpoint, "endpoint")
   if (!is.numeric(min_sd) || length(min_sd) != 1L || is.na(min_sd) || min_sd < 0) stop("`min_sd` must be a single number >= 0.", call. = FALSE)
   structure(list(min_samples = check_count(min_samples, "min_samples"), max_boundary = max_boundary, min_sd = min_sd, endpoint = endpoint,
                  maxit = check_count(maxit, "maxit", min = 1), bfgs_maxit = check_count(bfgs_maxit, "bfgs_maxit"),
-                 max_rounds = check_count(max_rounds, "max_rounds", min = 1), firth = check_flag(firth, "firth")),
+                 max_rounds = check_count(max_rounds, "max_rounds", min = 1), firth = check_flag(firth, "firth"),
+                 firth_null_start = check_flag(firth_null_start, "firth_null_start")),
             class = "bohr_control")
 }
 
@@ -54,7 +68,9 @@ print.bohr_control <- function(x, ...) {
   cat(sprintf("  skip: fewer than %d samples, >= %g at one boundary, or SD <= %g\n", x$min_samples, x$max_boundary, x$min_sd))
   cat(sprintf("  endpoint rule: remove a boundary holding <= %g of samples\n", x$endpoint))
   cat(sprintf("  optimiser: %d Newton steps; BFGS up to %d; at most %d restart rounds\n", x$maxit, x$bfgs_maxit, x$max_rounds))
-  cat(sprintf("  p0/p1 tests: %s\n", if (x$firth) "Firth-penalised likelihood ratio" else "unpenalised likelihood ratio"))
+  cat(sprintf("  p0/p1 tests: %s\n", if (!x$firth) "unpenalised likelihood ratio" else
+    paste0("Firth-penalised likelihood ratio", if (isTRUE(x$firth_null_start)) "; restricted fits also started from the null fit"
+           else " (the paper's engine: no null start)")))
   invisible(x)
 }
 

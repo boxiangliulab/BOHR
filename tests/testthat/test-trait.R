@@ -8,7 +8,7 @@ test_that("bohr_trait() equals the original trait regression (run_trait.R, data.
   for (f in names(ref_trait_lines)) for (l in ref_trait_lines[[f]]) expect_trait_line(f, l)
   env <- load_trait_code()
   x <- sim_trait()
-  res <- run_trait(x, absolute = x$absolute)
+  res <- run_trait(x, absolute = x$absolute, control = engine_control())
   R <- ref_trait(env, x, TRAITS4, A = x$absolute)
   P <- res$results; U <- R$units
   expect_identical(paste(P$trait, P$promoter, P$component), paste(U$trait, U$promoter, U$type))
@@ -27,7 +27,7 @@ test_that("bohr_trait() equals the original trait regression (run_trait.R, data.
   o <- P[P$abs_relabel & P$component == "p1", ]; s <- P[P$abs_relabel & P$component == "p0", ]
   expect_identical(o$bh_family, "p0"); expect_true(o$significant); expect_false(s$eligible); expect_identical(s$duplicate_of, paste0(o$promoter, ":p1"))
   ## without absolute activity: the v3m labels, the same P values and q values
-  plain <- run_trait(x)
+  plain <- run_trait(x, control = engine_control())
   R0 <- ref_trait(env, x, TRAITS4)$units
   expect_identical(plain$results$q, R0$q_final); expect_false(any(plain$results$abs_relabel))
   expect_match(plain$settings$mirror_labels, "absolute activity not given"); expect_null(plain$labels)
@@ -114,7 +114,7 @@ test_that("bohr_trait() with tissues equals one call per tissue; traits by indiv
 test_that("bohr_trait() matches the frozen output of the original trait regression", {
   fx <- readRDS(test_path("fixtures", "trait_fixture.rds"))
   x <- sim_trait()
-  res <- run_trait(x, absolute = x$absolute)
+  res <- run_trait(x, absolute = x$absolute, control = engine_control())
   P <- res$results; U <- fx$units
   expect_identical(paste(P$trait, P$promoter, P$component), paste(U$trait, U$promoter, U$type))
   expect_equal(P$p, U$p, tolerance = 1e-6); expect_equal(P$est, U$est, tolerance = 1e-6); expect_equal(P$effect, U$pe, tolerance = 1e-6)

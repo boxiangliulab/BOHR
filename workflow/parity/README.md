@@ -1,4 +1,4 @@
-# Real-data parity checks (stages 2 and 3a)
+# Real-data parity checks (stages 2, 3a and 3b-1)
 
 Compare the package with the stored results of the paper's original pipeline. GTEx individual-level data never enter
 this repository: the scripts read them from the lab's storage and write only to a scratch directory given on the
@@ -40,3 +40,14 @@ Paths to the lab storage are set at the top of each script. Results: `BOHR_v4/do
 9. `09_compare_trait.R <run.rds> [summary.rds]`: P values, estimates, effects, q values, eligibility, significance,
    mirror flags and labels against `export_B/trait_regression_units.tsv.gz`, per-promoter skip reasons against the
    stored rows, and the published examples (PDE5A in breast, CSNK1D in tibial artery).
+
+## The null start of the restricted Firth fits (stage 3b-1)
+
+`bohr_control(firth_null_start = TRUE)` (the default since stage 3b-1) also starts each restricted Firth fit from the null fit.
+Scripts 02, 05 and 08 use the package default; `BOHR_FIRTH_NULL_START=FALSE` runs the paper's engine exactly. With
+`BOHR_SAVE_SCANS=1`, script 05 also saves every conditional scan (each variant's conditional estimate, SE and log P in every
+forward round and leave-one-out scan).
+
+10. `10_compare_null_start.R <cis|cond|trait> <old.rds> <new.rds> [summary.rds]` (base R): compares a run with the paper's
+    engine (or of an earlier commit) with a run with the null start: counts and largest differences of the Firth statistics,
+    and every changed decision (units, signals, rounds, conditional scans, trait calls). Results: `STAGE3B1_REPORT.md`.

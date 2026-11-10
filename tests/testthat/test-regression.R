@@ -11,7 +11,7 @@ close_vec <- function(a, b, tol = 1e-6) {
 test_that("bohr_test() matches the frozen engine output (four families, separation)", {
   for (nm in names(fx$single)) {
     cs <- fx$single[[nm]]; e <- cs$engine
-    r <- bohr_test(cs$input$y, cs$input$g, cs$input$Z, type = "dosage")
+    r <- bohr_test(cs$input$y, cs$input$g, cs$input$Z, type = "dosage", control = engine_control())
     expect_identical(r$family, cs$family, info = nm)
     map <- BOHR:::CLEAR_MAP
     for (k in setdiff(names(map), c("conv_mu", "conv_p0", "conv_p1", "sep_mu", "sep_p0", "sep_p1", "complete_sep"))) {
@@ -27,7 +27,8 @@ test_that("bohr_test() matches the frozen engine output (four families, separati
 
 test_that("bohr_cis() matches the frozen engine output (variants, units, q)", {
   x <- fx$tissue; ref <- fx$tissue_engine
-  expect_warning(res <- bohr_cis(x$phenotype, x$genotype, x$variants, x$promoters, covariates = x$covariates, all_stats = TRUE),
+  expect_warning(res <- bohr_cis(x$phenotype, x$genotype, x$variants, x$promoters, covariates = x$covariates, all_stats = TRUE,
+                                control = engine_control()),
                  "3 covariates for 80 samples")                                  # more than floor(80/30) = 2: warning only
   kr <- paste(ref$snp$promoter, ref$snp$snp); kp <- paste(res$snp$promoter, res$snp$variant)
   expect_setequal(kp, kr)

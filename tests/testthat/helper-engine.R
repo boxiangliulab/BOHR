@@ -41,6 +41,10 @@ expect_code_line <- function(file, text) {
                         info = paste0(file, ": ", text))
 }
 
+## The settings of the paper's engine: the package defaults without the null start of the restricted Firth fits (stage 3b-1).
+## Every comparison with the original engine, or with frozen output of the original pipeline, uses it.
+engine_control <- function(...) bohr_control(firth_null_start = FALSE, ...)
+
 ## run expr with a fixed seed and restore the caller's RNG state
 with_seed <- function(seed, expr) {
   old <- if (exists(".Random.seed", globalenv())) get(".Random.seed", globalenv()) else NULL

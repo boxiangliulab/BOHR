@@ -12,7 +12,8 @@ bohr_control(
   maxit = 200L,
   bfgs_maxit = 1000L,
   max_rounds = 6L,
-  firth = TRUE
+  firth = TRUE,
+  firth_null_start = TRUE
 )
 }
 \arguments{
@@ -48,6 +49,19 @@ until neither improves. Default 6 (SI Section 2).}
 Default \code{TRUE} (SI Section 2). With \code{FALSE}, the unpenalised
 likelihood-ratio tests (and estimates) are reported for p0 and p1
 instead; these are not finite under separation.}
+
+\item{firth_null_start}{Also start each restricted penalised fit (the
+tested coefficient held at 0) from the fit without the predictor, when
+that fit converged, and keep the start that reaches the highest
+penalised log-likelihood. The penalised likelihood can have more than one
+local maximum. Near separation, the other two starts (the full fit with
+the tested coefficient set to 0, and the default start) can stop at a
+lower maximum of the restricted fit, which makes the likelihood-ratio
+statistic too large. \code{TRUE} (the default) finds the higher maximum.
+\code{FALSE} reproduces the analysis engine of the BOHR paper exactly. The
+paper's published conditional results include one refit that reached the
+higher maximum, Brain_Putamen PromoterID_47842 p0 (one signal); with
+\code{TRUE} the package reproduces it.}
 }
 \value{
 A list of class \code{"bohr_control"}.
@@ -62,6 +76,7 @@ Supplementary Methods (SI) or Methods that states it is given for each.
 \examples{
 bohr_control()
 bohr_control(maxit = 500)
+bohr_control(firth_null_start = FALSE)   # the paper's engine exactly
 }
 \seealso{
 \code{\link[=bohr_fit]{bohr_fit()}}, \code{\link[=bohr_test]{bohr_test()}}, \code{\link[=bohr_cis]{bohr_cis()}}.

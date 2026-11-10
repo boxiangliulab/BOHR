@@ -15,7 +15,17 @@
 ## With the defaults the arithmetic is unchanged. Stage 2b (2026-11-10):
 ## firth_snp_tests() gains `keep_fits = FALSE`; when TRUE it also returns the
 ## final full penalised fit it has already computed (element `fits$cat`), for
-## the coefficients of bohr(); no computation changes. Not ported: the
+## the coefficients of bohr(); no computation changes. Stage 3b-1
+## (2026-11-11, author decision): firth_snp_tests() gains `null_start = FALSE`.
+## When TRUE and the categorical null fit converged, each restricted fit gets
+## one more candidate start, the null fit with the tested coefficient at 0
+## (BEZI/BEOI: c(na0(nul$cat$coef), 0), fixed = gi; BEINF: the start of the
+## full fit, fixed = inu or itau), and better() keeps the higher penalised
+## log-likelihood, as for the other starts. The penalised likelihood can have
+## a second, lower local maximum that the other two starts reach (the Brain
+## Putamen PromoterID_47842 p0 refit of the paper's conditional analysis).
+## With null_start = FALSE (bohr_control(firth_null_start = FALSE)) the
+## function is the original. Not ported: the
 ## variable-precision beta fit, sandwich variances and addon_snp_tests()
 ## (lines 8-64 and 141-210), which were sensitivity analyses and do not enter
 ## any published P value. Requires engine.R (nr_max, vcov_of, log1pexp,
@@ -137,8 +147,9 @@ simulate_null <- function(C, nul, phi_mult = 1, y_obs = NULL) {
 ## current full solution (SNP coefficient set to 0) and from the intercept-only start; the full fit
 ## again from every restricted solution. At exit the full fit is at least as high as a full fit started
 ## at the restricted optimum, and the restricted fit at least as high as one started from the final full
-## solution (the review counter-example of 2026-10-01).
-firth_snp_tests <- function(y, C, g, nul, maxround = 6L, maxit = 200L, bfgs_maxit = 1000L, keep_fits = FALSE) {
+## solution (the review counter-example of 2026-10-01). null_start = TRUE (package, 2026-11-11): each restricted fit is
+## also started from the converged categorical null fit with the tested coefficient at 0; the highest maximum is kept.
+firth_snp_tests <- function(y, C, g, nul, maxround = 6L, maxit = 200L, bfgs_maxit = 1000L, keep_fits = FALSE, null_start = FALSE) {
   fam <- nul$family; pC <- ncol(C); Cg <- cbind(C, g = g); gi <- pC + 1L; eps <- 1e-9
   r <- list(nu_firth_stat = NA_real_, nu_firth_logp = NA_real_, nu_firth_est = NA_real_, nu_firth_se = NA_real_, nu_firth_conv = NA,
             tau_firth_stat = NA_real_, tau_firth_logp = NA_real_, tau_firth_est = NA_real_, tau_firth_se = NA_real_, tau_firth_conv = NA,
@@ -149,6 +160,7 @@ firth_snp_tests <- function(y, C, g, nul, maxround = 6L, maxit = 200L, bfgs_maxi
     s0 <- c(qlogis(min(max(mean(z), 1e-3), 1 - 1e-3)), rep(0, gi - 1))
     ff <- better(if (isTRUE(nul$cat$converged)) firth_logit(z, Cg, start = c(na0(nul$cat$coef), 0), maxit = maxit, bfgs_maxit = bfgs_maxit) else NULL, firth_logit(z, Cg, start = s0, maxit = maxit, bfgs_maxit = bfgs_maxit))
     fr <- better(firth_logit(z, Cg, start = replace(ff$coef, gi, 0), fixed = gi, maxit = maxit, bfgs_maxit = bfgs_maxit), firth_logit(z, Cg, start = s0, fixed = gi, maxit = maxit, bfgs_maxit = bfgs_maxit))
+    if (null_start && isTRUE(nul$cat$converged)) fr <- better(fr, firth_logit(z, Cg, start = c(na0(nul$cat$coef), 0), fixed = gi, maxit = maxit, bfgs_maxit = bfgs_maxit))
     for (k in seq_len(maxround)) {
       ch <- FALSE
       f2 <- firth_logit(z, Cg, start = fr$coef, maxit = maxit, bfgs_maxit = bfgs_maxit); if (f2$llpen > ff$llpen + eps) { ff <- f2; ch <- TRUE }
@@ -167,6 +179,11 @@ firth_snp_tests <- function(y, C, g, nul, maxround = 6L, maxit = 200L, bfgs_maxi
                  firth_mnl3(y0, y1, Cg, Cg, start = NULL, maxit = maxit, bfgs_maxit = bfgs_maxit))
     fn <- better(firth_mnl3(y0, y1, Cg, Cg, start = replace(ff$coef, inu, 0), fixed = inu, maxit = maxit, bfgs_maxit = bfgs_maxit), firth_mnl3(y0, y1, Cg, Cg, start = NULL, fixed = inu, maxit = maxit, bfgs_maxit = bfgs_maxit))
     ft <- better(firth_mnl3(y0, y1, Cg, Cg, start = replace(ff$coef, itau, 0), fixed = itau, maxit = maxit, bfgs_maxit = bfgs_maxit), firth_mnl3(y0, y1, Cg, Cg, start = NULL, fixed = itau, maxit = maxit, bfgs_maxit = bfgs_maxit))
+    if (null_start && isTRUE(nul$cat$converged)) {
+      sn <- c(na0(nul$cat$coef[1:pC]), 0, na0(nul$cat$coef[pC + 1:pC]), 0)
+      fn <- better(fn, firth_mnl3(y0, y1, Cg, Cg, start = sn, fixed = inu, maxit = maxit, bfgs_maxit = bfgs_maxit))
+      ft <- better(ft, firth_mnl3(y0, y1, Cg, Cg, start = sn, fixed = itau, maxit = maxit, bfgs_maxit = bfgs_maxit))
+    }
     for (k in seq_len(maxround)) {
       ch <- FALSE
       for (rr in list(fn, ft)) { f2 <- firth_mnl3(y0, y1, Cg, Cg, start = rr$coef, maxit = maxit, bfgs_maxit = bfgs_maxit); if (f2$llpen > ff$llpen + eps) { ff <- f2; ch <- TRUE } }

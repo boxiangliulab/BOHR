@@ -55,7 +55,7 @@ test_that("bohr_test() reproduces every engine statistic (mu F test, Firth p0/p1
   for (nm in names(cases)) {
     cs <- cases[[nm]]
     ref <- ref_promoter(eng, cs$y, cs$Z, cs$g)
-    tst <- bohr_test(cs$y, cs$g, cs$Z, contrast = c(0, 2), all_stats = TRUE)   # the engine's own coding of x
+    tst <- bohr_test(cs$y, cs$g, cs$Z, contrast = c(0, 2), all_stats = TRUE, control = engine_control())   # the engine's own coding of x
     expect_identical(nrow(tst), 1L)
     for (k in snp_cols) { n_cmp <- n_cmp + 1L; n_exact <- n_exact + exact_value(tst[[k]], ref$r[[k]])
       expect_true(same_value(tst[[k]], ref$r[[k]]), info = paste(nm, k)) }
@@ -115,7 +115,7 @@ test_that("binary and continuous predictors follow the engine with the trait-ana
   for (case in list(list(x = b, type = "binary", coded = 2 * b, per_unit = 2),
                     list(x = z, type = "continuous", coded = 2 * (z - mean(z)) / stats::sd(z), per_unit = 2 / stats::sd(z)))) {
     ref <- ref_promoter(eng, cs$y, cs$Z, case$coded)
-    tst <- bohr_test(cs$y, case$x, cs$Z, all_stats = TRUE)
+    tst <- bohr_test(cs$y, case$x, cs$Z, all_stats = TRUE, control = engine_control())
     expect_identical(tst$type, case$type)
     for (k in c(BOHR:::SNP_COLS, BOHR:::FIRTH_COLS)) expect_true(same_value(tst[[k]], ref$r[[k]] %||% ref[["f"]][[k]]), info = paste(case$type, k))
     expect_true(same_value(tst$log_p_mu, ref$mu_F_logp)); expect_true(same_value(tst$log_p_p0, ref[["f"]]$nu_firth_logp))

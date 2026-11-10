@@ -21,7 +21,8 @@ cond_test <- function(type, y, Cc, g, nul, n_mid, p_mean, control) {
   }
   pre <- if (type == "p0") "nu" else "tau"
   if (isTRUE(control$firth)) {
-    r <- firth_snp_tests(y, Cc, g, nul, maxround = control$max_rounds, maxit = control$maxit, bfgs_maxit = control$bfgs_maxit)
+    r <- firth_snp_tests(y, Cc, g, nul, maxround = control$max_rounds, maxit = control$maxit, bfgs_maxit = control$bfgs_maxit,
+                         null_start = isTRUE(control$firth_null_start))
     c(est = unname(r[[paste0(pre, "_firth_est")]]), se = unname(r[[paste0(pre, "_firth_se")]]), log_p = unname(r[[paste0(pre, "_firth_logp")]]),
       log_p_chi = NA_real_)
   } else {

@@ -44,6 +44,8 @@ test_that("bohr_control() validates its arguments", {
   expect_error(bohr_control(endpoint = -1), "endpoint")
   expect_error(bohr_control(min_sd = -1), "min_sd")
   expect_error(bohr_control(firth = "yes"), "firth")
+  expect_error(bohr_control(firth_null_start = NA), "firth_null_start")
+  expect_true(bohr_control()$firth_null_start); expect_false(bohr_control(firth_null_start = FALSE)$firth_null_start)
   expect_error(bohr_control(min_samples = 2.5), "min_samples")
   expect_s3_class(bohr_control(), "bohr_control")
 })

@@ -13,7 +13,7 @@ test_that("bohr_cis() reproduces the original pipeline: promoters, every per-SNP
   eng <- load_engine()
   x <- sim_tissue()
   ref <- ref_tissue(eng, x)
-  res <- bohr_cis(x$phenotype, x$genotype, x$variants, x$promoters, covariates = x$covariates, all_stats = TRUE)
+  res <- bohr_cis(x$phenotype, x$genotype, x$variants, x$promoters, covariates = x$covariates, all_stats = TRUE, control = engine_control())
   ## promoters: family, skip reason and sample counts
   P <- res$promoters[match(ref$prom$promoter, res$promoters$promoter), ]
   expect_identical(P$family, ref$prom$family)
@@ -96,7 +96,8 @@ test_that("single-tissue calls give the tables of the version before the tissue 
   fx <- readRDS(test_path("fixtures", "cis_ae071ae.rds"))
   cfg <- cis_v0_configs()
   for (nm in names(cfg)) {
-    r <- suppressWarnings(do.call(bohr_cis, cfg[[nm]]))
+    args <- cfg[[nm]]; if (is.null(args$control)) args$control <- engine_control()      # ae071ae: the paper's engine
+    r <- suppressWarnings(do.call(bohr_cis, args))
     for (k in c("snp", "units", "promoters", "mirror", "threshold")) {
       if (identical(Sys.getenv("NOT_CRAN"), "true")) expect_identical(r[[k]], fx[[nm]][[k]], info = paste(nm, k))
       else expect_equal(r[[k]], fx[[nm]][[k]], tolerance = 1e-6, info = paste(nm, k))   # other platforms and BLAS libraries

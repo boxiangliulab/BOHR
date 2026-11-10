@@ -67,7 +67,8 @@ engine_one <- function(fit, g, control, keep_fits = FALSE) {
   if (keep_fits) out$fits <- list(beta = r$fits$beta, cat = r$fits$cat, firth = NULL)
   if (isTRUE(control$firth) && fit$family != "BE") {
     ff <- tryCatch(firth_snp_tests(fit$y, fit$design, g, fit$null, maxround = control$max_rounds, maxit = control$maxit,
-                                   bfgs_maxit = control$bfgs_maxit, keep_fits = keep_fits), error = function(e) e)
+                                   bfgs_maxit = control$bfgs_maxit, keep_fits = keep_fits,
+                                   null_start = isTRUE(control$firth_null_start)), error = function(e) e)
     if (inherits(ff, "error")) { out$firth_error <- TRUE; out$nu_firth_conv <- FALSE; out$tau_firth_conv <- FALSE }
     else { out[FIRTH_COLS] <- ff[FIRTH_COLS]; if (keep_fits) out$fits$firth <- ff$fits$cat }
   }

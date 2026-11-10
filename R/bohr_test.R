@@ -53,7 +53,11 @@ code_predictor <- function(x, type, contrast = NULL) {
 #'     beta part cannot be fitted or when \eqn{n_{mid} \le p + 1}.}
 #'   \item{p0, p1}{Firth-penalised likelihood-ratio test of the predictor's
 #'     coefficient for \eqn{\nu} (p0) or \eqn{\tau} (p1) against
-#'     \eqn{\chi^2_1}. Full and restricted penalised fits are restarted from
+#'     \eqn{\chi^2_1}. The restricted fit (the coefficient held at 0) is
+#'     started from the full fit with the coefficient set to 0, from a
+#'     default start and, with `control$firth_null_start` (the default), from
+#'     the fit without the predictor; the highest maximum is kept. Full and
+#'     restricted penalised fits are then restarted from
 #'     each other, for at most `control$max_rounds` rounds, until neither
 #'     improves; a penalised fit that has not converged after
 #'     `control$maxit` Newton steps is continued with BFGS, and the BFGS
