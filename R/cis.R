@@ -10,9 +10,10 @@
 #' \enumerate{
 #'   \item Covariates are standardised over all samples and an intercept is
 #'     added. Missing genotypes are filled, per variant, with the most common
-#'     dosage over all samples (ties go to the smaller dosage); variants with a
-#'     minor-allele frequency below `min_maf` over all samples are dropped.
-#'     A warning is given when there are more covariates than one per 30
+#'     dosage over all samples (ties go to the smaller dosage). Variant
+#'     filtering (for example by allele frequency) is left to the user; the
+#'     paper tested variants with a minor-allele frequency of at least 0.05
+#'     over all 944 GTEx donors. A warning is given when there are more covariates than one per 30
 #'     samples (\eqn{\lfloor n/30 \rfloor}); nothing is dropped.
 #'   \item Each promoter is prepared and fitted without variants as in
 #'     [bohr_fit()] (skips, endpoint rule, family, orthonormal design).
@@ -78,14 +79,6 @@
 #' @param min_genotype_count A variant is tested only when at least this many
 #'   of the promoter's samples carry each dosage (0, 1 and 2). Default 5 (SI
 #'   Section 2).
-#' @param min_maf Variants whose minor-allele frequency is below this value are
-#'   not tested. The frequency is computed from the dosages of all samples of
-#'   `phenotype` after missing dosages are filled. Default 0.05 (Methods Section
-#'   4). The paper's genotype file had been filtered at a minor-allele
-#'   frequency of 0.05 over all 944 GTEx donors, not per tissue, and was used
-#'   without a per-tissue filter; to reproduce the paper exactly, pass such a
-#'   file with `min_maf = 0`. With fewer than about 150 samples the
-#'   `min_genotype_count` rule already implies a frequency above 0.05.
 #' @param min_n_mid A mu unit is estimable when the promoter has at least this
 #'   many intermediate samples. Default 80 (Methods Section 2).
 #' @param boundary_share A p0 (p1) unit is estimable when the share of the
@@ -129,8 +122,7 @@
 #'       `duplicate_of`, `q` and `significant`.}
 #'     \item{`promoters`}{One row per promoter: family or skip reason, sample
 #'       counts, design size, null-fit convergence and log-likelihoods, and
-#'       variant counts (`n_variants_window` after the `min_maf` filter,
-#'       `n_variants_low_maf` removed by it, `n_variants_tested`).}
+#'       variant counts (`n_variants_window`, `n_variants_tested`).}
 #'     \item{`mirror`}{The pairs found by [mirror_pairs()].}
 #'     \item{`threshold`}{Largest unit P value with `q <= fdr` (`NA` if
 #'       none).}
@@ -156,13 +148,12 @@
 #' res$units[, c("promoter", "component", "p", "q", "leader")]
 #' @export
 bohr_cis <- function(phenotype, genotype, variants, promoters, covariates = NULL,
-                     window = 5e5, chromosomes = NULL, min_genotype_count = 5L, min_maf = 0.05,
+                     window = 5e5, chromosomes = NULL, min_genotype_count = 5L,
                      min_n_mid = 80L, boundary_share = c(0.10, 0.90), fdr = 0.05,
                      acat_cap = TRUE, mirror = TRUE, mirror_tol = 1e-6, major_score = NULL,
                      control = bohr_control(), ncores = 1L, chunk_size = 100L, all_stats = FALSE) {
   t0 <- proc.time()[["elapsed"]]
   check_control(control); check_flag(acat_cap, "acat_cap")
-  if (!is.numeric(min_maf) || length(min_maf) != 1L || is.na(min_maf) || min_maf < 0 || min_maf > 0.5) stop("`min_maf` must be a single number in [0, 0.5].", call. = FALSE)
   if (!is.numeric(mirror_tol) || length(mirror_tol) != 1L || !(mirror_tol >= 0)) stop("`mirror_tol` must be a single number >= 0.", call. = FALSE)
   phenotype <- check_phenotype(phenotype)
   samples <- colnames(phenotype)
@@ -215,11 +206,6 @@ bohr_cis <- function(phenotype, genotype, variants, promoters, covariates = NULL
   used <- sort(unique(unlist(win)))
   if (length(used)) { Gi <- impute_modal(G_all[used, , drop = FALSE]); G_all <- NULL } else Gi <- NULL
   pos_in <- match(seq_len(nrow(V)), used)
-  ## minor-allele frequency over all samples, after filling (author 2026-11-10: min_maf)
-  low <- rep(FALSE, nrow(V))
-  if (length(used)) { af <- rowMeans(Gi) / 2; low[used] <- pmin(af, 1 - af) < min_maf }
-  n_low <- vapply(win, function(w) sum(low[w]), 0L)
-  win <- lapply(win, function(w) w[!low[w]])
 
   ## per-promoter preparation (run_final2.R:37-68)
   prep_one <- function(k) {
@@ -227,7 +213,7 @@ bohr_cis <- function(phenotype, genotype, variants, promoters, covariates = NULL
     base <- list(promoter = p, chr = prom$chr[i], pos = prom$pos[i], gene = prom$gene[i], family = NA_character_, skip = NA_character_,
                  n = NA_integer_, n0 = NA_integer_, n1 = NA_integer_, n_mid = NA_integer_, n_cov = NA_integer_, n_cov_dropped = NA_integer_,
                  rank_mid = NA_integer_, null_beta_conv = NA, null_cat_conv = NA, null_ll_beta = NA_real_, null_ll_cat = NA_real_,
-                 n_variants_window = NA_integer_, n_variants_low_maf = n_low[[k]], n_variants_tested = 0L, n_errors = 0L, n_firth_errors = 0L)
+                 n_variants_window = NA_integer_, n_variants_tested = 0L, n_errors = 0L, n_firth_errors = 0L)
     fit <- fit_promoter(phenotype[p, ], C_all, control)
     for (k2 in c("family", "skip", "n", "n0", "n1", "n_mid", "n_cov", "n_cov_dropped", "rank_mid")) base[[k2]] <- fit[[k2]]
     if (!is.na(fit$skip)) return(list(prom = base))
@@ -279,7 +265,7 @@ bohr_cis <- function(phenotype, genotype, variants, promoters, covariates = NULL
   out <- list(snp = snp, units = units, promoters = prom_out, mirror = pairs,
               threshold = unit_threshold(units, fdr),
               settings = list(window = window, chromosomes = if (is.null(chromosomes)) sort(unique(prom$chr[sel])) else as.character(chromosomes),
-                              min_genotype_count = min_genotype_count, min_maf = min_maf, min_n_mid = min_n_mid, boundary_share = boundary_share,
+                              min_genotype_count = min_genotype_count, min_n_mid = min_n_mid, boundary_share = boundary_share,
                               fdr = fdr, acat_cap = acat_cap, mirror = mirror, mirror_tol = mirror_tol, control = control,
                               n_samples = length(samples), n_covariates = ncol(Z)),
               seconds = proc.time()[["elapsed"]] - t0)
@@ -377,7 +363,7 @@ bohr_combine <- function(..., fdr = NULL) {
   L <- list(...)
   if (length(L) == 1L && is.list(L[[1]]) && !inherits(L[[1]], "bohr_cis")) L <- L[[1]]
   if (!length(L) || !all(vapply(L, inherits, TRUE, what = "bohr_cis"))) stop("Supply bohr_cis objects.", call. = FALSE)
-  key <- function(s) s[c("window", "min_genotype_count", "min_maf", "min_n_mid", "boundary_share", "acat_cap", "mirror", "mirror_tol", "control",
+  key <- function(s) s[c("window", "min_genotype_count", "min_n_mid", "boundary_share", "acat_cap", "mirror", "mirror_tol", "control",
                          "n_samples", "n_covariates")]
   if (length(unique(lapply(L, function(x) key(x$settings)))) > 1L) stop("The results use different settings or samples.", call. = FALSE)
   P <- bind_df(lapply(L, `[[`, "promoters"))

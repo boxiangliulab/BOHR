@@ -13,7 +13,6 @@ bohr_cis(
   window = 5e+05,
   chromosomes = NULL,
   min_genotype_count = 5L,
-  min_maf = 0.05,
   min_n_mid = 80L,
   boundary_share = c(0.1, 0.9),
   fdr = 0.05,
@@ -61,15 +60,6 @@ these chromosomes are mapped.}
 \item{min_genotype_count}{A variant is tested only when at least this many
 of the promoter's samples carry each dosage (0, 1 and 2). Default 5 (SI
 Section 2).}
-
-\item{min_maf}{Variants whose minor-allele frequency is below this value are
-not tested. The frequency is computed from the dosages of all samples of
-\code{phenotype} after missing dosages are filled. Default 0.05 (Methods Section
-4). The paper's genotype file had been filtered at a minor-allele
-frequency of 0.05 over all 944 GTEx donors, not per tissue, and was used
-without a per-tissue filter; to reproduce the paper exactly, pass such a
-file with \code{min_maf = 0}. With fewer than about 150 samples the
-\code{min_genotype_count} rule already implies a frequency above 0.05.}
 
 \item{min_n_mid}{A mu unit is estimable when the promoter has at least this
 many intermediate samples. Default 80 (Methods Section 2).}
@@ -126,8 +116,7 @@ columns (\code{n_prom_gene}, \code{mirror_pair_id}, \code{boundary_exact},
 \code{duplicate_of}, \code{q} and \code{significant}.}
 \item{\code{promoters}}{One row per promoter: family or skip reason, sample
 counts, design size, null-fit convergence and log-likelihoods, and
-variant counts (\code{n_variants_window} after the \code{min_maf} filter,
-\code{n_variants_low_maf} removed by it, \code{n_variants_tested}).}
+variant counts (\code{n_variants_window}, \code{n_variants_tested}).}
 \item{\code{mirror}}{The pairs found by \code{\link[=mirror_pairs]{mirror_pairs()}}.}
 \item{\code{threshold}}{Largest unit P value with \code{q <= fdr} (\code{NA} if
 none).}
@@ -146,9 +135,10 @@ The steps follow the analysis engine of the BOHR paper.
 \enumerate{
 \item Covariates are standardised over all samples and an intercept is
 added. Missing genotypes are filled, per variant, with the most common
-dosage over all samples (ties go to the smaller dosage); variants with a
-minor-allele frequency below \code{min_maf} over all samples are dropped.
-A warning is given when there are more covariates than one per 30
+dosage over all samples (ties go to the smaller dosage). Variant
+filtering (for example by allele frequency) is left to the user; the
+paper tested variants with a minor-allele frequency of at least 0.05
+over all 944 GTEx donors. A warning is given when there are more covariates than one per 30
 samples (\eqn{\lfloor n/30 \rfloor}); nothing is dropped.
 \item Each promoter is prepared and fitted without variants as in
 \code{\link[=bohr_fit]{bohr_fit()}} (skips, endpoint rule, family, orthonormal design).
