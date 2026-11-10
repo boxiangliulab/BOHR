@@ -1,0 +1,188 @@
+---
+title: "Getting started with BOHR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with BOHR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+options(width = 100)
+```
+
+BOHR is a regression for proportions in [0, 1] that contain exact 0s and 1s,
+such as the share of a gene's activity that comes from one of its promoters.
+It tests a predictor's effect on three parts of the response separately:
+
+- **p0**, the probability of 0 (here, the promoter is silent);
+- **p1**, the probability of 1 (the promoter is the gene's only active one);
+- **mu**, the mean of the values in between.
+
+This vignette makes a synthetic data set, fits one response with `bohr()`, and
+then maps promoter-usage QTLs in two tissues with `bohr_cis()`, reading the
+inputs from files. All files go to a temporary folder.
+
+```{r}
+library(BOHR)
+```
+
+## A synthetic input set
+
+`simulate_bohr()` makes every input of the analysis: individuals with
+genotypes and two traits, tissues with covariates, genes with two or three
+promoters, their absolute and relative activity, a TSS table and the true
+effects. With `out_dir` it also writes them to files.
+
+```{r}
+set.seed(2026)
+d <- file.path(tempdir(), "bohr_demo")
+sim <- simulate_bohr(n_individuals = 250, n_tissues = 2, n_genes = 6, variant_spacing = 1e5,
+                     out_dir = d)
+sim
+list.files(d)
+```
+
+Each sample belongs to one individual and one tissue:
+
+```{r}
+head(sim$samples, 3)
+```
+
+The TSS table lists every promoter with its gene. Promoters marked `internal`
+are not in the denominator of the relative activity, and promoters with
+`tested = FALSE` are in the denominator but are not tested:
+
+```{r}
+sim$tss[sim$tss$gene %in% c("G001", "G003"), ]
+sim$relative[c("P0001", "P0002"), 1:6]
+```
+
+`P0001` and `P0002` are the two promoters of gene `G001`; their relative
+activities sum to 1, which makes them an exact mirror pair.
+
+The truth table gives the simulated effects, on the scale of BOHR's effects
+(dosage 2 versus 0):
+
+```{r}
+tr <- sim$truth
+tr[tr$tissue == "T1" & tr$predictor_type == "dosage",
+   c("gene", "promoter", "role", "predictor", "effect_mu", "effect_p0", "effect_p1")]
+```
+
+## One response: `bohr()`
+
+Take the primary promoter of the first gene in tissue T1, with its causal
+variant and the tissue's covariates:
+
+```{r}
+one <- tr[tr$tissue == "T1" & tr$role == "primary" & tr$predictor_type == "dosage", ][1, ]
+s <- sim$samples[sim$samples$tissue == "T1", ]
+dat <- data.frame(y = sim$relative[one$promoter, s$sample],
+                  dosage = sim$genotype[one$predictor, s$individual],
+                  sim$covariates$T1[s$sample, ])
+head(dat, 3)
+```
+
+`bohr()` takes a formula and the name of the term to test. An allele dosage
+must be declared with `type = "dosage"`; the effects then compare two copies
+of the allele with none.
+
+```{r}
+m <- bohr(y ~ dosage + PC1 + PC2 + F1, data = dat, test = "dosage", type = "dosage")
+m
+```
+
+The table has one row per component: the coefficient of the dosage and its
+standard error, the likelihood-ratio statistic and its P value, the effect
+(the average change of the component between dosage 0 and dosage 2), and the
+number of observations of the component. Here the estimated p0 effect is
+`r round(m$result$effect_p0, 2)`; the simulated one is `r round(one$effect_p0, 2)`.
+`print()` and `summary()` also list every fitting rule that changed the data or
+the model, such as observations left out or a boundary removed.
+
+`summary()` gives the full coefficient table of each component, and the usual
+methods work:
+
+```{r}
+summary(m)
+coef(m, "p0")
+predict(m, newdata = data.frame(dosage = 0:2, PC1 = 0, PC2 = 0, F1 = 0), type = "p0")
+```
+
+The same model tests any numeric predictor or a two-level factor. Here, the
+binary trait, which raises p1 of the second gene's primary promoter in T1:
+
+```{r}
+p2 <- tr$promoter[tr$predictor == "binary_trait" & tr$role == "primary"][1]
+dat2 <- data.frame(y = sim$relative[p2, s$sample],
+                   trait = factor(sim$traits$binary_trait[match(s$individual, sim$traits$individual)]),
+                   sim$covariates$T1[s$sample, ])
+bohr(y ~ trait + PC1 + PC2 + F1, data = dat2, test = "trait")
+```
+
+## cis mapping in several tissues: `bohr_cis()`
+
+`bohr_cis()` tests every variant within 500 kb of each promoter, combines the
+variants of each promoter and component with ACAT, and controls the false
+discovery rate within each tissue. Its inputs can be R objects or files.
+Given a sample table as `tissue`, it maps each tissue on its own samples and
+binds the results; the covariates come from one file per tissue in a folder.
+
+```{r}
+res <- bohr_cis(phenotype  = file.path(d, "relative_activity.tsv"),
+                genotype   = file.path(d, "genotypes.tsv"),
+                variants   = file.path(d, "variants.tsv"),
+                promoters  = file.path(d, "tss.tsv"),
+                covariates = file.path(d, "covariates"),
+                tissue     = file.path(d, "samples.tsv"),
+                out_dir    = file.path(d, "results"))
+res
+```
+
+The defaults are the values of the BOHR paper: for example, a mu unit is
+tested only with at least 80 values between 0 and 1, and a p0 or p1 unit only
+when 10% to 90% of the samples lie at that boundary. These rules were set for
+GTEx sample sizes; they are arguments of `bohr_cis()`.
+
+A unit is a promoter and one component. The significant units, with the
+leading variant of each:
+
+```{r}
+U <- res$units
+U[U$significant, c("tissue", "promoter", "component", "p", "q", "leader", "leader_effect")]
+```
+
+The leader can be a variant in linkage with the causal one. For an exact
+mirror pair, each event is counted once: the p1 units of both promoters are
+dropped (p1 of one promoter is p0 of the other) and so is the mu unit of the
+non-canonical member:
+
+```{r}
+U[U$promoter %in% c("P0001", "P0002") & U$tissue == "T1",
+  c("promoter", "component", "p", "estimable", "dedup_drop", "duplicate_of", "q")]
+```
+
+The tables were also written to `out_dir`:
+
+```{r}
+list.files(file.path(d, "results"))
+head(read.delim(file.path(d, "results", "units.tsv")), 3)[, 1:8]
+```
+
+With the Bioconductor package VariantAnnotation installed, the VCF written by
+`simulate_bohr()` can replace the dosage file; the variant positions then come
+from the VCF:
+
+```{r, eval = FALSE}
+res_vcf <- bohr_cis(file.path(d, "relative_activity.tsv"),
+                    genotype = file.path(d, "genotypes.vcf"), variants = NULL,
+                    promoters = file.path(d, "tss.tsv"),
+                    covariates = file.path(d, "covariates"),
+                    tissue = file.path(d, "samples.tsv"))
+```
+
+```{r, include = FALSE}
+unlink(d, recursive = TRUE)
+```

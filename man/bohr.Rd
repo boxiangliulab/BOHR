@@ -68,7 +68,7 @@ model always has an intercept. Offsets and weights are not supported.
 The fitting rules of the BOHR paper (\code{\link[=bohr_fit]{bohr_fit()}}, set with
 \code{\link[=bohr_control]{bohr_control()}}) can change the data or the model: missing values are left
 out, a response is skipped when too few observations remain or almost all
-lie at one boundary, the observations at a boundary holding 5\\% of them or
+lie at one boundary, the observations at a boundary holding 5\% of them or
 fewer are removed (and that component is not modelled), covariate columns
 collinear with others are dropped, and the beta part is not fitted when too
 few values lie between 0 and 1. \code{print()} and \code{summary()} report every rule

@@ -18,7 +18,7 @@
 #' The fitting rules of the BOHR paper ([bohr_fit()], set with
 #' [bohr_control()]) can change the data or the model: missing values are left
 #' out, a response is skipped when too few observations remain or almost all
-#' lie at one boundary, the observations at a boundary holding 5\% of them or
+#' lie at one boundary, the observations at a boundary holding 5% of them or
 #' fewer are removed (and that component is not modelled), covariate columns
 #' collinear with others are dropped, and the beta part is not fitted when too
 #' few values lie between 0 and 1. `print()` and `summary()` report every rule
@@ -387,9 +387,16 @@ predict.bohr <- function(object, newdata = NULL, type = c("mean", "mu", "p0", "p
 }
 
 ## ---- printing --------------------------------------------------------------------------------------
-FAMILY_TEXT <- c(BEINF = "0s, 1s and values in between", BEZI = "0s and values in between (p1 not modelled)",
-                 BEOI = "1s and values in between (p0 not modelled)", BE = "values in between only (mu only)")
-family_line <- function(fam) if (is.na(fam)) "none (skipped)" else paste0(fam, ": ", FAMILY_TEXT[[fam]])
+FAMILY_TEXT <- c(BEINF = "0s, 1s and values in between", BEZI = "0s and values in between; p1 not modelled",
+                 BEOI = "1s and values in between; p0 not modelled", BE = "values in between only; mu only")
+family_line <- function(fam) if (is.na(fam)) "none (skipped)" else paste0(fam, " (", FAMILY_TEXT[[fam]], ")")
+## the tests of the modelled components, in words
+tests_text <- function(fam, firth) {
+  b <- switch(fam, BEINF = "p0 and p1", BEZI = "p0", BEOI = "p1", NULL)
+  paste0("mu, F-corrected likelihood ratio", if (!is.null(b)) paste0("; ", b, ", ", if (firth) "Firth-penalised" else "unpenalised",
+                                                                     " likelihood ratio"))
+}
+cat_wrapped <- function(...) cat(strwrap(paste0(...), width = max(40L, getOption("width") - 2L)), sep = "\n")
 contrast_text <- function(tst) {
   ctr <- tst$contrast
   if (anyNA(ctr)) return(tst$type)
@@ -432,9 +439,8 @@ test_footer <- function(object) {
   fam <- object$fit$family
   b <- switch(fam, BEINF = "; p0 and p1 as log odds against a value in between", BEZI = "; p0 on the logit scale",
               BEOI = "; p1 on the logit scale", "")
-  cat(sprintf("Estimates per unit of %s: mu on the logit scale%s.\n", object$test$name, b))
-  cat("Tests: mu, F-corrected likelihood ratio", if (fam != "BE") paste0("; ", switch(fam, BEINF = "p0 and p1", BEZI = "p0", BEOI = "p1"), ", ",
-      if (firth) "Firth-penalised" else "unpenalised", " likelihood ratio"), ".\n", sep = "")
+  cat_wrapped(sprintf("Estimates per unit of %s: mu on the logit scale%s.", object$test$name, b))
+  cat_wrapped("Tests: ", tests_text(fam, firth), ".")
 }
 
 #' @rdname bohr-methods
@@ -484,9 +490,9 @@ print.summary.bohr <- function(x, digits = 4L, ...) {
                                                   format(signif(x$phi[["estimate"]], digits)), format(signif(x$phi[["SE"]], digits))))
   }
   if (length(x$tables)) {
-    cat("\nStatistic and P value: tested term only. ")
-    cat("mu: F-corrected likelihood-ratio test; p0, p1: ", if (isTRUE(x$control$firth)) "Firth-penalised" else "unpenalised",
-        " likelihood-ratio tests. Effect: average change of the component for the contrast.\n", sep = "")
+    cat("\n")
+    cat_wrapped("Statistic, P value and effect: tested term only. Tests: ", tests_text(x$fit$family, isTRUE(x$control$firth)),
+                ". Effect: average change of the component for the contrast.")
     if (is.finite(x$loglik)) cat(sprintf("Log-likelihood (unpenalised, full model): %s on %d parameters\n", format(signif(as.numeric(x$loglik), 8)), attr(x$loglik, "df")))
   }
   if (nrow(x$rules) || nrow(x$notes)) cat("\n")

@@ -2,13 +2,14 @@
 % Please edit documentation in R/cis.R
 \name{bohr_combine}
 \alias{bohr_combine}
-\title{Combine cis-mapping results of one tissue}
+\title{Combine cis-mapping results run in parts}
 \usage{
 bohr_combine(..., fdr = NULL)
 }
 \arguments{
 \item{...}{\code{bohr_cis} objects, or one list of them. They must use the same
-samples and settings and cover different promoters.}
+samples, tissues and settings and cover different promoters (for example
+different chromosomes).}
 
 \item{fdr}{False-discovery rate for the \code{significant} column; defaults to
 that of the inputs.}
@@ -17,10 +18,11 @@ that of the inputs.}
 A \code{bohr_cis} object.
 }
 \description{
-Combines \code{\link[=bohr_cis]{bohr_cis()}} results of the same tissue run separately, for
+Combines \code{\link[=bohr_cis]{bohr_cis()}} results of the same samples run separately, for
 example one chromosome per cluster job, and recomputes the q values over
 all units together, so that the false-discovery control is within the
-whole tissue.
+whole tissue. Results of a tissue loop (\code{bohr_cis(tissue = )}) are combined
+the same way, with the q values recomputed within each tissue.
 }
 \examples{
 set.seed(5)

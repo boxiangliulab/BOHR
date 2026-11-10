@@ -457,15 +457,17 @@ units_bh_tissue <- function(U, fdr) {
   U
 }
 
-#' Combine cis-mapping results of one tissue
+#' Combine cis-mapping results run in parts
 #'
-#' Combines [bohr_cis()] results of the same tissue run separately, for
+#' Combines [bohr_cis()] results of the same samples run separately, for
 #' example one chromosome per cluster job, and recomputes the q values over
 #' all units together, so that the false-discovery control is within the
-#' whole tissue.
+#' whole tissue. Results of a tissue loop (`bohr_cis(tissue = )`) are combined
+#' the same way, with the q values recomputed within each tissue.
 #'
 #' @param ... `bohr_cis` objects, or one list of them. They must use the same
-#'   samples and settings and cover different promoters.
+#'   samples, tissues and settings and cover different promoters (for example
+#'   different chromosomes).
 #' @param fdr False-discovery rate for the `significant` column; defaults to
 #'   that of the inputs.
 #' @return A `bohr_cis` object.

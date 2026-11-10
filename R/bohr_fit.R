@@ -34,11 +34,11 @@ fit_promoter <- function(yv, C_all, control) {
 #'   \item Missing values of `y` are removed. The response is skipped
 #'     (`skip = "n"`) when fewer than `min_samples` (20) observations remain,
 #'     or fewer observations than covariates. It is also skipped
-#'     (`skip = "prop_or_sd"`) when at least `max_boundary` (95\%) of the
+#'     (`skip = "prop_or_sd"`) when at least `max_boundary` (95%) of the
 #'     observations lie at 0 or at 1, or when the standard deviation is
 #'     `min_sd` (0.05) or less.
 #'   \item Boundary rule: the observations at a boundary are removed when that
-#'     boundary holds `endpoint` (5\%) of the observations or fewer.
+#'     boundary holds `endpoint` (5%) of the observations or fewer.
 #'   \item The family follows from the boundaries that remain: `"BEINF"` (0s
 #'     and 1s; components p0, p1 and mu), `"BEZI"` (0s only; p0 and mu),
 #'     `"BEOI"` (1s only; p1 and mu) or `"BE"` (neither; mu only). A response

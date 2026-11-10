@@ -57,11 +57,11 @@ Section 2); their thresholds are set with \code{\link[=bohr_control]{bohr_contro
 \item Missing values of \code{y} are removed. The response is skipped
 (\code{skip = "n"}) when fewer than \code{min_samples} (20) observations remain,
 or fewer observations than covariates. It is also skipped
-(\code{skip = "prop_or_sd"}) when at least \code{max_boundary} (95\\%) of the
+(\code{skip = "prop_or_sd"}) when at least \code{max_boundary} (95\%) of the
 observations lie at 0 or at 1, or when the standard deviation is
 \code{min_sd} (0.05) or less.
 \item Boundary rule: the observations at a boundary are removed when that
-boundary holds \code{endpoint} (5\\%) of the observations or fewer.
+boundary holds \code{endpoint} (5\%) of the observations or fewer.
 \item The family follows from the boundaries that remain: \code{"BEINF"} (0s
 and 1s; components p0, p1 and mu), \code{"BEZI"} (0s only; p0 and mu),
 \code{"BEOI"} (1s only; p1 and mu) or \code{"BE"} (neither; mu only). A response

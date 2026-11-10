@@ -20,7 +20,7 @@
 #'   \item{`boundary_only`}{A and B tested; a third promoter C, active only
 #'     when A is neither silent nor alone, is not tested but stays in the
 #'     denominator: the pair is `boundary_exact` but not `interior_exact`.}
-#'   \item{`nonexact`}{A and B tested; C, active in about 30\% of samples, is
+#'   \item{`nonexact`}{A and B tested; C, active in about 30% of samples, is
 #'     not tested but stays in the denominator: not a mirror pair.}
 #' }
 #' Every third gene also has an internal promoter (`internal = TRUE` in the
@@ -37,7 +37,7 @@
 #' and `F1` (logit scale). B and C take shares of the rest. Absolute
 #' activities are the shares times a gene-level total (rounded to 4
 #' decimals); a gene is not expressed (all promoters 0, relative activity
-#' `NA`) in about 2\% of samples. The relative activity is each external
+#' `NA`) in about 2% of samples. The relative activity is each external
 #' promoter's absolute activity over the sum of its gene's external
 #' promoters, rounded to 12 decimals (so that it is the same after a round
 #' trip through a file).
@@ -47,7 +47,7 @@
 #' frequency 0.3 to 0.5) within 50 kb of A, acting on p0, mu, p1 or p0 and mu
 #' (in turn); in every tissue for alternate causal genes, in the first tissue
 #' only for the others. The two variants on each side of a causal variant are
-#' in linkage with it (copies with 10\% of the genotypes redrawn), so a unit's
+#' in linkage with it (copies with 10% of the genotypes redrawn), so a unit's
 #' leader need not be the causal variant. The binary trait raises p1 of A in
 #' the second gene in the first tissue (by 0.15), and the continuous trait
 #' raises mu of A in the third gene in every tissue (by 0.08 per standard
@@ -85,8 +85,8 @@
 #'     \item{`tss`}{The TSS table, one row per promoter: `id`, `gene`, `chr`,
 #'       `pos`, `strand`, `internal` and `tested`.}
 #'     \item{`genotype`, `variants`}{Dosages (variants x individuals, about
-#'       1\% missing) and their positions (`id`, `chr`, `pos`, `end`, `ref`,
-#'       `alt`; about 10\% are indels).}
+#'       1% missing) and their positions (`id`, `chr`, `pos`, `end`, `ref`,
+#'       `alt`; about 10% are indels).}
 #'     \item{`covariates`}{A list by tissue of covariate matrices (samples x
 #'       `PC1`, `PC2`, `F1`).}
 #'     \item{`traits`}{One row per individual: `binary_trait` (0/1) and
