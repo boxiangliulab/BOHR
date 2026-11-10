@@ -25,6 +25,15 @@ chosen contrast;
 the values of the BOHR paper);
 \item \code{\link[=simulate_bohr]{simulate_bohr()}}: simulated predictor and response.
 }
+Genomics (high-throughput) layer:
+\itemize{
+\item \code{\link[=bohr_cis]{bohr_cis()}}: cis mapping of promoter-usage QTLs in one tissue, with
+\code{\link[=bohr_combine]{bohr_combine()}} to merge per-chromosome runs;
+\item \code{\link[=mirror_pairs]{mirror_pairs()}}: two features of one group whose proportions sum
+to 1;
+\item \code{\link[=acat]{acat()}}, \code{\link[=simes]{simes()}}, \code{\link[=bb_select]{bb_select()}}: P-value combination and
+selection.
+}
 }
 \references{
 Ospina R, Ferrari SLP (2010). Inflated beta distributions. \emph{Statistical

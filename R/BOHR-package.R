@@ -18,6 +18,15 @@
 #'     the values of the BOHR paper);
 #'   \item [simulate_bohr()]: simulated predictor and response.
 #' }
+#' Genomics (high-throughput) layer:
+#' \itemize{
+#'   \item [bohr_cis()]: cis mapping of promoter-usage QTLs in one tissue, with
+#'     [bohr_combine()] to merge per-chromosome runs;
+#'   \item [mirror_pairs()]: two features of one group whose proportions sum
+#'     to 1;
+#'   \item [acat()], [simes()], [bb_select()]: P-value combination and
+#'     selection.
+#' }
 #'
 #' @references
 #' Ospina R, Ferrari SLP (2010). Inflated beta distributions. *Statistical
