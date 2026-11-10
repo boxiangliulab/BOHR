@@ -146,3 +146,16 @@ ref_tissue_lines <- list(
   units_v3m_mirror.R = c('U[, dedup_drop := fifelse(type == "mu", drop_mu, be & type == "p1")]',
                          'U[, duplicate_of := fifelse(dedup_drop, paste0(mirror_partner, ":", lab[type]), NA_character_)]',
                          "U[, q := NA_real_]; U[dedup_drop == FALSE & estimable == TRUE, q := p.adjust(p, \"BH\")]"))
+
+## Configurations of the single-tissue parity check of stage 2b: bohr_cis() must give the same tables as commit ae071ae
+## (before the tissue loop and file inputs), whose outputs are frozen in fixtures/cis_ae071ae.rds
+## (data-raw/make_cis_fixture.R). Each element is the argument list of one bohr_cis() call.
+cis_v0_configs <- function() {
+  x <- sim_tissue(); z <- sim_tissue(seed = 21, n = 80, spacing = 125000, span = 1.3e6)
+  ms <- stats::setNames(seq_len(nrow(x$phenotype)) / 100, rownames(x$phenotype))
+  list(small = list(z$phenotype, z$genotype, z$variants, z$promoters, covariates = z$covariates, all_stats = TRUE),
+       full_chr2 = list(x$phenotype, x$genotype, x$variants, x$promoters, covariates = x$covariates, chromosomes = "chr2"),
+       full_major = list(x$phenotype, x$genotype, x$variants, x$promoters, covariates = x$covariates, major_score = ms),
+       full_opts = list(x$phenotype, x$genotype, x$variants, x$promoters, covariates = x$covariates, mirror = FALSE, acat_cap = FALSE,
+                        min_n_mid = 30, boundary_share = c(0.05, 0.95), fdr = 0.2, window = 2e5, control = bohr_control(firth = FALSE)))
+}

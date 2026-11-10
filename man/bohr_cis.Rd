@@ -2,14 +2,16 @@
 % Please edit documentation in R/cis.R
 \name{bohr_cis}
 \alias{bohr_cis}
-\title{cis mapping of promoter-usage QTLs in one tissue}
+\title{cis mapping of promoter-usage QTLs}
 \usage{
 bohr_cis(
   phenotype,
   genotype,
-  variants,
+  variants = NULL,
   promoters,
   covariates = NULL,
+  tissue = NULL,
+  individual = NULL,
   window = 5e+05,
   chromosomes = NULL,
   min_genotype_count = 5L,
@@ -23,32 +25,52 @@ bohr_cis(
   control = bohr_control(),
   ncores = 1L,
   chunk_size = 100L,
-  all_stats = FALSE
+  all_stats = FALSE,
+  out_dir = NULL
 )
 }
 \arguments{
-\item{phenotype}{Numeric matrix of relative activities in [0, 1],
-promoters in rows and samples in columns, with row names (promoter IDs)
-and column names (sample IDs). \code{NA} marks a missing value. Should hold all
-promoters of the tissue, so that two-promoter genes are recognised.}
+\item{phenotype}{Relative activities in [0, 1], promoters in rows and
+samples in columns, with row names (promoter IDs) and unique column names
+(sample IDs); a numeric matrix or the path of a TSV file. \code{NA} marks a
+missing value. Should hold all tested promoters, so that two-promoter
+genes are recognised.}
 
-\item{genotype}{Numeric matrix of dosages (0, 1, 2 or \code{NA}), variants in
-rows (row names = variant IDs) and samples in columns (column names must
-include every sample of \code{phenotype}).}
+\item{genotype}{Dosages (0, 1, 2 or \code{NA}), variants in rows (row names =
+variant IDs) and individuals in columns: a numeric matrix, the path of a
+TSV file, or the path of a VCF file (\code{.vcf} or \code{.vcf.gz}; see
+\code{\link[=read_vcf_dosage]{read_vcf_dosage()}}). Its columns must include the genotype column of
+every sample (see \code{individual}).}
 
-\item{variants}{Data frame describing the rows of \code{genotype}, with columns
-\code{chr} and \code{pos} (start position), and optionally \code{id} (matched to the row
-names of \code{genotype}; otherwise rows are taken in the same order) and \code{end}
-(end position, default \code{pos}; for an indel, \code{pos} + length of the
-reference allele - 1).}
+\item{variants}{Positions of the rows of \code{genotype}: a data frame or the
+path of a TSV file with columns \code{chr} and \code{pos} (start position), and
+optionally \code{id} (matched to the row names of \code{genotype}; otherwise rows
+are taken in the same order) and \code{end} (end position, default \code{pos}; for
+an indel, \code{pos} + length of the reference allele - 1). \code{NULL} when
+\code{genotype} is a VCF file.}
 
-\item{promoters}{Data frame with one row per promoter: \code{id}, \code{chr}, \code{pos}
-(transcription start site) and optionally \code{gene} (needed for mirror
-pairs).}
+\item{promoters}{One row per promoter, a data frame or the path of a TSV
+file: \code{id}, \code{chr}, \code{pos} (transcription start site) and optionally \code{gene}
+(needed for mirror pairs). Rows for promoters not in \code{phenotype} (for
+example internal or untested promoters of a TSS table) are ignored.}
 
-\item{covariates}{\code{NULL}, or a numeric matrix or data frame with one row per
-sample (row names = sample IDs, or rows in the order of
-\code{colnames(phenotype)}) and no intercept column.}
+\item{covariates}{\code{NULL}, or covariates with one row per sample and no
+intercept column: a numeric matrix or data frame (row names = sample IDs,
+or rows in the order of the columns of \code{phenotype}), or the path of a TSV
+file (first column = sample IDs). With \code{tissue}: a list named by tissue
+(each element a matrix, data frame or file path), the path of a folder
+with one file per tissue named \verb{<tissue>.tsv} (or \code{.txt}, optionally
+gzipped), or one table whose row names cover the samples of every tissue.}
+
+\item{tissue}{\code{NULL} (one tissue), or the tissue of each sample: a vector
+with one label per column of \code{phenotype} (or named by sample ID), or a
+sample table (a data frame or the path of a TSV file) with columns
+\code{sample} and \code{tissue}, and optionally \code{individual}. See Details.}
+
+\item{individual}{\code{NULL}, or the genotype column of each sample: a vector
+with one value per column of \code{phenotype} (or named by sample ID). By
+default the \code{individual} column of a sample table given as \code{tissue}, or
+else the sample ID itself.}
 
 \item{window}{Half-width of the cis window in base pairs: variants
 overlapping [\code{pos} - \code{window}, \code{pos} + \code{window} - 1] are tested. Default
@@ -82,9 +104,10 @@ Section 2; SI Section 2).}
 pairs. Default 1e-6 (SI Section 2).}
 
 \item{major_score}{Optional numeric vector named by promoter ID that picks
-the canonical member of a mirror pair (see \code{\link[=mirror_pairs]{mirror_pairs()}}); defaults to
-the mean relative activity in \code{phenotype}. The paper used the mean over
-all samples of all 50 tissues (SI Section 2).}
+the canonical member of a mirror pair (see \code{\link[=mirror_pairs]{mirror_pairs()}}). Defaults to
+the mean relative activity in \code{phenotype}: over all samples pooled across
+tissues when \code{tissue} is given (the paper's rule: all samples of all 50
+tissues, SI Section 2), otherwise over the tissue's samples.}
 
 \item{control}{Fitting rules, optimiser limits and the choice of the p0/p1
 test, from \code{\link[=bohr_control]{bohr_control()}}; the defaults are the values of the BOHR
@@ -98,6 +121,12 @@ is multithreaded (e.g. OpenBLAS), setting the environment variable
 
 \item{all_stats}{Logical: keep every statistic of the analysis engine in the
 \code{snp} table (see Details).}
+
+\item{out_dir}{Optional folder (created if needed). When given, the tables
+\code{snp}, \code{units}, \code{promoters} and \code{mirror} are also written to it as
+\code{snp.tsv}, \code{units.tsv}, \code{promoters.tsv} and \code{mirror.tsv} (tab-separated,
+\code{NA} for missing values); a table without rows is not written. The tables
+are returned either way.}
 }
 \value{
 An object of class \code{"bohr_cis"}, a list with
@@ -119,35 +148,39 @@ counts, design size, null-fit convergence and log-likelihoods, and
 variant counts (\code{n_variants_window}, \code{n_variants_tested}).}
 \item{\code{mirror}}{The pairs found by \code{\link[=mirror_pairs]{mirror_pairs()}}.}
 \item{\code{threshold}}{Largest unit P value with \code{q <= fdr} (\code{NA} if
-none).}
+none); with \code{tissue}, one value per tissue.}
 \item{\code{settings}, \code{seconds}}{Settings used and elapsed time.}
 }
+With \code{tissue}, every table starts with a column \code{tissue}.
 }
 \description{
 Tests every variant within a window around each promoter's transcription
 start site for association with each component of the promoter's relative
 activity (mu, p0 and p1; see \code{\link[=bohr_test]{bohr_test()}}), combines the variant P values
 of each promoter and component with ACAT, and controls the false-discovery
-rate with the Benjamini-Hochberg procedure across all tests of the tissue.
+rate with the Benjamini-Hochberg procedure across all tests of a tissue.
+With \code{tissue}, it loops over tissues and binds the results.
 }
 \details{
-The steps follow the analysis engine of the BOHR paper.
+The steps follow the analysis engine of the BOHR paper; each tissue is
+mapped on its own samples.
 \enumerate{
-\item Covariates are standardised over all samples and an intercept is
-added. Missing genotypes are filled, per variant, with the most common
-dosage over all samples (ties go to the smaller dosage). Variant
-filtering (for example by allele frequency) is left to the user; the
-paper tested variants with a minor-allele frequency of at least 0.05
-over all 944 GTEx donors. A warning is given when there are more covariates than one per 30
-samples (\eqn{\lfloor n/30 \rfloor}); nothing is dropped.
+\item Covariates are standardised over the tissue's samples and an
+intercept is added. Missing genotypes are filled, per variant, with the
+most common dosage over the tissue's samples (ties go to the smaller
+dosage). Variant filtering (for example by allele frequency) is left to
+the user; the paper tested variants with a minor-allele frequency of at
+least 0.05 over all 944 GTEx donors. A warning is given when there are
+more covariates than one per 30 samples (\eqn{\lfloor n/30 \rfloor});
+nothing is dropped.
 \item Each promoter is prepared and fitted without variants as in
 \code{\link[=bohr_fit]{bohr_fit()}} (skips, endpoint rule, family, orthonormal design).
 \item Variants overlapping [\code{pos} - \code{window}, \code{pos} + \code{window} - 1] on
 the promoter's chromosome are tested when at least
 \code{min_genotype_count} of the promoter's samples carry each dosage (0, 1
-and 2). Each variant is tested with \code{\link[=bohr_test]{bohr_test()}}: mu with the
-F-corrected likelihood-ratio test, p0 and p1 with the Firth-penalised
-likelihood-ratio test.
+and 2). Each variant is tested with \code{\link[=bohr_test]{bohr_test()}} as an allele dosage:
+mu with the F-corrected likelihood-ratio test, p0 and p1 with the
+Firth-penalised likelihood-ratio test.
 \item A unit is a promoter and one of its components: mu for every fitted
 promoter, p0 when zeros remain after the endpoint rule (families BEINF
 and BEZI), p1 when ones remain (BEINF and BEOI). The unit P value
@@ -156,20 +189,51 @@ combines the P values of all tested variants in the window with
 broken by variant ID (C-locale order), as in the paper's pipeline.
 \item Estimability: a mu unit needs at least \code{min_n_mid} intermediate
 samples; a p0 or p1 unit needs a boundary share (samples at that
-boundary over all samples used) within \code{boundary_share}.
-\item Exact mirror pairs (\code{\link[=mirror_pairs]{mirror_pairs()}}; needs \code{promoters$gene}): for a
-\code{boundary_exact} pair the p1 units of both members are dropped (p1 of
-one promoter is p0 of the other, which is kept: each boundary event is
-tested as p0 at the promoter that goes silent); for an
-\code{interior_exact} pair the mu unit of the partner (non-canonical member)
-is dropped.
-\item q values: Benjamini-Hochberg over the units that are estimable and
-not dropped, all components together. Other units have \code{q = NA}.
+boundary over all samples used) within \code{boundary_share}. These rules
+were set for GTEx sample sizes.
+\item Exact mirror pairs (\code{\link[=mirror_pairs]{mirror_pairs()}}, judged in each tissue; needs
+\code{promoters$gene}): for a \code{boundary_exact} pair the p1 units of both
+members are dropped (p1 of one promoter is p0 of the other, which is
+kept: each boundary event is tested as p0 at the promoter that goes
+silent); for an \code{interior_exact} pair the mu unit of the partner
+(non-canonical member) is dropped.
+\item q values: Benjamini-Hochberg over the units of the tissue that are
+estimable and not dropped, all components together. Other units have
+\code{q = NA}.
 }
 To match the paper's within-tissue false-discovery control, run all
 chromosomes of a tissue in one call, or run chromosomes separately (for
 example as cluster jobs) and combine the results with \code{\link[=bohr_combine]{bohr_combine()}}.
 Results do not depend on \code{ncores} or \code{chunk_size}.
+
+\strong{Inputs as objects or files.} Each of \code{phenotype}, \code{genotype},
+\code{variants}, \code{promoters}, \code{covariates} and \code{tissue} is either an R object or
+the path of a tab-separated file with a header line, read with
+\code{\link[data.table:fread]{data.table::fread()}} when data.table is installed and with
+\code{\link[utils:read.delim]{utils::read.delim()}} otherwise (\code{NA} or an empty field is missing):
+\describe{
+\item{matrices (\code{phenotype}, \code{genotype}, \code{covariates})}{The first column
+holds the row IDs (promoter, variant or sample IDs); the header holds the
+column IDs. Covariate files have samples in rows.}
+\item{tables (\code{variants}, \code{promoters}, sample table)}{One row per item with
+the named columns; other columns are ignored.}
+\item{VCF}{A \code{genotype} path ending in \code{.vcf} or \code{.vcf.gz} is read with
+\code{\link[=read_vcf_dosage]{read_vcf_dosage()}} (needs the Bioconductor package VariantAnnotation);
+the variant positions then come from the VCF and \code{variants} must be
+\code{NULL}.}
+}
+\code{\link[=simulate_bohr]{simulate_bohr()}} writes a complete example input set in these formats.
+
+\strong{Tissues.} With \code{tissue}, the samples (columns of \code{phenotype}) are
+split by tissue and each tissue is mapped as above, on its own samples,
+covariates and genotype imputation; q values and \code{threshold} stay within
+each tissue. The tables are bound with a first column \code{tissue}. The
+canonical member of a mirror pair is chosen by the mean relative activity
+over all supplied samples pooled across tissues, the rule of the paper (one
+choice for every tissue); a single-tissue call uses that tissue's mean.
+Each sample's genotypes are looked up in the column \code{individual} of
+\code{genotype} (by default the sample ID itself), so samples of one donor in
+several tissues share the donor's genotypes.
 
 With \code{all_stats = TRUE}, the \code{snp} table also holds every statistic of
 the analysis engine under its original name: unpenalised likelihood-ratio
@@ -186,16 +250,30 @@ geno <- matrix(rbinom(30 * n, 2, 0.35), 30, n,
                dimnames = list(paste0("v", 1:30), samples))
 vars <- data.frame(id = rownames(geno), chr = "chr1", pos = seq(1000, 30000, 1000))
 y1 <- simulate_response(n, x = geno[5, ], mu = 0.4, p0 = 0.3, p1 = 0,
-                    effect_p0 = 0.15)$y
+                        effect_p0 = 0.15)$y
 y2 <- simulate_response(n, x = geno[20, ], mu = 0.6, p0 = 0, p1 = 0.2,
-                    effect_mu = 0.08)$y
+                        effect_mu = 0.08)$y
 ph <- rbind(P1 = y1, P2 = y2); colnames(ph) <- samples
 proms <- data.frame(id = c("P1", "P2"), chr = "chr1", pos = c(5000, 20000),
                     gene = c("G1", "G2"))
 res <- bohr_cis(ph, geno, vars, proms, window = 3000)
 res
 res$units[, c("promoter", "component", "p", "q", "leader")]
+
+## files and a tissue loop: a small synthetic input set
+d <- file.path(tempdir(), "bohr_example")
+sim <- simulate_bohr(n_individuals = 90, n_tissues = 2, n_genes = 3,
+                     variant_spacing = 1e5, out_dir = d)
+res2 <- bohr_cis(file.path(d, "relative_activity.tsv"),
+                 genotype = file.path(d, "genotypes.tsv"),
+                 variants = file.path(d, "variants.tsv"),
+                 promoters = file.path(d, "tss.tsv"),
+                 covariates = file.path(d, "covariates"),
+                 tissue = file.path(d, "samples.tsv"), window = 2e5)
+res2
+unlink(d, recursive = TRUE)
 }
 \seealso{
-\code{\link[=bohr_test]{bohr_test()}}, \code{\link[=bohr_combine]{bohr_combine()}}, \code{\link[=mirror_pairs]{mirror_pairs()}}, \code{\link[=acat]{acat()}}.
+\code{\link[=bohr_test]{bohr_test()}}, \code{\link[=bohr_combine]{bohr_combine()}}, \code{\link[=mirror_pairs]{mirror_pairs()}}, \code{\link[=acat]{acat()}},
+\code{\link[=read_vcf_dosage]{read_vcf_dosage()}}, \code{\link[=simulate_bohr]{simulate_bohr()}}.
 }

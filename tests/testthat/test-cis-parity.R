@@ -91,3 +91,15 @@ test_that("acat() and simes() reproduce the engine's ACAT and Simes", {
   expect_identical(BOHR:::acat_log(c(-800, -1)), eng$acat_log(c(-800, -1)))          # exp underflow -> 0
   expect_identical(BOHR:::acat_log(-c(30, 35, 40)), eng$acat_log(-c(30, 35, 40)))    # small-p branch
 })
+
+test_that("single-tissue calls give the tables of the version before the tissue loop (ae071ae)", {
+  fx <- readRDS(test_path("fixtures", "cis_ae071ae.rds"))
+  cfg <- cis_v0_configs()
+  for (nm in names(cfg)) {
+    r <- suppressWarnings(do.call(bohr_cis, cfg[[nm]]))
+    for (k in c("snp", "units", "promoters", "mirror", "threshold")) {
+      if (identical(Sys.getenv("NOT_CRAN"), "true")) expect_identical(r[[k]], fx[[nm]][[k]], info = paste(nm, k))
+      else expect_equal(r[[k]], fx[[nm]][[k]], tolerance = 1e-6, info = paste(nm, k))   # other platforms and BLAS libraries
+    }
+  }
+})
