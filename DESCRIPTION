@@ -1,0 +1,34 @@
+Package: BOHR
+Type: Package
+Title: Beta One-Zero Hybrid Regression for Proportions with Exact Zeros and Ones
+Version: 0.1.0
+Authors@R:
+    person("Yuhao", "Dong", email = "yuhaodong999@gmail.com", role = c("aut", "cre"))
+Description: Regression for proportion data in [0, 1] that contain exact zeros
+    and ones, such as the relative usage of a promoter or isoform. The response
+    is modelled with a zero-and-one-inflated beta distribution (Ospina and
+    Ferrari (2010) <doi:10.1007/s00362-008-0125-4>), and a predictor's effect
+    is tested separately on the probability of zero, the probability of one and
+    the mean of the values in between. The mean is tested with a small-sample
+    corrected likelihood-ratio test of a beta regression (Ferrari and
+    Cribari-Neto (2004) <doi:10.1080/0266476042000214501>) and the boundary
+    components with Firth-penalised likelihood-ratio tests (Firth (1993)
+    <doi:10.1093/biomet/80.1.27>). A genomics layer maps quantitative trait
+    loci of alternative promoter usage, with the Cauchy combination test (Liu
+    and Xie (2020) <doi:10.1080/01621459.2018.1554485>) and false-discovery
+    control. Written in base R.
+License: MIT + file LICENSE
+URL: https://github.com/YuhaoDoong/BOHR
+BugReports: https://github.com/YuhaoDoong/BOHR/issues
+Depends:
+    R (>= 3.6.0)
+Imports:
+    stats,
+    utils,
+    parallel
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Config/roxygen2/version: 8.1.0

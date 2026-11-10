@@ -1,0 +1,11 @@
+^workflow$
+^test_data$
+^LICENSE\.md$
+^README\.Rmd$
+^\.github$
+^.*\.Rproj$
+^\.Rproj\.user$
+^data-raw$
+^docs$
+^_pkgdown\.yml$
+^cran-comments\.md$
