@@ -30,6 +30,9 @@
 #'   \item [bohr_conditional()]: independent signals and lead variants of the
 #'     significant cis units (forward selection at the discovery threshold,
 #'     then the backward step);
+#'   \item [bohr_trait()]: association of every feature with donor traits in
+#'     each tissue, with the paper's eligibility rules and false-discovery
+#'     control within tissue, trait and component;
 #'   \item [simulate_bohr()]: a complete synthetic input set (tissues,
 #'     promoters, absolute and relative activity, genotypes, covariates, traits
 #'     and the true effects), in memory or written to files;
