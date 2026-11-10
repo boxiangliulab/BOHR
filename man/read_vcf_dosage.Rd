@@ -34,6 +34,9 @@ restrict \code{samples}. Variant IDs are the VCF's \code{ID} column, or
 \code{chrom:pos_ref/alt} when it is missing (VariantAnnotation's rule).
 }
 \examples{
+\donttest{
+## needs the Bioconductor package VariantAnnotation, which takes several
+## seconds to load
 if (requireNamespace("VariantAnnotation", quietly = TRUE)) {
   d <- file.path(tempdir(), "bohr_vcf_example")
   sim <- simulate_bohr(n_individuals = 30, n_tissues = 1, n_genes = 2,
@@ -42,6 +45,7 @@ if (requireNamespace("VariantAnnotation", quietly = TRUE)) {
   g$genotype[1:3, 1:5]
   head(g$variants)
   unlink(d, recursive = TRUE)
+}
 }
 }
 \seealso{

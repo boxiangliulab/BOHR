@@ -141,6 +141,9 @@ write_cis_tables <- function(out, out_dir) {
 #'   formats [bohr_cis()] takes.
 #' @seealso [bohr_cis()], [simulate_bohr()] (which writes a small VCF).
 #' @examples
+#' \donttest{
+#' ## needs the Bioconductor package VariantAnnotation, which takes several
+#' ## seconds to load
 #' if (requireNamespace("VariantAnnotation", quietly = TRUE)) {
 #'   d <- file.path(tempdir(), "bohr_vcf_example")
 #'   sim <- simulate_bohr(n_individuals = 30, n_tissues = 1, n_genes = 2,
@@ -149,6 +152,7 @@ write_cis_tables <- function(out, out_dir) {
 #'   g$genotype[1:3, 1:5]
 #'   head(g$variants)
 #'   unlink(d, recursive = TRUE)
+#' }
 #' }
 #' @export
 read_vcf_dosage <- function(file, samples = NULL) {
