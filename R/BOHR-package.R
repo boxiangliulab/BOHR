@@ -27,6 +27,9 @@
 #'     looping over tissues, from R objects or files, with [bohr_combine()] to
 #'     merge per-chromosome runs and [read_vcf_dosage()] to read genotypes
 #'     from a VCF;
+#'   \item [bohr_conditional()]: independent signals and lead variants of the
+#'     significant cis units (forward selection at the discovery threshold,
+#'     then the backward step);
 #'   \item [simulate_bohr()]: a complete synthetic input set (tissues,
 #'     promoters, absolute and relative activity, genotypes, covariates, traits
 #'     and the true effects), in memory or written to files;

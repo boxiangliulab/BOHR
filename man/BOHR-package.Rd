@@ -34,6 +34,9 @@ Genomics (high-throughput) layer:
 looping over tissues, from R objects or files, with \code{\link[=bohr_combine]{bohr_combine()}} to
 merge per-chromosome runs and \code{\link[=read_vcf_dosage]{read_vcf_dosage()}} to read genotypes
 from a VCF;
+\item \code{\link[=bohr_conditional]{bohr_conditional()}}: independent signals and lead variants of the
+significant cis units (forward selection at the discovery threshold,
+then the backward step);
 \item \code{\link[=simulate_bohr]{simulate_bohr()}}: a complete synthetic input set (tissues,
 promoters, absolute and relative activity, genotypes, covariates, traits
 and the true effects), in memory or written to files;
