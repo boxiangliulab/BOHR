@@ -171,6 +171,64 @@ list.files(file.path(d, "results"))
 head(read.delim(file.path(d, "results", "units.tsv")), 3)[, 1:8]
 ```
 
+## Independent signals: `bohr_conditional()`
+
+A significant unit can hold more than one independent association.
+`bohr_conditional()` takes the `bohr_cis()` result and the same inputs. From
+each significant unit's leader it adds the selected variants as covariates,
+rescans the window, and adds the best variant while the window's ACAT P value
+stays at or below the tissue's discovery threshold (the largest P value with
+q at or below 0.05). A backward step then retests each signal given the
+others. With `absolute`, a boundary event of an exact mirror pair is renamed
+p1 at the partner when only the partner's absolute activity changes.
+
+```{r}
+cond <- bohr_conditional(res, phenotype = file.path(d, "relative_activity.tsv"),
+                         genotype = file.path(d, "genotypes.tsv"),
+                         variants = file.path(d, "variants.tsv"),
+                         promoters = file.path(d, "tss.tsv"),
+                         covariates = file.path(d, "covariates"),
+                         tissue = file.path(d, "samples.tsv"),
+                         absolute = file.path(d, "absolute_activity.tsv"))
+cond
+cond$signals[, c("tissue", "promoter", "component", "k", "variant", "log_p", "kept")]
+```
+
+`log_p` is the variant's P value when it was selected (natural log). For a
+unit with two or more signals, `loo_log_p`, `loo_est` and `loo_se` give each
+signal conditional on the others, and `cond$loo` holds those leave-one-out
+scans, which per-signal colocalization needs.
+
+## Donor traits: `bohr_trait()`
+
+`bohr_trait()` tests every promoter against donor traits in each tissue. The
+traits and covariates can be given per individual; a covariate with the name
+of the tested trait is left out of that test. Binary traits need at least
+five donors per group, the eligibility rules of `bohr_cis()` apply, and q
+values are computed within each tissue, trait and component. Estimates are
+per contrast: one standard deviation for a continuous trait, low to high for
+a binary one.
+
+```{r}
+trt <- bohr_trait(file.path(d, "relative_activity.tsv"),
+                  traits = file.path(d, "traits.tsv"),
+                  covariates = file.path(d, "covariates"),
+                  tissue = file.path(d, "samples.tsv"),
+                  promoters = file.path(d, "tss.tsv"))
+trt
+R <- trt$results
+R[R$significant, c("tissue", "trait", "promoter", "component", "p", "q", "est", "effect")]
+```
+
+The simulated trait effects, for comparison:
+
+```{r}
+tr[tr$predictor_type != "dosage" & tr$tissue == "T1",
+   c("promoter", "predictor", "effect_mu", "effect_p0", "effect_p1")]
+```
+
+## Reading genotypes from a VCF
+
 With the Bioconductor package VariantAnnotation installed, the VCF written by
 `simulate_bohr()` can replace the dosage file; the variant positions then come
 from the VCF:

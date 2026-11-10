@@ -107,8 +107,9 @@ An object of class \code{"bohr_trait"}, a list with
 \item{\code{results}}{One row per tissue, trait, feature and component with a
 finite P value: \code{tissue}, \code{trait}, \code{promoter}, \code{gene}, \code{component},
 \code{p}, \code{log_p}, \code{est}, \code{se} (per contrast), \code{effect}, \code{eligible}, \code{q},
-\code{significant}, \code{dedup_drop}, \code{duplicate_of}, the mirror columns,
-\code{family}, \code{n}, \code{n0}, \code{n1}, \code{n_mid}, \code{boundary_share}, \code{n_donors},
+\code{significant}, \code{dedup_drop}, \code{duplicate_of}, the mirror columns
+(\code{mirror_role} and \code{mirror_partner} are given for \code{boundary_exact}
+pairs, as in the paper's tables), \code{family}, \code{n}, \code{n0}, \code{n1}, \code{n_mid}, \code{boundary_share}, \code{n_donors},
 \code{complete_sep}, \code{bh_family} (the BH family of \code{q}) and \code{abs_relabel}.}
 \item{\code{features}}{One row per tissue, trait and feature: family or skip
 reason, sample and group counts, and the engine messages.}

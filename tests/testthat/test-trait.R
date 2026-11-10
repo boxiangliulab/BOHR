@@ -18,6 +18,7 @@ test_that("bohr_trait() equals the original trait regression (run_trait.R, data.
   ## the paper's rules are all exercised: mirror drops (exact and boundary-only pairs), relabel, ineligible units
   expect_true(any(P$dedup_drop & P$component == "p1")); expect_true(any(P$dedup_drop & P$component == "mu"))
   expect_true(any(!P$eligible & !P$dedup_drop))
+  expect_true(all(is.na(P$mirror_role[!P$boundary_exact]))); expect_true(all(!is.na(P$mirror_role[P$boundary_exact])))
   expect_identical(sum(P$abs_relabel), 2L)
   L <- res$labels
   expect_identical(L$S, R$labels$S); expect_identical(L$z_S, unname(R$labels$z_S)); expect_identical(L$z_O, unname(R$labels$z_O))
