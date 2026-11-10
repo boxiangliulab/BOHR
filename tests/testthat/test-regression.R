@@ -27,7 +27,8 @@ test_that("bohr_test() matches the frozen engine output (four families, separati
 
 test_that("bohr_cis() matches the frozen engine output (variants, units, q)", {
   x <- fx$tissue; ref <- fx$tissue_engine
-  res <- bohr_cis(x$phenotype, x$genotype, x$variants, x$promoters, covariates = x$covariates, all_stats = TRUE)
+  expect_warning(res <- bohr_cis(x$phenotype, x$genotype, x$variants, x$promoters, covariates = x$covariates, all_stats = TRUE),
+                 "3 covariates for 80 samples")                                  # more than floor(80/30) = 2: warning only
   kr <- paste(ref$snp$promoter, ref$snp$snp); kp <- paste(res$snp$promoter, res$snp$variant)
   expect_setequal(kp, kr)
   S <- res$snp[match(kr, kp), ]

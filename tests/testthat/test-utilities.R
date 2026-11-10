@@ -80,3 +80,23 @@ test_that("bohr_cis() applies the estimability and mirror rules to its units", {
   expect_true(all(r2$units$estimable[r2$units$component == "mu"]))
   expect_output(print(r), "BOHR cis mapping")
 })
+
+test_that("bohr_cis() drops low-frequency variants (min_maf) and warns about many covariates", {
+  n <- 100; s <- paste0("S", 1:n)
+  G <- with_seed(41, rbind(v1 = stats::rbinom(n, 2, 0.4), v2 = c(1, 1, rep(0, n - 2)), v3 = stats::rbinom(n, 2, 0.3)))
+  colnames(G) <- s
+  V <- data.frame(id = rownames(G), chr = "c1", pos = c(1000, 2000, 3000))
+  y <- with_seed(42, simulate_bohr(n, x = G[1, ], p0 = 0.2, p1 = 0.1)$y)
+  ph <- matrix(y, 1, n, dimnames = list("F1", s)); pr <- data.frame(id = "F1", chr = "c1", pos = 2000)
+  r <- bohr_cis(ph, G, V, pr, window = 5000)
+  expect_identical(r$promoters$n_variants_low_maf, 1L)                       # v2: frequency 0.01
+  expect_identical(r$promoters$n_variants_window, 2L)
+  r0 <- bohr_cis(ph, G, V, pr, window = 5000, min_maf = 0)
+  expect_identical(r0$promoters$n_variants_low_maf, 0L)
+  expect_identical(r0$promoters$n_variants_window, 3L)
+  expect_identical(r0$snp, r$snp)                                             # v2 fails the genotype-count rule anyway
+  expect_error(bohr_cis(ph, G, V, pr, min_maf = 0.6), "min_maf")
+  Z <- matrix(with_seed(43, stats::rnorm(n * 4)), n, 4, dimnames = list(s, NULL))
+  expect_warning(bohr_cis(ph, G, V, pr, covariates = Z, window = 5000), "4 covariates for 100 samples")
+  expect_silent(bohr_cis(ph, G, V, pr, covariates = Z[, 1:3], window = 5000))
+})

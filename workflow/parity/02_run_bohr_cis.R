@@ -7,10 +7,16 @@ x <- readRDS(IN)
 ph <- x$phenotype
 if (MAXP > 0) ph <- ph[seq_len(MAXP), , drop = FALSE]
 t0 <- proc.time()[["elapsed"]]; c0 <- sum(proc.time()[c("user.self", "sys.self", "user.child", "sys.child")], na.rm = TRUE)
-res <- bohr_cis(ph, x$genotype, x$variants, x$promoters, covariates = x$covariates, major_score = x$major_score,
-                ncores = NC, all_stats = TRUE)
+## min_maf = 0: the stored run used the VCF pre-filtered at MAF >= 0.05 over all 944 donors, without a per-tissue filter.
+## The covariate-count warning (5 covariates > floor(n/30) for small tissues) is expected and recorded.
+warn <- character(0)
+res <- withCallingHandlers(bohr_cis(ph, x$genotype, x$variants, x$promoters, covariates = x$covariates, major_score = x$major_score,
+                                    min_maf = 0, ncores = NC, all_stats = TRUE),
+                           warning = function(w) { warn <<- c(warn, conditionMessage(w)); invokeRestart("muffleWarning") })
+res$warnings <- warn
 el <- proc.time()[["elapsed"]] - t0
 res$cpu <- sum(proc.time()[c("user.self", "sys.self", "user.child", "sys.child")], na.rm = TRUE) - c0   # includes the forked workers
 res$wall <- el; res$ncores <- NC; res$host <- Sys.info()[["nodename"]]; res$bohr_version <- as.character(utils::packageVersion("BOHR"))
 saveRDS(res, OUT)
 print(res); cat(sprintf("wall %.1f s on %d cores; CPU %.0f s; %d SNP rows\n", el, NC, res$cpu, nrow(res$snp)))
+if (length(warn)) cat("warnings:", warn, sep = "\n  ")
