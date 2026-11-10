@@ -2,8 +2,9 @@ Package: BOHR
 Type: Package
 Title: Beta One-Zero Hybrid Regression for Proportions with Exact Zeros and Ones
 Version: 0.1.0
-Authors@R:
-    person("Yuhao", "Dong", email = "yuhaodong999@gmail.com", role = c("aut", "cre"))
+Authors@R: c(
+    person("Yuhao", "Dong", email = "yuhaodong999@gmail.com", role = c("aut", "cre")),
+    person("Boxiang", "Liu", role = "aut"))
 Description: Regression for proportion data in [0, 1] that contain exact zeros
     and ones, such as the relative usage of a promoter or isoform. The response
     is modelled with a zero-and-one-inflated beta distribution (Ospina and
