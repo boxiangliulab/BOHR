@@ -1,4 +1,4 @@
-# Real-data parity checks (stages 2, 3a and 3b-1)
+# Real-data parity checks (stages 2, 3a, 3b-1 and 3b-2)
 
 Compare the package with the stored results of the paper's original pipeline. GTEx individual-level data never enter
 this repository: the scripts read them from the lab's storage and write only to a scratch directory given on the
@@ -59,3 +59,14 @@ forward round and leave-one-out scan).
     gamlss fits) and compares with `fit/v11_raw_fit_fit_results.txt`: pairs and sample sizes, the sample-mean rules, the means,
     the families, and the 0.10 ROKU effect filter with ROKU's stored calls held fixed. Run it as a PBS job (about 1 GB of input;
     8 cores, 24 GB).
+
+## Relative activity and the promoter filter, `relative_activity()` (stage 3b-2)
+
+12. `12_relative_activity_parity.R <input folder> <out_dir>` (R with BOHR and Matrix): assembles the object `from_proactiv()`
+    builds from the stored outputs of `0103_proActiv_data_process_tissue.R` (GTEx v11: the promoter annotation with proActiv's
+    class per tissue, proActiv's absolute and relative activity of the 92,557 external promoters in 22,865 samples), runs
+    `relative_activity()` with its defaults and the 57 tissues (SMTSD) as `group`, and compares the promoters and genes left
+    after each step with SI Section 1, the final set with `Promoter_info_filter_5.RData`, and every value with
+    `filter_5_recal_att_filter.RData`. Writes aggregate tables only (`12_steps_vs_paper.tsv`, `12_summary.tsv`) and the
+    per-promoter reasons (`12_promoters.tsv.gz`). About 90 GB of memory and 6 minutes as a PBS job. Results:
+    `STAGE3B2_REPORT.md`.

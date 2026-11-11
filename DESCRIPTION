@@ -27,7 +27,8 @@ Depends:
 Imports:
     stats,
     utils,
-    parallel
+    parallel,
+    methods
 Suggests:
     data.table,
     knitr,

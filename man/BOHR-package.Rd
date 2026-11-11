@@ -71,11 +71,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Yuhao Dong \email{yuhaodong999@gmail.com}
+\strong{Maintainer}: Yuhao Dong \email{yuhaodong999@gmail.com} (\href{https://orcid.org/0000-0003-2510-4175}{ORCID})
 
 Authors:
 \itemize{
-  \item Yuhao Dong \email{yuhaodong999@gmail.com}
+  \item Yuhao Dong \email{yuhaodong999@gmail.com} (\href{https://orcid.org/0000-0003-2510-4175}{ORCID})
   \item Boxiang Liu
 }
 
