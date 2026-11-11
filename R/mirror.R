@@ -33,6 +33,31 @@ id_order <- function(ids) {
 #' canonical member decides only which of the two mu tests of an
 #' `interior_exact` pair is kept.
 #'
+#' @section Mirror columns of the result tables:
+#' [bohr_cis()] (`units`), [bohr_trait()] (`results`) and [bohr_conditional()]
+#' (`units`) describe each unit's feature with the same columns, from the pairs
+#' found in that tissue among the features with at least one value there:
+#' \describe{
+#'   \item{`n_prom_gene`}{Number of features of the group (for promoters, the
+#'     gene) with at least one value in the tissue.}
+#'   \item{`mirror_pair_id`}{The group of a two-feature group (a pair); `NA`
+#'     for a feature that is not in a pair.}
+#'   \item{`boundary_exact`, `interior_exact`}{The pair's exactness, as above;
+#'     `FALSE` for a feature that is not in a pair.}
+#'   \item{`mirror_role`, `mirror_partner`}{`"canonical"` or `"partner"`, and
+#'     the other feature, for every pair, exact or not; `NA` otherwise.}
+#'   \item{`dedup_drop`, `duplicate_of`}{Whether the unit is the duplicate of
+#'     the other member's unit, and that unit (`feature:component`): the p1
+#'     units of a `boundary_exact` pair (each event is tested as p0 at the
+#'     feature that goes silent) and the mu unit of the partner of an
+#'     `interior_exact` pair. A duplicate gets no q value. In [bohr_cis()]
+#'     and [bohr_trait()] only; [bohr_conditional()] analyses kept units.}
+#' }
+#' A boundary event relabelled by absolute activity (`absolute`) is reported
+#' at the other feature of the pair, with that feature's columns:
+#' [bohr_conditional()] gives the unit it was tested as in `relabelled_from`;
+#' [bohr_trait()] keeps both rows and marks them with `abs_relabel`.
+#'
 #' @param phenotype Numeric matrix of proportions, features in rows (row names
 #'   = feature IDs) and samples in columns (same samples in every row; missing
 #'   values allowed). Should hold all features of each group, so that
@@ -114,6 +139,24 @@ tissue_mirror <- function(phenotype, gene, major_score, tol, mirror = TRUE, gene
   n_prom_gene <- if (all(is.na(g))) rep(NA_integer_, length(g)) else { tb <- table(g[!is.na(g)]); as.integer(tb[g]) }
   pairs <- if (mirror && any(!is.na(g))) pair_table(phenotype[has, , drop = FALSE], gene[has], major_score, tol = tol, genes = genes) else NULL
   list(has = has, n_prom_gene = n_prom_gene, pairs = pairs, flags = mirror_flags(pairs))
+}
+
+## The mirror columns of the unit tables (bohr_cis() units, bohr_trait() results; bohr_conditional() units carry the first
+## six), in this order; documented once, in the section "Mirror columns" of ?mirror_pairs.
+MIRROR_COLS <- c("n_prom_gene", "mirror_pair_id", "boundary_exact", "interior_exact", "mirror_role", "mirror_partner", "dedup_drop", "duplicate_of")
+## the columns for units (promoter, component), from tissue_mirror()'s flags and per-unit counts: the pair of every feature of a
+## two-feature group (exact or not), and the v3m de-duplication (units_v3m_mirror.R:35-37 = mirror_v3.R:18): p1 units of a
+## boundary_exact pair and the partner's mu unit of an interior_exact pair are duplicates
+mirror_columns <- function(promoter, component, flags, n_prom_gene) {
+  fi <- if (is.null(flags)) rep(NA_integer_, length(promoter)) else match(promoter, flags$promoter)
+  get_f <- function(k, na) { v <- if (is.null(flags)) rep(na, length(promoter)) else flags[[k]][fi]; v[is.na(fi)] <- na; v }
+  out <- list(n_prom_gene = n_prom_gene, mirror_pair_id = get_f("mirror_pair_id", NA_character_), boundary_exact = get_f("boundary_exact", FALSE),
+              interior_exact = get_f("interior_exact", FALSE), mirror_role = get_f("mirror_role", NA_character_),
+              mirror_partner = get_f("mirror_partner", NA_character_))
+  out$dedup_drop <- ifelse(component == "mu", get_f("drop_mu", FALSE), out$boundary_exact & component == "p1")
+  lab <- c(mu = "mu", p0 = "p1", p1 = "p0")
+  out$duplicate_of <- ifelse(out$dedup_drop, paste0(out$mirror_partner, ":", lab[component]), NA_character_)
+  out
 }
 
 ## per-promoter flags (mirror_pairs.R:44-50) and the v3m drop rule (units_v3m_mirror.R:23-26):

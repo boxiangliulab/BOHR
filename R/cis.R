@@ -175,8 +175,9 @@
 #'       `leader_log_p`, `leader_est`, `leader_effect`, the other components'
 #'       log P values and estimates at the leader, `estimable`, the mirror
 #'       columns (`n_prom_gene`, `mirror_pair_id`, `boundary_exact`,
-#'       `interior_exact`, `mirror_role`, `mirror_partner`), `dedup_drop`,
-#'       `duplicate_of`, `q` and `significant`.}
+#'       `interior_exact`, `mirror_role`, `mirror_partner`, `dedup_drop`,
+#'       `duplicate_of`; see "Mirror columns" in [mirror_pairs()]), `q` and
+#'       `significant`.}
 #'     \item{`promoters`}{One row per promoter: family or skip reason, sample
 #'       counts, design size, null-fit convergence and log-likelihoods, and
 #'       variant counts (`n_variants_window`, `n_variants_tested`).}
@@ -421,17 +422,9 @@ make_units <- function(snp, prom, n_prom_gene, flags, min_n_mid, boundary_share,
   ## estimability (units_v3_estimable.R:15-17)
   U$estimable <- !(U$component == "mu" & U$n_mid < min_n_mid) &
     (U$component == "mu" | (U$boundary_share >= boundary_share[1] & U$boundary_share <= boundary_share[2]))
-  ## mirror flags and the v3m de-duplication (discovery_nogate.R:50-57, units_v3m_mirror.R:35-37)
-  U$n_prom_gene <- n_prom_gene[match(U$promoter, prom$promoter)]
-  fi <- if (is.null(flags)) rep(NA_integer_, nrow(U)) else match(U$promoter, flags$promoter)
-  get_f <- function(k, na) { v <- if (is.null(flags)) rep(na, nrow(U)) else flags[[k]][fi]; v[is.na(fi)] <- na; v }
-  U$mirror_pair_id <- get_f("mirror_pair_id", NA_character_)
-  U$boundary_exact <- get_f("boundary_exact", FALSE); U$interior_exact <- get_f("interior_exact", FALSE)
-  U$mirror_role <- get_f("mirror_role", NA_character_); U$mirror_partner <- get_f("mirror_partner", NA_character_)
-  drop_mu <- get_f("drop_mu", FALSE)
-  U$dedup_drop <- ifelse(U$component == "mu", drop_mu, U$boundary_exact & U$component == "p1")
-  lab <- c(mu = "mu", p0 = "p1", p1 = "p0")
-  U$duplicate_of <- ifelse(U$dedup_drop, paste0(U$mirror_partner, ":", lab[U$component]), NA_character_)
+  ## mirror columns and the v3m de-duplication (discovery_nogate.R:50-57, units_v3m_mirror.R:35-37; mirror_columns())
+  mc <- mirror_columns(U$promoter, U$component, flags, n_prom_gene[match(U$promoter, prom$promoter)])
+  for (k in MIRROR_COLS) U[[k]] <- mc[[k]]
   rownames(U) <- NULL
   U
 }

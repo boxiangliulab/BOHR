@@ -18,7 +18,11 @@ test_that("bohr_trait() equals the original trait regression (run_trait.R, data.
   ## the paper's rules are all exercised: mirror drops (exact and boundary-only pairs), relabel, ineligible units
   expect_true(any(P$dedup_drop & P$component == "p1")); expect_true(any(P$dedup_drop & P$component == "mu"))
   expect_true(any(!P$eligible & !P$dedup_drop))
-  expect_true(all(is.na(P$mirror_role[!P$boundary_exact]))); expect_true(all(!is.na(P$mirror_role[P$boundary_exact])))
+  ## the mirror columns of bohr_cis(): role and partner for every pair, also H3 (PromoterID_305 and _310, not interior_exact)
+  expect_identical(names(P)[match(BOHR:::MIRROR_COLS, names(P))], BOHR:::MIRROR_COLS)
+  expect_identical(is.na(P$mirror_role), is.na(P$mirror_pair_id)); expect_true(all(!is.na(P$mirror_role[P$boundary_exact])))
+  h3 <- P[P$promoter %in% c("PromoterID_305", "PromoterID_310"), ]
+  expect_true(all(h3$mirror_pair_id == "H3" & !h3$interior_exact & !h3$dedup_drop)); expect_setequal(h3$mirror_role, c("canonical", "partner"))
   expect_identical(sum(P$abs_relabel), 2L)
   L <- res$labels
   expect_identical(L$S, R$labels$S); expect_identical(L$z_S, unname(R$labels$z_S)); expect_identical(L$z_O, unname(R$labels$z_O))

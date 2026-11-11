@@ -247,9 +247,9 @@ trait_feature <- function(p, gene, yv, C_all, gp, binary, min_group, control) {
 #'     \item{`results`}{One row per tissue, trait, feature and component with a
 #'       finite P value: `tissue`, `trait`, `promoter`, `gene`, `component`,
 #'       `p`, `log_p`, `est`, `se` (per contrast), `effect`, `eligible`, `q`,
-#'       `significant`, `dedup_drop`, `duplicate_of`, the mirror columns
-#'       (`mirror_role` and `mirror_partner` are given for `boundary_exact`
-#'       pairs, as in the paper's tables), `family`, `n`, `n0`, `n1`, `n_mid`, `boundary_share`, `n_donors`,
+#'       `significant`, the mirror columns of [bohr_cis()] (`n_prom_gene`
+#'       to `duplicate_of`; see "Mirror columns" in [mirror_pairs()]),
+#'       `family`, `n`, `n0`, `n1`, `n_mid`, `boundary_share`, `n_donors`,
 #'       `complete_sep`, `bh_family` (the BH family of `q`) and `abs_relabel`.}
 #'     \item{`features`}{One row per tissue, trait and feature: family or skip
 #'       reason, sample and group counts, and the engine messages.}
@@ -400,17 +400,10 @@ trait_one <- function(ph, gene_all, TR, cv, major_score, absolute, opt, label = 
     if (!nrow(U)) next
     U$p <- exp(U$log_p)
     U$boundary_share <- ifelse(U$component == "p0", U$n0 / U$n, ifelse(U$component == "p1", U$n1 / U$n, NA_real_))
-    ## mirror rule v3 (mirror_v3.R:18, summarize.R:67-74)
-    fi <- if (is.null(flags)) rep(NA_integer_, nrow(U)) else match(U$promoter, flags$promoter)
-    get_f <- function(k, na) { v <- if (is.null(flags)) rep(na, nrow(U)) else flags[[k]][fi]; v[is.na(fi)] <- na; v }
-    U$n_prom_gene <- n_prom_gene[match(U$promoter, feats)]
-    U$boundary_exact <- get_f("boundary_exact", FALSE); U$interior_exact <- get_f("interior_exact", FALSE)
-    ## role and partner are named for boundary_exact pairs only, as in the trait run's mirror table (mirror.R:53-54)
-    U$mirror_role <- ifelse(U$boundary_exact, get_f("mirror_role", NA_character_), NA_character_)
-    U$mirror_partner <- ifelse(U$boundary_exact, get_f("mirror_partner", NA_character_), NA_character_)
-    U$dedup_drop <- ifelse(U$component == "mu", get_f("drop_mu", FALSE), U$component == "p1" & U$boundary_exact)
-    swap <- c(mu = "mu", p0 = "p1", p1 = "p0")
-    U$duplicate_of <- ifelse(U$dedup_drop, paste0(U$mirror_partner, ":", swap[U$component]), NA_character_)
+    ## mirror rule v3 (mirror_v3.R:18, summarize.R:67-74) and the mirror columns of bohr_cis() (mirror_columns()); role and
+    ## partner are given for every pair (the trait run's own table named them for boundary_exact pairs only, mirror.R:53-54)
+    mc <- mirror_columns(U$promoter, U$component, flags, n_prom_gene[match(U$promoter, feats)])
+    for (k in MIRROR_COLS) U[[k]] <- mc[[k]]
     ## eligibility and BH within component (summarize.R:84-98)
     sh <- opt$boundary_share
     U$eligible <- !U$dedup_drop & (U$component != "mu" | U$n_mid >= opt$min_n_mid) &
@@ -436,8 +429,7 @@ trait_one <- function(ph, gene_all, TR, cv, major_score, absolute, opt, label = 
       }
     }
     R[[tr]] <- U[, c("trait", "promoter", "gene", "component", "p", "log_p", "est", "se", "effect", "eligible", "q", "significant",
-                     "dedup_drop", "duplicate_of", "n_prom_gene", "mirror_role", "mirror_partner", "boundary_exact", "interior_exact",
-                     "family", "n", "n0", "n1", "n_mid", "boundary_share", "n_donors", "complete_sep", "bh_family", "abs_relabel")]
+                     MIRROR_COLS, "family", "n", "n0", "n1", "n_mid", "boundary_share", "n_donors", "complete_sep", "bh_family", "abs_relabel")]
   }
   ord <- function(d) { if (is.null(d)) return(NULL); d <- d[order(match(d$trait, names(TR)), d$promoter, if (!is.null(d$component)) d$component else 0,
                                                                  method = "radix"), , drop = FALSE]; rownames(d) <- NULL; d }

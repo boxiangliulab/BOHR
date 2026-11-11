@@ -141,8 +141,9 @@ class), and the columns of \code{\link[=bohr_test]{bohr_test()}}.}
 \code{leader_log_p}, \code{leader_est}, \code{leader_effect}, the other components'
 log P values and estimates at the leader, \code{estimable}, the mirror
 columns (\code{n_prom_gene}, \code{mirror_pair_id}, \code{boundary_exact},
-\code{interior_exact}, \code{mirror_role}, \code{mirror_partner}), \code{dedup_drop},
-\code{duplicate_of}, \code{q} and \code{significant}.}
+\code{interior_exact}, \code{mirror_role}, \code{mirror_partner}, \code{dedup_drop},
+\code{duplicate_of}; see "Mirror columns" in \code{\link[=mirror_pairs]{mirror_pairs()}}), \code{q} and
+\code{significant}.}
 \item{\code{promoters}}{One row per promoter: family or skip reason, sample
 counts, design size, null-fit convergence and log-likelihoods, and
 variant counts (\code{n_variants_window}, \code{n_variants_tested}).}

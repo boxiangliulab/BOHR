@@ -177,7 +177,10 @@ cond_pass <- function(jobs, PP, control, ncores, chunk_size) {
 #'     \item{`units`}{One row per analysed unit: `promoter`, `gene`,
 #'       `component`, `chr`, `family`, `n`, `n0`, `n1`, `p` and `q` (from
 #'       [bohr_cis()]), `leader`, `n_signals` (forward), `n_kept` (after the
-#'       backward step) and `stop` (why the forward step stopped).}
+#'       backward step), `stop` (why the forward step stopped), the mirror
+#'       columns `n_prom_gene` to `mirror_partner` of [bohr_cis()] (see
+#'       "Mirror columns" in [mirror_pairs()]) and, with `absolute`,
+#'       `relabelled_from`.}
 #'     \item{`rounds`}{One row per unit and forward round: conditioning
 #'       variants, variants tested and failed, the window ACAT P value (and,
 #'       for mu, that of the uncorrected P values), the best variant and its
@@ -433,6 +436,11 @@ cond_one <- function(phenotype, G, V, prom, Z, U, th, snp_t, prom_t, set, contro
                       n_kept = NA_integer_, stop = vapply(stt, `[[`, "", "stop"), stringsAsFactors = FALSE)
   ukey <- paste(units$promoter, units$component, sep = "\r"); skey <- paste(sig_tab$promoter, sig_tab$component, sep = "\r")
   units$n_kept <- vapply(ukey, function(k) { v <- sig_tab$kept[skey == k]; if (anyNA(v)) NA_integer_ else sum(v) }, 0L, USE.NAMES = FALSE)
+  ## the mirror columns of the analysed units, from `cis` (section "Mirror columns" of ?mirror_pairs; kept units only, so no
+  ## de-duplication columns); NA when `cis` lacks a column
+  na_of <- list(n_prom_gene = NA_integer_, mirror_pair_id = NA_character_, boundary_exact = NA, interior_exact = NA,
+                mirror_role = NA_character_, mirror_partner = NA_character_)
+  for (k in names(na_of)) units[[k]] <- if (is.null(U[[k]])) rep(na_of[[k]], nrow(U)) else U[[k]]
   rounds <- bind_df(rounds)
 
   ## ---- optional absolute-activity labels of exact-pair boundary events (mirror_abs_labels.R) ----
@@ -445,7 +453,8 @@ cond_one <- function(phenotype, G, V, prom, Z, U, th, snp_t, prom_t, set, contro
     for (j in seq_len(if (is.null(ch)) 0L else nrow(ch))) {
       rn <- function(d, swap_n = FALSE) { w <- d$promoter == ch$S[j] & d$component == "p0"
         if (!is.null(d$relabelled_from)) d$relabelled_from[w] <- paste0(ch$S[j], ":p0")
-        if (swap_n) { n0 <- d$n0[w]; d$n0[w] <- d$n1[w]; d$n1[w] <- n0 }
+        if (swap_n) { n0 <- d$n0[w]; d$n0[w] <- d$n1[w]; d$n1[w] <- n0                # units: the partner's counts and mirror columns
+          d$mirror_partner[w] <- ch$S[j]; d$mirror_role[w] <- unname(c(canonical = "partner", partner = "canonical")[d$mirror_role[w]]) }
         d$promoter[w] <- ch$O[j]; d$component[w] <- "p1"; d }
       units <- rn(units, swap_n = TRUE); sig_tab <- rn(sig_tab)
       if (!is.null(rounds)) rounds <- rn(rounds)

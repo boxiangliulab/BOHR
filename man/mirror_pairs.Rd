@@ -59,6 +59,33 @@ activity over all analysed samples of all 50 tissues. In \code{\link[=bohr_cis]{
 canonical member decides only which of the two mu tests of an
 \code{interior_exact} pair is kept.
 }
+\section{Mirror columns of the result tables}{
+
+\code{\link[=bohr_cis]{bohr_cis()}} (\code{units}), \code{\link[=bohr_trait]{bohr_trait()}} (\code{results}) and \code{\link[=bohr_conditional]{bohr_conditional()}}
+(\code{units}) describe each unit's feature with the same columns, from the pairs
+found in that tissue among the features with at least one value there:
+\describe{
+\item{\code{n_prom_gene}}{Number of features of the group (for promoters, the
+gene) with at least one value in the tissue.}
+\item{\code{mirror_pair_id}}{The group of a two-feature group (a pair); \code{NA}
+for a feature that is not in a pair.}
+\item{\code{boundary_exact}, \code{interior_exact}}{The pair's exactness, as above;
+\code{FALSE} for a feature that is not in a pair.}
+\item{\code{mirror_role}, \code{mirror_partner}}{\code{"canonical"} or \code{"partner"}, and
+the other feature, for every pair, exact or not; \code{NA} otherwise.}
+\item{\code{dedup_drop}, \code{duplicate_of}}{Whether the unit is the duplicate of
+the other member's unit, and that unit (\code{feature:component}): the p1
+units of a \code{boundary_exact} pair (each event is tested as p0 at the
+feature that goes silent) and the mu unit of the partner of an
+\code{interior_exact} pair. A duplicate gets no q value. In \code{\link[=bohr_cis]{bohr_cis()}}
+and \code{\link[=bohr_trait]{bohr_trait()}} only; \code{\link[=bohr_conditional]{bohr_conditional()}} analyses kept units.}
+}
+A boundary event relabelled by absolute activity (\code{absolute}) is reported
+at the other feature of the pair, with that feature's columns:
+\code{\link[=bohr_conditional]{bohr_conditional()}} gives the unit it was tested as in \code{relabelled_from};
+\code{\link[=bohr_trait]{bohr_trait()}} keeps both rows and marks them with \code{abs_relabel}.
+}
+
 \examples{
 set.seed(3)
 a <- simulate_response(60, p0 = 0.2, p1 = 0.2)$y

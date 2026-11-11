@@ -37,6 +37,10 @@ test_that("bohr_conditional() equals the original conditional analysis (run_cond
   expect_identical(cr$best_log_p, rr$best_logp)
   expect_identical(cr$best_variant, rr$best_snp)
   expect_identical(cr$n_conditioned, rr$n_cond)
+  ## the units carry the mirror columns of the cis units (no de-duplication columns: only kept units are analysed)
+  cu <- cis$units[cis$units$significant, ]
+  for (k in BOHR:::MIRROR_COLS[1:6]) expect_identical(cond$units[[k]], cu[[k]], info = k)
+  expect_false(any(c("dedup_drop", "duplicate_of") %in% names(cond$units)))
   expect_identical(paste(cond$loo$promoter, cond$loo$component, cond$loo$k, cond$loo$variant), paste(R$loo$promoter, R$loo$type, R$loo$k, R$loo$snp))
   for (k in c("est", "se")) expect_identical(cond$loo[[k]], R$loo[[k]], info = k)
   expect_identical(cond$loo$log_p, R$loo$logp); expect_identical(cond$loo$log_p_chi, R$loo$logp_chi)
@@ -66,6 +70,9 @@ test_that("absolute-activity labels follow mirror_abs_labels.R and rename only O
   u <- cond$units[cond$units$promoter == O & cond$units$component == "p1", ]
   u0 <- plain$units[plain$units$promoter == S & plain$units$component == "p0", ]
   expect_identical(c(u$n0, u$n1), c(u0$n1, u0$n0)); expect_identical(u$p, u0$p); expect_identical(u$relabelled_from, paste0(S, ":p0"))
+  ## the mirror columns are those of the partner: its role, and the silent promoter as its partner
+  expect_identical(u$mirror_partner, S); expect_identical(u0$mirror_partner, O)
+  expect_identical(sort(c(u$mirror_role, u0$mirror_role)), c("canonical", "partner")); expect_identical(u$mirror_pair_id, u0$mirror_pair_id)
   s1 <- cond$signals[cond$signals$promoter == O & cond$signals$component == "p1", ]
   s0 <- plain$signals[plain$signals$promoter == S & plain$signals$component == "p0", ]
   expect_identical(s1$log_p, s0$log_p); expect_identical(s1$variant, s0$variant)

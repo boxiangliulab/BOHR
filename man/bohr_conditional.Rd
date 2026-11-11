@@ -81,7 +81,10 @@ of mu; log odds of 0 or 1 against an intermediate value).}
 \item{\code{units}}{One row per analysed unit: \code{promoter}, \code{gene},
 \code{component}, \code{chr}, \code{family}, \code{n}, \code{n0}, \code{n1}, \code{p} and \code{q} (from
 \code{\link[=bohr_cis]{bohr_cis()}}), \code{leader}, \code{n_signals} (forward), \code{n_kept} (after the
-backward step) and \code{stop} (why the forward step stopped).}
+backward step), \code{stop} (why the forward step stopped), the mirror
+columns \code{n_prom_gene} to \code{mirror_partner} of \code{\link[=bohr_cis]{bohr_cis()}} (see
+"Mirror columns" in \code{\link[=mirror_pairs]{mirror_pairs()}}) and, with \code{absolute},
+\code{relabelled_from}.}
 \item{\code{rounds}}{One row per unit and forward round: conditioning
 variants, variants tested and failed, the window ACAT P value (and,
 for mu, that of the uncorrected P values), the best variant and its

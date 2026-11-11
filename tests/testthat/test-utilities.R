@@ -62,6 +62,26 @@ test_that("mirror_pairs() applies the exact and boundary-only rules", {
   expect_true(mirror_pairs(ph, group = c("G1", "G1", "G2", "G2", "G3", "G3", "G4"), tol = 1e-4)$interior_exact[1])
 })
 
+test_that("bohr_cis(), bohr_conditional() and bohr_trait() report the same mirror columns", {
+  skip_on_cran()
+  sim <- with_seed(61, simulate_bohr(n_individuals = 120, n_tissues = 1, n_genes = 8, variant_spacing = 1e5))
+  ph <- sim$relative; cv <- sim$covariates$T1; ind <- sim$samples$individual
+  cis <- suppressWarnings(bohr_cis(ph, sim$genotype, sim$variants, sim$tss, covariates = cv, individual = ind, window = 2e5, min_n_mid = 30))
+  trt <- data.frame(sim$traits[, -1], row.names = sim$traits$individual)
+  tr <- bohr_trait(ph, trt, covariates = cv, individual = ind, promoters = sim$tss, min_n_mid = 30, min_donors = 20)
+  a <- cis$units; b <- tr$results[tr$results$trait == "binary_trait", ]
+  ka <- paste(a$promoter, a$component); kb <- paste(b$promoter, b$component); k <- intersect(ka, kb)
+  expect_gt(length(k), 10)
+  for (col in BOHR:::MIRROR_COLS) expect_identical(a[[col]][match(k, ka)], b[[col]][match(k, kb)], info = col)
+  expect_identical(names(a)[match(BOHR:::MIRROR_COLS, names(a))], BOHR:::MIRROR_COLS)
+  expect_true(any(!a$boundary_exact & !is.na(a$mirror_role)))       # a pair that is not exact (gene G004) has a role and a partner
+  expect_true(any(a$dedup_drop & a$component == "p1")); expect_true(any(a$dedup_drop & a$component == "mu"))
+  cond <- bohr_conditional(cis, ph, sim$genotype, sim$variants, sim$tss, covariates = cv, individual = ind)
+  expect_gt(nrow(cond$units), 0)
+  ku <- paste(cond$units$promoter, cond$units$component)
+  for (col in BOHR:::MIRROR_COLS[1:6]) expect_identical(cond$units[[col]], a[[col]][match(ku, ka)], info = col)
+})
+
 test_that("bohr_cis() applies the estimability and mirror rules to its units", {
   x <- sim_tissue(seed = 14, n = 90)
   keep <- c("PromoterID_102", "PromoterID_103", "PromoterID_104", "PromoterID_105")

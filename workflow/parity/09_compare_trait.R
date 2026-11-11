@@ -21,11 +21,14 @@ dd <- function(a, b, lab) { ok <- is.finite(a) & is.finite(b); d <- abs(a[ok] - 
 print(rbind(dd(K$logp, K$log_p, "log P"), dd(K$p.st, K$p.pk, "P"), dd(K$est.st, K$est.pk, "estimate (per contrast)"), dd(K$se.st, K$se.pk, "SE"),
             dd(K$pe, K$effect, "effect"), dd(K$q_final, K$q, "q (within tissue x trait x component)")), digits = 3)
 eqv <- function(a, b) sum((is.na(a) & is.na(b)) | (!is.na(a) & !is.na(b) & a == b))
-cat(sprintf("agreement over %d units: eligible (final) %d; significant %d; mirror drop %d; BH family %d; relabelled %d; n/n0/n1/n_mid %d; n_donors %d; boundary_exact %d; interior_exact %d; mirror role %d\n",
+## mirror role: the export names it for boundary_exact pairs only; the package (stage 3b-1) for every pair, as bohr_cis()
+KB <- K[boundary_exact.st %in% TRUE]
+cat(sprintf("agreement over %d units: eligible (final) %d; significant %d; mirror drop %d; BH family %d; relabelled %d; n/n0/n1/n_mid %d; n_donors %d; boundary_exact %d; interior_exact %d; mirror role (boundary_exact pairs) %d of %d; roles of other pairs named by the package only: %d\n",
             nrow(K), eqv(K$final, K$eligible), eqv(K$sig_final, K$significant), eqv(K$dedup_drop.st, K$dedup_drop.pk), eqv(K$bh_family.st, K$bh_family.pk),
             eqv(K$abs_relabel.st, K$abs_relabel.pk), K[n.st == n.pk & n0.st == n0.pk & n1.st == n1.pk & n_mid.st == n_mid.pk, .N], eqv(K$n_donors.st, K$n_donors.pk),
             eqv(K$boundary_exact.st, K$boundary_exact.pk), eqv(K$interior_exact.st, K$interior_exact.pk),
-            eqv(fifelse(K$mirror_role.st == "", NA_character_, K$mirror_role.st), K$mirror_role.pk)))
+            eqv(fifelse(KB$mirror_role.st == "", NA_character_, KB$mirror_role.st), KB$mirror_role.pk), nrow(KB),
+            K[!(boundary_exact.st %in% TRUE) & !is.na(mirror_role.pk), .N]))
 cat(sprintf("significant: export %d (mu %d, p0 %d, p1 %d), package %d (mu %d, p0 %d, p1 %d); eligible: export %d, package %d\n",
             E[sig_final == TRUE, .N], E[sig_final == TRUE & type == "mu", .N], E[sig_final == TRUE & type == "p0", .N], E[sig_final == TRUE & type == "p1", .N],
             P[significant == TRUE, .N], P[significant == TRUE & type == "mu", .N], P[significant == TRUE & type == "p0", .N], P[significant == TRUE & type == "p1", .N],
