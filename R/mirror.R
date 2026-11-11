@@ -103,6 +103,19 @@ pair_table <- function(phenotype, gene, major_score, tol = 1e-6, genes = NULL) {
   rows_to_df(rows, cols)
 }
 
+## Mirror pairs of one tissue, for bohr_cis() and bohr_trait() (one rule for both, stage 3b-1). A group's features are counted
+## over the features with at least one value in the tissue's samples ("the gene's only two promoters in that tissue's data",
+## SI Section 2), so a matrix that is the union of tissue-specific feature sets gives each tissue its own pairs. phenotype:
+## features x the tissue's samples; gene: per row (NA = no group); genes: optional groups to pair (bohr_cis(chromosomes = )).
+## Returns has (per row), n_prom_gene (per row; NA without a group or without values), pairs (pair_table) and flags.
+tissue_mirror <- function(phenotype, gene, major_score, tol, mirror = TRUE, genes = NULL) {
+  has <- rowSums(!is.na(phenotype)) > 0
+  g <- ifelse(has, gene, NA_character_)
+  n_prom_gene <- if (all(is.na(g))) rep(NA_integer_, length(g)) else { tb <- table(g[!is.na(g)]); as.integer(tb[g]) }
+  pairs <- if (mirror && any(!is.na(g))) pair_table(phenotype[has, , drop = FALSE], gene[has], major_score, tol = tol, genes = genes) else NULL
+  list(has = has, n_prom_gene = n_prom_gene, pairs = pairs, flags = mirror_flags(pairs))
+}
+
 ## per-promoter flags (mirror_pairs.R:44-50) and the v3m drop rule (units_v3m_mirror.R:23-26):
 ## drop_mu = interior_exact & partner; drop_p1 = boundary_exact (both members).
 mirror_flags <- function(pairs) {

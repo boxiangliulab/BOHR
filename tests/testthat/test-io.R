@@ -62,6 +62,33 @@ test_that("the tissue loop maps each tissue on its own samples, with the pooled 
   expect_output(print(r), "q values within each tissue")
 })
 
+test_that("a union matrix: each tissue counts a gene's promoters over those with values in it (SI Section 2)", {
+  x <- sim_tissue(seed = 14, n = 90)
+  g5 <- c("PromoterID_107", "PromoterID_108", "PromoterID_109")                # gene G5: three promoters
+  ren <- function(m, p) { colnames(m) <- paste0(p, colnames(m)); m }
+  A <- ren(x$phenotype[g5, ], "A_"); B <- ren(x$phenotype[g5, ], "B_")
+  A["PromoterID_109", ] <- NA                                                 # not measured in tissue A
+  A["PromoterID_108", ] <- 1 - A["PromoterID_107", ]                          # so 107 and 108 are an exact mirror pair in A
+  smp <- data.frame(sample = c(colnames(A), colnames(B)), tissue = rep(c("A", "B"), each = ncol(A)),
+                    individual = rep(colnames(x$phenotype), 2), stringsAsFactors = FALSE)
+  rcv <- function(p) { z <- x$covariates; rownames(z) <- paste0(p, rownames(z)); z }
+  cv <- rbind(rcv("A_"), rcv("B_"))
+  ph <- cbind(A, B)
+  res <- suppressWarnings(bohr_cis(ph, x$genotype, x$variants, x$promoters, covariates = cv, tissue = smp))
+  U <- res$units
+  ua <- U[U$tissue == "A", ]; ub <- U[U$tissue == "B", ]
+  expect_true(all(ua$n_prom_gene == 2)); expect_true(all(ub$n_prom_gene == 3))
+  expect_true(all(ua$mirror_pair_id == "G5" & ua$boundary_exact & ua$interior_exact))
+  expect_true(all(is.na(ub$mirror_pair_id)) && !any(ub$boundary_exact) && !any(ub$dedup_drop))
+  expect_true(any(ua$dedup_drop & ua$component == "p1")); expect_true(any(ua$dedup_drop & ua$component == "mu"))
+  expect_identical(nrow(res$mirror), 1L); expect_identical(res$mirror$tissue, "A")
+  ## tissue A of the union matrix equals A's own matrix without the unmeasured promoter (pooled score for the canonical member)
+  ms <- rowMeans(ph, na.rm = TRUE)
+  one <- suppressWarnings(bohr_cis(A[1:2, ], x$genotype[, colnames(x$phenotype)], x$variants, x$promoters,
+                                   covariates = rcv("A_"), individual = colnames(x$phenotype), major_score = ms))
+  expect_identical(strip_tissue(ua), one$units); expect_identical(strip_tissue(res$snp[res$snp$tissue == "A", ]), one$snp)
+})
+
 test_that("one tissue label for every sample equals the single-tissue call", {
   sim <- small_sim(seed = 33, n_tissues = 1)
   a <- run_cis(sim$relative, sim$genotype, sim$variants, sim$tss, covariates = sim$covariates$T1,

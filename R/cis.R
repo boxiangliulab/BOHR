@@ -307,14 +307,12 @@ cis_one <- function(phenotype, G_all, V, prom, covariates, major_score, opt, t0,
                            "factors). The BOHR paper kept at most one covariate per 30 donors where possible. Nothing was dropped."),
                     if (is.null(label)) "" else paste0("Tissue ", label, ": "), ncol(Z), length(samples), floor(length(samples) / 30)), call. = FALSE)
 
-  ## mirror pairs over the whole matrix (promoter counts per gene), flags for the selected chromosomes
+  ## mirror pairs: a gene's promoters are counted over the promoters with at least one value in this tissue (all
+  ## chromosomes; tissue_mirror(), the rule of bohr_trait()); flags for the genes of the selected chromosomes
   has_gene <- "gene" %in% names(prom) && any(!is.na(prom$gene))
-  n_prom_gene <- if (has_gene) { tb <- table(prom$gene[!is.na(prom$gene)]); as.integer(tb[prom$gene]) } else rep(NA_integer_, nrow(prom))
-  pairs <- NULL
-  if (mirror && has_gene) {
-    if (is.null(major_score)) major_score <- rowMeans(phenotype, na.rm = TRUE)
-    pairs <- pair_table(phenotype, prom$gene, major_score, tol = mirror_tol, genes = unique(prom$gene[sel]))
-  }
+  if (mirror && has_gene && is.null(major_score)) major_score <- rowMeans(phenotype, na.rm = TRUE)
+  tm <- tissue_mirror(phenotype, prom$gene, major_score, mirror_tol, mirror = mirror && has_gene, genes = unique(prom$gene[sel]))
+  n_prom_gene <- tm$n_prom_gene; pairs <- tm$pairs
 
   ## variants: chromosome index; fill missing dosages of the variants that can enter a window
   todo <- which(sel); todo <- todo[order(match(prom$chr[todo], unique(prom$chr[todo])), prom$pos[todo], method = "radix")]
@@ -376,7 +374,7 @@ cis_one <- function(phenotype, G_all, V, prom, covariates, major_score, opt, t0,
   prom_out <- rows_to_df(lapply(prep, `[[`, "prom"))
   if (!is.null(snp)) { o <- order(match(snp$promoter, prom_out$promoter), snp$pos, snp$variant, method = "radix"); snp <- snp[o, , drop = FALSE]; rownames(snp) <- NULL }
 
-  units <- make_units(snp, prom_out, n_prom_gene[match(prom_out$promoter, prom$id)], mirror_flags(pairs),
+  units <- make_units(snp, prom_out, n_prom_gene[match(prom_out$promoter, prom$id)], tm$flags,
                       min_n_mid, boundary_share, acat_cap)
   units <- units_bh(units, fdr)
   out <- list(snp = snp, units = units, promoters = prom_out, mirror = pairs,

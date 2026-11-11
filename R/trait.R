@@ -356,14 +356,10 @@ bohr_trait <- function(phenotype, traits, covariates = NULL, tissue = NULL, indi
 ## one tissue: ph = features x the tissue's samples; TR = traits over the same samples; cv = covariate frame (rows = samples)
 trait_one <- function(ph, gene_all, TR, cv, major_score, absolute, opt, label = NULL) {
   control <- opt$control
-  has <- rowSums(!is.na(ph)) > 0                                       # features with data in this tissue
+  tm <- tissue_mirror(ph, gene_all, major_score, opt$mirror_tol, mirror = opt$mirror)   # pairs among the features with data here
+  has <- tm$has; pairs <- tm$pairs; flags <- tm$flags
   ph <- ph[has, , drop = FALSE]; gene <- gene_all[has]; feats <- rownames(ph); s_all <- colnames(ph)
-  pairs <- NULL; flags <- NULL
-  if (opt$mirror && length(feats)) {
-    pairs <- pair_table(ph, gene, major_score, tol = opt$mirror_tol)
-    flags <- mirror_flags(pairs)
-  }
-  n_prom_gene <- if (all(is.na(gene))) rep(NA_integer_, length(feats)) else { tb <- table(gene[!is.na(gene)]); as.integer(tb[gene]) }
+  n_prom_gene <- tm$n_prom_gene[has]
   R <- list(); Fe <- list(); Tt <- list(); L <- list()
   for (tr in names(TR)) {
     x <- TR[[tr]]$x; ty <- TR[[tr]]$type

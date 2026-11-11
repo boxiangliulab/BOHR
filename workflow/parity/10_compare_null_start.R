@@ -69,9 +69,14 @@ if (KIND == "cis") {
     flat <- function(S) do.call(rbind, lapply(seq_along(S), function(pi) do.call(rbind, lapply(S[[pi]], function(j) if (!is.null(j$res) && nrow(j$res))
       data.frame(key = j$key, type = j$type, cs = paste(j$cs, collapse = ","), variant = j$res$variant, est = j$res$est, se = j$res$se,
                  log_p = j$res$log_p, stringsAsFactors = FALSE)))))
-    FA <- flat(O$scans); FB <- flat(N$scans)
+    ## a scan is identified by the unit and its conditioning variants; a leave-one-out scan of a two-signal unit repeats the
+    ## round-1 scan (conditioning on the leader), so each distinct scan is counted once
+    uniq <- function(F) F[!duplicated(paste(F$key, F$type, F$cs, F$variant, sep = "\r")), , drop = FALSE]
+    FA <- uniq(flat(O$scans)); FB <- uniq(flat(N$scans))
     q <- key_match(FA, FB, c("key", "type", "cs", "variant")); A <- q$a; B <- q$b
-    cat(sprintf("conditional scans (every variant of every forward round and leave-one-out scan): old %d, new %d, matched %d\n", nrow(FA), nrow(FB), nrow(A)))
+    ns <- function(F) length(unique(paste(F$key, F$type, F$cs, sep = "\r")))
+    cat(sprintf("conditional scans (distinct forward-round and leave-one-out scans): old %d scans, %d tests; new %d scans, %d tests; matched %d tests (only old %d, only new %d)\n",
+                ns(FA), nrow(FA), ns(FB), nrow(FB), nrow(A), q$only_a, q$only_b))
     for (cc in c("mu", "p0", "p1")) { w <- A$type == cc
       if (any(w)) print(rbind(dd(A$log_p[w], B$log_p[w], paste(cc, "conditional log P")), dd(A$est[w], B$est[w], paste(cc, "conditional estimate"))), digits = 3, row.names = FALSE) }
     d <- abs(A$log_p - B$log_p); i <- which(is.finite(d) & d > 1e-6)
