@@ -40,6 +40,8 @@ then the backward step);
 \item \code{\link[=bohr_trait]{bohr_trait()}}: association of every feature with donor traits in
 each tissue, with the paper's eligibility rules and false-discovery
 control within tissue, trait and component;
+\item \code{\link[=tissue_means]{tissue_means()}}: one representative mean per feature and tissue,
+the input of tissue-specificity methods such as ROKU;
 \item \code{\link[=simulate_bohr]{simulate_bohr()}}: a complete synthetic input set (tissues,
 promoters, absolute and relative activity, genotypes, covariates, traits
 and the true effects), in memory or written to files;

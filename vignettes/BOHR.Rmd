@@ -227,6 +227,35 @@ tr[tr$predictor_type != "dosage" & tr$tissue == "T1",
    c("promoter", "predictor", "effect_mu", "effect_p0", "effect_p1")]
 ```
 
+## Tissue means for tissue specificity: `tissue_means()`
+
+`tissue_means()` gives one representative mean per promoter and tissue: the
+overall mean of an intercept-only fit of the model, or the sample mean when
+the values are all equal, at least 90% sit at one boundary, the standard
+deviation is 0.05 or less, or the fit fails; fewer than 10 values give no mean.
+The result is a tidy table; a promoter x tissue matrix of the means is the
+input of ROKU (package TCC), which the paper ran with `upper.limit = 0.25`,
+keeping a call when the tissue's mean differed by at least 0.10 from the median
+of the tissues without a call.
+
+```{r}
+tm <- tissue_means(file.path(d, "relative_activity.tsv"), tissue = file.path(d, "samples.tsv"))
+head(tm[, c("feature", "tissue", "mean", "method", "reason", "n")])
+M <- tapply(tm$mean, list(tm$feature, tm$tissue), c)    # promoters x tissues
+```
+
+```{r, eval = FALSE}
+roku <- TCC::ROKU(M, upper.limit = 0.25, sort = TRUE)
+calls <- roku$outlier                                    # +1 / -1: specifically high / low
+## the paper's effect filter: |tissue mean - median of the tissues without a call| >= 0.10
+for (i in seq_len(nrow(calls))) {
+  o <- calls[i, ]; x <- M[rownames(calls)[i], colnames(calls)]
+  out <- which(!is.na(o) & o != 0 & !is.na(x)); nor <- which(!is.na(o) & o == 0 & !is.na(x))
+  if (length(out)) calls[i, out] <- if (length(nor) < 2) 0 else
+    ifelse(abs(x[out] - median(x[nor])) >= 0.10, o[out], 0)
+}
+```
+
 ## Reading genotypes from a VCF
 
 With the Bioconductor package VariantAnnotation installed, the VCF written by

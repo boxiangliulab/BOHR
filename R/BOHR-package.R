@@ -33,6 +33,8 @@
 #'   \item [bohr_trait()]: association of every feature with donor traits in
 #'     each tissue, with the paper's eligibility rules and false-discovery
 #'     control within tissue, trait and component;
+#'   \item [tissue_means()]: one representative mean per feature and tissue,
+#'     the input of tissue-specificity methods such as ROKU;
 #'   \item [simulate_bohr()]: a complete synthetic input set (tissues,
 #'     promoters, absolute and relative activity, genotypes, covariates, traits
 #'     and the true effects), in memory or written to files;

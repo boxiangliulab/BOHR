@@ -29,6 +29,7 @@ export(read_vcf_dosage)
 export(simes)
 export(simulate_bohr)
 export(simulate_response)
+export(tissue_means)
 importFrom(stats,
   coef,
   logLik,

@@ -51,3 +51,11 @@ forward round and leave-one-out scan).
 10. `10_compare_null_start.R <cis|cond|trait> <old.rds> <new.rds> [summary.rds]` (base R): compares a run with the paper's
     engine (or of an earlier commit) with a run with the null start: counts and largest differences of the Firth statistics,
     and every changed decision (units, signals, rounds, conditional scans, trait calls). Results: `STAGE3B1_REPORT.md`.
+
+## Tissue means, `tissue_means()` (stage 3b-1)
+
+11. `11_tissue_means_parity.R <out_dir> <ncores> [lib] [tissue ...]` (R with BOHR, or `BOHR_LOAD_ALL=<package dir>`): runs
+    `tissue_means()` on the v11 relative activity over the samples of the 944 genotyped donors (the sample set of the stored
+    gamlss fits) and compares with `fit/v11_raw_fit_fit_results.txt`: pairs and sample sizes, the sample-mean rules, the means,
+    the families, and the 0.10 ROKU effect filter with ROKU's stored calls held fixed. Run it as a PBS job (about 1 GB of input;
+    8 cores, 24 GB).
