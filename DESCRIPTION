@@ -3,7 +3,8 @@ Type: Package
 Title: Beta One-Zero Hybrid Regression for Proportions with Exact Zeros and Ones
 Version: 0.1.0
 Authors@R: c(
-    person("Yuhao", "Dong", email = "yuhaodong999@gmail.com", role = c("aut", "cre")),
+    person("Yuhao", "Dong", email = "yuhaodong999@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-2510-4175")),
     person("Boxiang", "Liu", role = "aut"))
 Description: Regression for proportion data in [0, 1] that contain exact zeros
     and ones, such as the relative usage of a promoter or isoform. The response
