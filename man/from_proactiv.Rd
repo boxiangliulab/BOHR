@@ -42,9 +42,30 @@ are not kept: proActiv cannot quantify them, they are not in the
 denominator of \code{\link[=relative_activity]{relative_activity()}} and they are never tested.
 }
 \examples{
-\dontrun{
-pa <- from_proactiv(list.files("proActiv", pattern = "\\\\.rds$", full.names = TRUE))
-ra <- relative_activity(pa, group = sample_tissue)
+## With proActiv's results saved as one .rds file per tissue:
+## pa <- from_proactiv(list.files("proActiv", pattern = "\\.rds$", full.names = TRUE))
+## Here, proActiv-like results built from simulated data
+## (proActiv itself needs RNA-seq junction files):
+\donttest{
+if (requireNamespace("SummarizedExperiment", quietly = TRUE)) {
+  set.seed(1)
+  sim <- simulate_bohr(n_individuals = 40, n_tissues = 2, n_genes = 4)
+  one_tissue <- function(tt) {
+    s <- sim$samples$sample[sim$samples$tissue == tt]
+    A <- sim$absolute[sim$tss$id, s]
+    total <- rowsum(A, sim$tss$gene)[sim$tss$gene, ]    # proActiv: all promoters of the gene
+    rd <- data.frame(promoterId = seq_len(nrow(A)), geneId = sim$tss$gene,
+                     internalPromoter = sim$tss$internal)
+    rd[[paste0(tt, ".class")]] <- ifelse(sim$tss$internal, NA,
+                                        ifelse(rowMeans(A) < 0.25, "Inactive", "Minor"))
+    SummarizedExperiment::SummarizedExperiment(
+      assays = list(absolutePromoterActivity = A, relativePromoterActivity = A / total),
+      rowData = rd)
+  }
+  pa <- from_proactiv(lapply(unique(sim$samples$tissue), one_tissue))
+  pa
+  relative_activity(pa, group = sim$samples)
+}
 }
 }
 \seealso{

@@ -110,14 +110,14 @@ fake_proactiv <- function(k, cols, cond, rel = NULL) {
   A <- k$A[, cols, drop = FALSE]
   if (is.null(rel)) { tot <- rowsum(A, k$gene); rel <- A / tot[k$gene, , drop = FALSE] }   # proActiv: internal in the denominator
   rownames(A) <- rownames(rel) <- NULL
-  rd <- S4Vectors::DataFrame(promoterId = 1:17, geneId = k$gene, seqnames = "chr1", start = seq(100, 1700, 100), strand = "+",
-                             internalPromoter = k$internal, promoterPosition = 1L)
+  rd <- data.frame(promoterId = 1:17, geneId = k$gene, seqnames = "chr1", start = seq(100, 1700, 100), strand = "+",
+                   internalPromoter = k$internal, promoterPosition = 1L)
   mn <- rowMeans(A)
   rd[[paste0(cond, ".class")]] <- ifelse(k$internal, NA, ifelse(mn < 0.25, "Inactive", "Minor"))
   SummarizedExperiment::SummarizedExperiment(
     assays = list(promoterCounts = A, normalizedPromoterCounts = A, absolutePromoterActivity = A, relativePromoterActivity = rel,
                   geneExpression = A),
-    rowData = rd, colData = S4Vectors::DataFrame(sampleName = k$s[cols], condition = cond, row.names = k$s[cols]))
+    rowData = rd, colData = data.frame(sampleName = k$s[cols], condition = cond, row.names = k$s[cols]))
 }
 
 test_that("from_proactiv() collects proActiv results; relative_activity() uses its classes and relative activity", {

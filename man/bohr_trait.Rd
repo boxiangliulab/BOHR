@@ -37,8 +37,10 @@ tissue is not analysed there.}
 
 \item{traits}{Donor traits, one column per trait: numeric (binary or
 continuous), logical, or a two-level factor or character column. A data
-frame or matrix with one row per sample or individual (row names = IDs),
-or a TSV path (first column = IDs). \code{NA} marks a missing value.}
+frame or matrix with one row per sample or individual (row names = IDs,
+or a first column named \code{individual}, \code{sample} or \code{id} holding them, as in
+\code{simulate_bohr()$traits}), or a TSV path (first column = IDs). \code{NA} marks
+a missing value.}
 
 \item{covariates}{\code{NULL}, or covariates with one row per sample or
 individual (numeric or categorical columns): a data frame or matrix, a

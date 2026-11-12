@@ -141,3 +141,15 @@ test_that("bohr_trait() checks its inputs", {
   expect_error(bohr_trait(x$phenotype, "no_such_file.tsv"), "not found")
   expect_error(bohr_trait(x$phenotype, data.frame(row.names = rownames(inp$traits))), "no columns")
 })
+
+test_that("bohr_trait() takes simulate_bohr()'s traits as an object (ID column) as it takes the file", {
+  set.seed(11)
+  d <- withr::local_tempdir()
+  sim <- simulate_bohr(n_individuals = 80, n_tissues = 1, n_genes = 3, out_dir = d)
+  a <- bohr_trait(sim$relative, traits = sim$traits, covariates = sim$covariates, tissue = sim$samples, promoters = sim$tss)
+  b <- bohr_trait(sim$relative, traits = file.path(d, "traits.tsv"), covariates = sim$covariates, tissue = sim$samples,
+                  promoters = sim$tss)
+  expect_equal(a$results, b$results)
+  tr <- sim$traits; names(tr)[1] <- "donor"                           # an unknown ID column is a trait, and is refused
+  expect_error(bohr_trait(sim$relative, traits = tr, tissue = sim$samples, promoters = sim$tss))
+})

@@ -17,6 +17,11 @@ read_frame <- function(x, what) {
   if (is_path(x)) { d <- read_tsv(x, what); rn <- as.character(d[[1]]); d <- d[, -1, drop = FALSE]; rownames(d) <- rn; return(d) }
   if (is.matrix(x)) x <- as.data.frame(x, stringsAsFactors = FALSE)
   if (!is.data.frame(x)) stop("`", what, "` must be a data frame, a matrix or the path of a TSV file.", call. = FALSE)
+  ## a data frame without row names whose first column holds the IDs (as written to and read from a TSV file)
+  if (.row_names_info(x) < 0 && ncol(x) > 1L && names(x)[1] %in% c("individual", "sample", "id") &&
+      (is.character(x[[1]]) || is.factor(x[[1]])) && !anyDuplicated(x[[1]])) {
+    rn <- as.character(x[[1]]); x <- x[, -1, drop = FALSE]; rownames(x) <- rn
+  }
   x
 }
 ## rows of d for the samples: by sample ID, else by individual ID, else (no row names) in sample order
@@ -196,8 +201,10 @@ trait_feature <- function(p, gene, yv, C_all, gp, binary, min_group, control) {
 #'   tissue is not analysed there.
 #' @param traits Donor traits, one column per trait: numeric (binary or
 #'   continuous), logical, or a two-level factor or character column. A data
-#'   frame or matrix with one row per sample or individual (row names = IDs),
-#'   or a TSV path (first column = IDs). `NA` marks a missing value.
+#'   frame or matrix with one row per sample or individual (row names = IDs,
+#'   or a first column named `individual`, `sample` or `id` holding them, as in
+#'   `simulate_bohr()$traits`), or a TSV path (first column = IDs). `NA` marks
+#'   a missing value.
 #' @param covariates `NULL`, or covariates with one row per sample or
 #'   individual (numeric or categorical columns): a data frame or matrix, a
 #'   TSV path, or, per tissue, a list named by tissue or a folder of
