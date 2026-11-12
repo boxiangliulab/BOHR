@@ -20,8 +20,8 @@ Description: Regression for proportion data in [0, 1] that contain exact zeros
     and Xie (2020) <doi:10.1080/01621459.2018.1554485>) and false-discovery
     control. Written in base R.
 License: MIT + file LICENSE
-URL: https://github.com/YuhaoDoong/BOHR
-BugReports: https://github.com/YuhaoDoong/BOHR/issues
+URL: https://github.com/boxiangliulab/BOHR
+BugReports: https://github.com/boxiangliulab/BOHR/issues
 Depends:
     R (>= 3.6.0)
 Imports:

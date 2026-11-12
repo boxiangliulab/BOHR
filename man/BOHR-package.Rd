@@ -65,8 +65,8 @@ Firth D (1993). Bias reduction of maximum likelihood estimates.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/YuhaoDoong/BOHR}
-  \item Report bugs at \url{https://github.com/YuhaoDoong/BOHR/issues}
+  \item \url{https://github.com/boxiangliulab/BOHR}
+  \item Report bugs at \url{https://github.com/boxiangliulab/BOHR/issues}
 }
 
 }
