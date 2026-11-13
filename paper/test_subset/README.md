@@ -1,7 +1,9 @@
 # Subset test of the analysis code
 
 One command re-runs the key real-data steps of the paper on two tissues and one chromosome, with the scripts of
-`paper/` as they were run, and compares every output with the paper's stored results.
+`paper/` as they were run, and compares every output with the paper's stored results. It is the short form of
+`../run_paper.sh`, which tests every step of the paper (see `../README.md`); `run_subset.sh` runs its sub-steps 00.1,
+01.2, 03.1 and 03.2.
 
 ## Who can run it
 
@@ -18,24 +20,24 @@ the login node):
 bash paper/test_subset/run_subset.sh paper/test_subset/config_lab.sh
 ```
 
-It prints the job ID and where the log and summary will be. Settings can be changed in `config_lab.sh` or on the command
+It prints the job ID and where the report, log and summary will be. Settings can be changed in `config_lab.sh` or on the command
 line, for example `OUT=/scratch/$USER/bohr_test TISSUES="Kidney_Cortex" CHR=chr22 bash paper/test_subset/run_subset.sh
 paper/test_subset/config_lab.sh`. The job uses 8 cores and up to 48 GB (queue `long`; the `normal` queue allows only
 24 GB) and takes about 30–60 minutes. To run inside an interactive job instead, set `SUBMIT=0`.
 
 ## What it does
 
-| step | script (folder in `paper/`) | output in `OUT` |
+| sub-step | script (folder in `paper/`) | output in `OUT` |
 |---|---|---|
-| 0 | installs the BOHR package of this repository into `OUT/lib` | `step1_install.log` |
-| 1 | promoter filter of Supplementary Methods §1 on the promoters of `CHR`, with `BOHR::relative_activity()` on the stored outputs of `0103_proActiv_data_process_tissue.R` (`test_subset/step1_filter.R`) | `step1_relative_activity.rds`, `step1_filter.log` |
-| 2 | per-SNP BOHR scan of every tested promoter of `CHR` in each tissue (`03_cis_mapping_conditional/scan/run_final2.R`) | `shadow/results/final/freeze/<tissue>/real/<chr>.rds` |
-| 3 | forward conditional selection for the units of each tissue and `CHR` that the final conditional run re-ran (`03_cis_mapping_conditional/conditional/run_conditional_v3m.R`), on the scan of step 2 | `shadow/results/conditional_v3m/…` |
-| checks | `test_subset/check_subset.R` | `summary.tsv`, `check.txt`, end of `run_subset.log` |
+| 00.1 | installs the BOHR package of this repository into `OUT/lib` | `lib/`, `logs/00.1.log` |
+| 01.2 | promoter filter of Supplementary Methods §1 on the promoters of `CHR`, with `BOHR::relative_activity()` on the stored outputs of `0103_proActiv_data_process_tissue.R` (`test_subset/step1_filter.R`) | `step1_relative_activity.rds`, `logs/01.2.log` |
+| 03.1 | per-SNP BOHR scan of every tested promoter of `CHR` in each tissue (`03_cis_mapping_conditional/scan/run_final2.R`) | `shadow/results/final/freeze/<tissue>/real/<chr>.rds`, `logs/03.1.log` |
+| 03.2 | forward conditional selection for the units of each tissue and `CHR` that the final conditional run re-ran (`03_cis_mapping_conditional/conditional/run_conditional_v3m.R`), on the scan of 03.1 | `shadow/results/conditional_v3m/…`, `logs/03.2.log` |
+| checks | `test_subset/check_subset.R`, one part after each sub-step | `check.txt` (the report), `summary.tsv` (one row per check) |
 
-Step 1 uses the package because the 57 per-tissue proActiv files that `0103` reads are no longer stored; the package
+Step 01.2 uses the package because the 57 per-tissue proActiv files that `0103` reads are no longer stored; the package
 reproduces `0103` exactly (repository `workflow/parity/12_relative_activity_parity.R`). The filter works promoter by
-promoter and gene by gene, so one chromosome gives the paper's result for its genes. Steps 2 and 3 run the original
+promoter and gene by gene, so one chromosome gives the paper's result for its genes. Steps 03.1 and 03.2 run the original
 scripts unchanged. They read the stored inputs through `OUT/shadow`, a folder of symbolic links to the paper's run folder,
 and write only under `OUT`.
 
@@ -50,11 +52,12 @@ and write only under `OUT`.
 | 3 signals of the re-run units | the same signals (promoter, component, order, lead variant), with log P at selection within 10⁻⁶ |
 | 4 final signal table | those signals are in the paper's final table of 14,800 independent signals |
 
-The last lines of `check.txt` give PASS or FAIL per check and the number passed. Please send `summary.tsv` and the
-`run_subset.log` (no individual data in either) to the authors.
+`check.txt` lists each sub-step with its log and one line per check (PASS, FAIL or SKIP); after a FAIL it names the log to
+read, and the last lines give the totals. Please send `summary.tsv` and `check.txt` (no individual data in either) to the
+authors.
 
 ## Defaults
 
 Tissues `Kidney_Cortex` and `Brain_Substantia_nigra` (103 and 183 donors), chromosome `chr21`. Any of the 50 tissues
 (`work/final/tissues.tsv` of the run folder, rows with `def == freeze`) and any chromosome can be used; larger tissues and
-chromosomes take longer, and step 3 runs only where the final conditional run re-ran a unit (`work/cond_v3m/units_to_run.tsv`).
+chromosomes take longer, and 03.2 runs only where the final conditional run re-ran a unit (`work/cond_v3m/units_to_run.tsv`).

@@ -1,16 +1,19 @@
-## Subset test, checks (authored for the repository): compares the outputs of run_subset.sh with the stored results of
-## the paper and prints PASS or FAIL per check. Prints aggregate numbers only.
+## Subset test, checks (authored for the repository): compares the outputs of run_subset.sh and of run_paper.sh sub-steps
+## 01.2, 03.1 and 03.2 with the stored results of the paper and prints PASS or FAIL per check. Prints aggregate numbers only.
 ## Usage: Rscript check_subset.R <OUT> <RUN_ROOT> <chr> <tissue> [<tissue> ...]
+## Environment: CHECK_PARTS selects parts 1 (promoter filter), 2 (cis scan) and 3 (signals), default all; with CHECK_OUT the
+## rows are appended to that file (run_paper.sh), otherwise they go to <OUT>/summary.tsv and are printed.
 suppressMessages(library(data.table))
 a <- commandArgs(TRUE); OUT <- a[1]; RUN <- a[2]; CHR <- a[3]; TIS <- a[-(1:3)]
 v11 <- file.path(Sys.getenv("GTEX", "/home/e1327989/project/GTEx"), "v11")
 res <- list()
 add <- function(check, ok, detail) res[[length(res) + 1L]] <<- data.table(check = check, result = if (isTRUE(ok)) "PASS" else "FAIL", detail = detail)
 TOL <- 1e-8
+PARTS <- strsplit(Sys.getenv("CHECK_PARTS", "1 2 3"), " +")[[1]]
 
 ## 1. promoter filter
 f1 <- file.path(OUT, "step1_relative_activity.rds")
-if (!file.exists(f1)) add("1 promoter filter", FALSE, "no output (see step1_filter.log)") else {
+if (!"1" %in% PARTS) {} else if (!file.exists(f1)) add("1 promoter filter", FALSE, "no output (see logs/01.2.log)") else {
   s1 <- readRDS(f1)
   load(file.path(v11, "Promoter_info_filter_5.RData"))      # info: the paper's final promoter set
   want <- rownames(info)[as.character(info$seqnames) == CHR]
@@ -31,10 +34,10 @@ if (!file.exists(f1)) add("1 promoter filter", FALSE, "no output (see step1_filt
 num <- c("mu_lrt_logp", "nu_lrt_logp", "tau_lrt_logp", "nu_firth_logp", "tau_firth_logp", "mu_est", "nu_est", "tau_est",
          "nu_firth_est", "tau_firth_est")
 pcols <- c("family", "skip", "n", "n0", "n1", "n_cov", "elig_mu", "elig_p0", "elig_p1", "n_snp_window", "n_snp_tested")
-for (t in TIS) {
+for (t in if ("2" %in% PARTS) TIS else character()) {
   fn <- file.path(OUT, "shadow", "results", "final", "freeze", t, "real", paste0(CHR, ".rds"))
   fo <- file.path(RUN, "results", "final", "freeze", t, "real", paste0(CHR, ".rds"))
-  if (!file.exists(fn)) { add(sprintf("2 cis scan %s", t), FALSE, "no output (see step2 log)"); next }
+  if (!file.exists(fn)) { add(sprintf("2 cis scan %s", t), FALSE, "no output (see logs/03.1.log)"); next }
   N <- readRDS(fn); O <- readRDS(fo)
   pn <- as.data.table(N$prom)[order(promoter)]; po <- as.data.table(O$prom)[order(promoter)]
   pc <- intersect(pcols, intersect(names(pn), names(po)))
@@ -57,11 +60,11 @@ for (t in TIS) {
 }
 
 ## 3. independent signals of the re-run units, and 4. against the final signal table
-fin <- fread(cmd = paste("gzip -dc", shQuote(file.path(RUN, "results", "conditional_final_v3c", "freeze_real_signals.tsv.gz"))))   # no R.utils needed
-for (t in TIS) {
+if ("3" %in% PARTS) fin <- fread(cmd = paste("gzip -dc", shQuote(file.path(RUN, "results", "conditional_final_v3c", "freeze_real_signals.tsv.gz"))))   # no R.utils needed
+for (t in if ("3" %in% PARTS) TIS else character()) {
   fn <- file.path(OUT, "shadow", "results", "conditional_v3m", "freeze", t, "real", paste0(CHR, ".rds"))
   fo <- file.path(RUN, "results", "conditional_v3m", "freeze", t, "real", paste0(CHR, ".rds"))
-  if (!file.exists(fn)) { add(sprintf("3 conditional %s", t), FALSE, "no output (see step3 log)"); next }
+  if (!file.exists(fn)) { add(sprintf("3 conditional %s", t), FALSE, "no output (see logs/03.2.log)"); next }
   N <- readRDS(fn); O <- readRDS(fo)
   key <- function(s) if (nrow(s)) s[order(promoter, type, k), paste(promoter, type, k, snp)] else character(0)
   sn <- as.data.table(N$signals); so <- as.data.table(O$signals)
@@ -79,6 +82,9 @@ for (t in TIS) {
   }
 }
 R <- rbindlist(res)
+if (nzchar(Sys.getenv("CHECK_OUT"))) {
+  fwrite(R, Sys.getenv("CHECK_OUT"), sep = "\t", append = file.exists(Sys.getenv("CHECK_OUT"))); print(R); quit(save = "no")
+}
 fwrite(R, file.path(OUT, "summary.tsv"), sep = "\t")
 w <- max(nchar(R$check))
 for (i in seq_len(nrow(R))) cat(sprintf("%-*s  %s  %s\n", w, R$check[i], R$result[i], R$detail[i]))

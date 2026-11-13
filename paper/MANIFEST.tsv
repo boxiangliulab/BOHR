@@ -176,9 +176,24 @@ paper_path	source_path	source_md5	paper_md5	comment_edits	string_edits	sections	
 07_coloc_gwas_alphagenome/gwas_inputs/prep_magic_eur.py	/projects/group/bliu/e1327989/GTEx/TATA_Enhancer/_tssQTL_repo/Figure6_MRAS_puQTL_AlphaGenome/03_coloc_v4_ldwindow/coloc_final_nogate_v3/gwas_eur_20261009/scripts/prep_magic_eur.py	560b9383b315d416983ddfaed9e38011	b0ba0bd69498ca1ff622ea0bdedcce55	1	0	M10,S10	analysis
 07_coloc_gwas_alphagenome/gwas_inputs/prep_ra_adipo_eur.R	/projects/group/bliu/e1327989/GTEx/TATA_Enhancer/_tssQTL_repo/Figure6_MRAS_puQTL_AlphaGenome/03_coloc_v4_ldwindow/coloc_final_nogate_v3/gwas_eur_20261009/scripts/prep_ra_adipo_eur.R	b017faab4b1639ac2738c7bc26652e79	adef2c40038db419d788a94cd228b74a	1	0	M10,S10	analysis
 07_coloc_gwas_alphagenome/run.sh	(authored)		ff0385ff09b31a830fcbf3e67855642b				authored
-README.md	(authored)		1ff5665c82d699035278f3d0b762d191				doc
-test_subset/README.md	(authored)		12c9f06427aabebb697b8612ae6053d7				doc
-test_subset/check_subset.R	(authored)		2c8003b396e93826cd13768d9b4e3dcb				authored
+README.md	(authored)		9a5a7fed42190838e375b2a9fb9728e0				doc
+test_subset/README.md	(authored)		5cf7e6a9aa98c12c4527d20676c8aca5				doc
+test_subset/check_subset.R	(authored)		764b57453ec963d5bae5c74cc30e3b09				authored
 test_subset/config_lab.sh	(authored)		651cd4ba8328d43d7e48ca28675372f8				authored
-test_subset/run_subset.sh	(authored)		ab436fd5d63f766c3edab7a75808b70d				authored
+test_subset/run_subset.sh	(authored)		0f6b552d37e92ae5a8cfd0590042798c				authored
 test_subset/step1_filter.R	(authored)		1341361e8142650aa97ff888c41a806e				authored
+checks/check_04.R	(authored)		facc22e24934b762eecda58558f1bd3d				authored
+checks/check_05_07.R	(authored)		56d5beceafa16dbd1998be99495d9cc5				authored
+checks/check_06.R	(authored)		ffed207d8ada0c90d8a4d24b5b6100a1				authored
+checks/check_package.R	(authored)		04153b2cdbc7a9a3d66c6da1c3f76d9c				authored
+checks/check_setup.R	(authored)		987d83b9147b79938b1e5f26c45a4eb7				authored
+checks/check_sim.R	(authored)		fe046819e9d68d3d761e1dfaa2593af2				authored
+checks/common.R	(authored)		877d985fb07130cfe765b916a95c12d9				authored
+checks/redirect.py	(authored)		3a0ebdb945aa64405eeed4e046bc550e				authored
+checks/verify_01.R	(authored)		05529ea013255faeecb9401312ac9d15				authored
+checks/verify_02.R	(authored)		d1661028d9b959fe44ca8131df91e297				authored
+checks/verify_03.R	(authored)		03cfac46ff0b1fe8908592e1220e49ae				authored
+checks/verify_04.R	(authored)		41aadf851e8ff65d5554bf7134e68bc8				authored
+config_lab.sh	(authored)		532b7a138179a0a549a814b536f32ed1				authored
+run_paper.sh	(authored)		58c3183bd5b5951fb2eed6c0d5954bc0				authored
+with_package/run_package_route.sh	(authored)		8613f4a4462336a7644884df459d4cbf				authored
