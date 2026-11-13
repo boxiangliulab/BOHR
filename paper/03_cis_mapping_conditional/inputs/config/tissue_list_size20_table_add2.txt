@@ -1,0 +1,4 @@
+Cervix_Ectocervix	27
+Cervix_Endocervix	28
+Fallopian_Tube	30
+Cells_Leukemia_cell_line_CML	203
