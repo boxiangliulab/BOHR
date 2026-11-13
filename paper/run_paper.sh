@@ -203,7 +203,7 @@ s05_1() {
   ln -sf "$RUN_ROOT/results/coloc_eqtl_ldwin/pairs.tsv.gz" "$S/coloc_eqtl_ldwin/"
   ln -sfn "$RUN_ROOT/results/coloc_eqtl_ldwin/eqtl_subset" "$S/coloc_eqtl_ldwin/eqtl_subset"
   redirect "$PAPER/05_coloc_eqtl/ldwin/06_coloc_tissue.R" "$OUT/coloc_eqtl/06_coloc_tissue.R" \
-    'source("/projects/group/bliu/e1327989/GTEx/new_GWAS/coloc_final_nogate_v3/scripts/coloc_final_lib.R")' "source(\"$PAPER/05_coloc_eqtl/coloc_final_lib.R\")" \
+    'source("/projects/group/bliu/e1327989/GTEx/new_GWAS/coloc_final_nogate_v3/scripts/coloc_final_lib.R")' "source(\"$PAPER/05_coloc_eqtl/v3c/coloc_final_lib.R\")" \
     'V2L <- "/projects/group/bliu/e1327989/GTEx/QTL_figure/rerun_v2/results"' "V2L <- \"$S\""
   for T in "${TIS[@]}"; do echo "== 06_coloc_tissue.R $T"; "$RS" "$OUT/coloc_eqtl/06_coloc_tissue.R" "$T" "$NCORES"; done
   "$RS" "$CK/check_05_07.R" eqtl "$S/coloc_eqtl_ldwin/per_tissue" "$RUN_ROOT/results/coloc_eqtl_ldwin/per_tissue" "$OUT/status/05.1.tsv" "${TIS[@]}"

@@ -1,0 +1,35 @@
+#!/bin/bash
+#PBS -P 11003054
+#PBS -q normal
+#PBS -l walltime=06:00:00
+#PBS -l select=1:ncpus=32:mem=128GB
+#PBS -j oe
+#PBS -o /scratch/users/nus/e1327989/rerun_v2/ld_ref_v9/logs/ldwin.log
+# Figure 4 panel e, LD-window coloc (author 2026-10-12), step 1: LD window of every lead (puQTL signal SNPs and GTEx
+# eGene top variants, per tissue). PLINK 1.9 on the GTEx v9 reference (LD_ref_v9_plink19), the tissue's freeze donors,
+# r2 >= 0.1 within 1 Mb, no variant cap. Kept per lead: number of partners and the leftmost/rightmost partner position.
+# Window (step 2, in R) = [min(lead, partners) - 50 kb, max(lead, partners) + 50 kb].
+set -eo pipefail
+P=/home/users/nus/e1327989/bin/plink
+R=/home/users/nus/e1327989/YuhaoDong/GTEx/LD_ref_v9_plink19
+W=/scratch/users/nus/e1327989/rerun_v2/ld_ref_v9
+cd $W; mkdir -p ldwin/out ldwin/logs
+cat > ldwin/run_one.sh <<'ONE'
+#!/bin/bash
+set -eo pipefail
+P=/home/users/nus/e1327989/bin/plink; R=/home/users/nus/e1327989/YuhaoDong/GTEx/LD_ref_v9_plink19; W=/scratch/users/nus/e1327989/rerun_v2/ld_ref_v9
+x=$1; T=${x%.chr*}; C=${x##*.}; cd $W/ldwin
+[ -f out/$x.win.tsv ] && exit 0
+awk 'NR==FNR{b[$2]=1; next} ($1 in b)' $R/bfile/$C.bim inputs/snps/$x.txt > out/$x.present.txt
+awk 'NR==FNR{b[$2]=1; next} !($1 in b)' $R/bfile/$C.bim inputs/snps/$x.txt > out/$x.absent.txt
+if [ -s out/$x.present.txt ]; then
+  $P --bfile $R/bfile/$C --keep-allele-order --keep $R/donors/$T.txt --ld-snp-list out/$x.present.txt --r2 --ld-window 99999 \
+     --ld-window-kb 1000 --ld-window-r2 0.1 --threads 1 --memory 3000 --out out/$x > logs/$x.txt 2>&1
+  awk 'NR>1 { s=$3; p=$5; if (!(s in n)) { n[s]=0; lo[s]=p; hi[s]=p; bp[s]=$2 } if ($6 != s) n[s]++; if (p<lo[s]) lo[s]=p; if (p>hi[s]) hi[s]=p }
+       END { print "snp\tpos\tn_partners\tmin_partner_pos\tmax_partner_pos"; for (s in n) print s "\t" bp[s] "\t" n[s] "\t" lo[s] "\t" hi[s] }' out/$x.ld > out/$x.win.tmp
+  mv out/$x.win.tmp out/$x.win.tsv; rm -f out/$x.ld out/$x.nosex
+else printf "snp\tpos\tn_partners\tmin_partner_pos\tmax_partner_pos\n" > out/$x.win.tsv; fi
+ONE
+ls ldwin/inputs/snps | sed 's/\.txt$//' | xargs -P 32 -n 1 bash ldwin/run_one.sh
+echo "windows: $(ls ldwin/out/*.win.tsv | wc -l) of $(ls ldwin/inputs/snps | wc -l); absent leads: $(cat ldwin/out/*.absent.txt | wc -l)"
+echo "ALL DONE $(date)"

@@ -1,0 +1,17 @@
+#!/bin/bash
+#PBS -q large
+#PBS -l select=1:ncpus=2:mem=96gb
+#PBS -N ag_MRAS_v3add
+#PBS -l walltime=48:00:00
+#PBS -j oe
+#PBS -o /projects/group/bliu/e1327989/GTEx/new_GWAS/coloc_final_nogate_v3/logs/alphagenome_perbase_MRAS_v3add_retry.log
+# AlphaGenome per-base add-on for the 75 MRAS candidates added by the LD standard (PLINK rule).
+# Same settings as the original 95-variant run (1 Mb interval; CAGE/PROCAP/DNASE/ATAC). Resumes: variants with an
+# existing npz are skipped. Copy of the original script with retry-on-server-error and per-variant memory release.
+set -e
+source /home/e1327989/project/miniconda3/etc/profile.d/conda.sh
+conda activate alphagenome
+echo "host: $(hostname)"; python -c "import alphagenome; print('alphagenome import OK')"
+export AG_SEQLEN=1048576
+python -u /projects/group/bliu/e1327989/GTEx/new_GWAS/coloc_final_nogate_v3/alphagenome_addon/alphagenome_perbase_MRAS_retry.py /projects/group/bliu/e1327989/GTEx/new_GWAS/coloc_final_nogate_v3/alphagenome_addon/MRAS_v3_new_candidates_to_score_ALL75.txt /projects/group/bliu/e1327989/alphagenome_results/perbase_MRAS_v3add CAGE,PROCAP,DNASE,ATAC
+echo "PBS job finished."

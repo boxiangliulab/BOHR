@@ -1,0 +1,36 @@
+#!/bin/bash
+#PBS -P 11003054
+#PBS -q normal
+#PBS -l walltime=04:00:00
+#PBS -l select=1:ncpus=16:mem=64GB
+#PBS -j oe
+#PBS -o /scratch/users/nus/e1327989/rerun_v2/ld_ref_v9/v3m/logs/job.log
+# Mirror rule v3 coloc, step 3 (NSCC): (a) LD windows of the new leads, rule of coloc_eqtl_ldwin/01_ldwin_nscc.pbs
+# (PLINK 1.9, GTEx v9 panel bfile, tissue freeze donors, r2 >= 0.1 within 1 Mb); leads absent from the panel get option A'
+# (author 2026-10-12): typed in the unfiltered bfile (bfile_full_maf0.005), partners restricted to the panel.
+# (b) recursive clumping of the new eGenes with sens_clump/s2_clump_nscc.R (unchanged copy).
+module load miniforge3
+eval "$(conda shell.bash hook)"
+conda activate /home/users/nus/e1327989/YuhaoDong/miniconda3/envs/normal
+set -eo pipefail
+P=/home/users/nus/e1327989/bin/plink; R=/home/users/nus/e1327989/YuhaoDong/GTEx/LD_ref_v9_plink19; W=/scratch/users/nus/e1327989/rerun_v2/ld_ref_v9/v3m
+cd $W; mkdir -p out logs clump_out
+for f in snps/*.txt; do x=$(basename $f .txt); T=${x%.chr*}; C=${x##*.}
+  awk 'NR==FNR{b[$2]=1; next} ($1 in b)' $R/bfile/$C.bim $f > out/$x.present.txt
+  awk 'NR==FNR{b[$2]=1; next} !($1 in b)' $R/bfile/$C.bim $f > out/$x.absent.txt
+  for kind in present absent; do
+    [ -s out/$x.$kind.txt ] || continue
+    B=$R/bfile/$C; [ $kind = absent ] && B=$R/bfile_full_maf0.005/$C
+    $P --bfile $B --keep-allele-order --keep $R/donors/$T.txt --ld-snp-list out/$x.$kind.txt --r2 --ld-window 99999 \
+       --ld-window-kb 1000 --ld-window-r2 0.1 --threads 1 --memory 3000 --out out/$x.$kind > logs/$x.$kind.txt 2>&1
+    ## A': partners restricted to the panel (the lead itself is kept)
+    awk -v K=$kind 'NR==FNR{b[$2]=1; next} FNR==1 || K=="present" || ($6 in b) || ($6==$3)' $R/bfile/$C.bim out/$x.$kind.ld > out/$x.$kind.ldf
+    awk 'NR>1 { s=$3; p=$5; if (!(s in n)) { n[s]=0; lo[s]=p; hi[s]=p; bp[s]=$2 } if ($6 != s) n[s]++; if (p<lo[s]) lo[s]=p; if (p>hi[s]) hi[s]=p }
+         END { print "snp\tpos\tn_partners\tmin_partner_pos\tmax_partner_pos"; for (s in n) print s "\t" bp[s] "\t" n[s] "\t" lo[s] "\t" hi[s] }' out/$x.$kind.ldf > out/$x.$kind.win.tsv
+    rm -f out/$x.$kind.ld out/$x.$kind.nosex
+  done
+done
+echo "windows: $(cat out/*.win.tsv | grep -v '^snp' | wc -l) leads (absent-from-panel leads: $(cat out/*.absent.txt | wc -l))"
+for T in $(ls sig | sed 's/\.tsv\.gz$//'); do Rscript $W/s2_clump_nscc.R "$T" $W/sig $W/clump_out 4 > logs/s2_$T.log 2>&1; done
+echo "clumped tissues: $(ls clump_out/*/DONE 2>/dev/null | wc -l) of $(ls sig | wc -l)"
+echo "ALL DONE $(date)"

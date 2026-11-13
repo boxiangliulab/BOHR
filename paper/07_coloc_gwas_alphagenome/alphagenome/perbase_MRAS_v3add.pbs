@@ -1,0 +1,20 @@
+#!/bin/bash
+#PBS -q normal
+#PBS -l select=1:ncpus=2:mem=24G
+#PBS -N ag_MRAS_v3add
+#PBS -l walltime=24:00:00
+#PBS -j oe
+#PBS -o /projects/group/bliu/e1327989/GTEx/new_GWAS/coloc_final_nogate_v3/logs/alphagenome_perbase_MRAS_v3add.log
+# AlphaGenome per-base add-on for the 74 MRAS candidates that the LD-standard (Figure 4 ld_v3, 2026-10-03) adds to
+# the 95 variants already scored. Same script, environment, 1 Mb interval and modalities as the original run
+# (alphagenome/MRAS_perbase_analysis/scripts/perbase_MRAS.pbs); separate output dir, nothing is overwritten.
+set -e
+source /home/e1327989/project/miniconda3/etc/profile.d/conda.sh
+conda activate alphagenome
+SCRIPT=/projects/group/bliu/e1327989/GTEx/alphagenome/alphagenome_perbase_MRAS.py
+SNPS=/projects/group/bliu/e1327989/GTEx/new_GWAS/coloc_final_nogate_v3/alphagenome_addon/MRAS_v3_new_candidates_to_score.txt
+OUT=/projects/group/bliu/e1327989/alphagenome_results/perbase_MRAS_v3add
+echo "host: $(hostname)"; python -c "import alphagenome; print('alphagenome import OK')"
+export AG_SEQLEN=1048576
+python -u "$SCRIPT" "$SNPS" "$OUT" CAGE,PROCAP,DNASE,ATAC
+echo "PBS job finished."

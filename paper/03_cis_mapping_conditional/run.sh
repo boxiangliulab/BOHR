@@ -6,8 +6,12 @@ set -euo pipefail
 export BOHR2_CODE=/path/to/code            # a folder holding ../02_bohr_model_and_simulation/engine/bohr2_*.R and these scripts
 export BOHR2_ROOT=/path/to/run_root        # work/, perm_maps/, results/
 export OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 OMP_NUM_THREADS=1
-TISSUES=$(cut -f1 tissues_50.txt)        # the 50 tissues (work/final/tissues.tsv, def == freeze)
-# 1. inputs: PEER factors per tissue (57 jobs), the chromosome 22 PEER scan, then the per-tissue input objects
+TISSUES=$(cat ../07_coloc_gwas_alphagenome/config/tissues_50.txt)   # the 50 tissues (work/final/tissues.tsv, def == freeze)
+# 1. inputs: PEER factors per tissue (57 jobs), the chromosome 22 PEER scan, then the per-tissue input objects.
+#    The PEER input filter_5_recal_att_filter_SMTSD_mean.txt is written by ../01_promoter_quantification/export_txt.R
+#    (the recipe recorded in inputs/peer/0104_peer.R lines 48-57; that file names an input that does not exist).
+#    prep_all.R takes each tissue's promoters from the result files of the earlier GAMLSS scan; the same sets follow
+#    from a rule, written out in inputs/promoter_sets_rule.R (see README, 'Tested promoters').
 for T in $TISSUES; do Rscript inputs/peer/peer_analysis.R "$T" filter_5_recal_att_filter_SMTSD_mean.txt peer/v11; done
 Rscript inputs/prep_all.R
 # 2. per-SNP scan, per tissue and arm (real, perm0 to perm2), chromosome by chromosome; Firth add-on; F-corrected mu
@@ -32,7 +36,7 @@ Rscript conditional/cond_v3m_select.R
 #    for each (tissue, chr) of work/cond_v3m/units_to_run.tsv:
 #    Rscript conditional/run_conditional_v3m.R freeze <tissue> real <chr> 8
 Rscript conditional/merge_conditional_v3m.R
-#    refit of two units (conditional/units_to_run_v3c.tsv):
+#    refit of two units (conditional/units_to_run_v3c.tsv; job conditional/cond_v3c.pbs):
 #    Rscript conditional/run_conditional_v3c.R freeze <tissue> real <chr> 8
 LABELS=none Rscript conditional/merge_conditional_v3c.R
 COND_FINAL=results/conditional_final_v3c LABEL_DIR=results/mirror_abs_labels_v3c NC=10 Rscript units/mirror_abs_labels.R

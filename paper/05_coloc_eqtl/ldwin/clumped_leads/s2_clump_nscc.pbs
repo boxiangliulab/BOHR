@@ -1,0 +1,15 @@
+#!/bin/bash
+#PBS -P 11003054
+#PBS -q normal
+#PBS -J 1-50
+#PBS -l walltime=04:00:00
+#PBS -l select=1:ncpus=16:mem=64GB
+#PBS -j oe
+#PBS -o /scratch/users/nus/e1327989/rerun_v2/ld_ref_v9/sens_clump/logs/
+# Figure 4 panel e, LD-window coloc, sensitivity (eQTL leads by recursive clumping), step s2: clumping + lead partners.
+module load miniforge3
+eval "$(conda shell.bash hook)"
+conda activate /home/users/nus/e1327989/YuhaoDong/miniconda3/envs/normal
+W=/scratch/users/nus/e1327989/rerun_v2/ld_ref_v9/sens_clump
+TIS=$(sed -n "${PBS_ARRAY_INDEX}p" $W/tissues.txt)
+cd $W && Rscript $W/s2_clump_nscc.R "$TIS" $W/sig $W/out 16 > $W/logs/s2_${TIS}.log 2>&1

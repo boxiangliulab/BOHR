@@ -1,0 +1,22 @@
+#!/bin/bash
+#PBS -q normal
+#PBS -l select=1:ncpus=2:mem=24G
+#PBS -N ag_perbase_MRAS
+#PBS -l walltime=24:00:00
+#PBS -o /home/e1327989/qsub_dir/ag_perbase_MRAS.o
+#PBS -e /home/e1327989/qsub_dir/ag_perbase_MRAS.e
+
+set -e
+source /home/e1327989/project/miniconda3/etc/profile.d/conda.sh
+conda activate alphagenome
+
+SCRIPT=/projects/group/bliu/e1327989/GTEx/alphagenome/alphagenome_perbase_MRAS.py
+SNPS=/projects/group/bliu/e1327989/GTEx/new_GWAS/results/MRAS_allpromoter_snplist.txt
+OUT=/projects/group/bliu/e1327989/alphagenome_results/perbase_MRAS
+
+echo "host: $(hostname)"; echo "python: $(which python)"
+python -c "import alphagenome; print('alphagenome import OK')"
+
+export AG_SEQLEN=1048576     # uniform 1MB interval (AlphaGenome native context; matches puQTL +/-500kb cis-window)
+python -u "$SCRIPT" "$SNPS" "$OUT" CAGE,PROCAP,DNASE,ATAC
+echo "PBS job finished."

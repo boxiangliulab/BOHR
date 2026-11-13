@@ -6,7 +6,8 @@ units (promoter × component) with window P values combined by ACAT, estimabilit
 forward conditional selection with a backward step, giving the 14,800 independent signals.
 
 **Run order.**
-1. `inputs/`: `peer/peer_analysis.R` (PEER factors; input built as recorded in `peer/0104_peer.R`),
+1. `inputs/`: `peer/peer_analysis.R` (PEER factors; input recipe recorded in `peer/0104_peer.R`, file written by
+   `../01_promoter_quantification/export_txt.R`),
    `peer/gamlss_QTL_peer_test.R` and `peer/peer_plot.R` (the chromosome 22 scan that set the PEER count per tissue,
    `config/tissue_list_best_peer_table.txt`), `gamlss_QTL_optimized.R` (lines 115–137 set the tested promoters), then
    `prep_all.R` (per-tissue input objects and permutation maps).
@@ -20,7 +21,7 @@ forward conditional selection with a backward step, giving the 14,800 independen
    `run_conditional_ng3.R` (units new or continued under v2 and v3), `merge_conditional_ng3.R` and `loo_est_patch.R`;
    then `cond_v3m_select.R` and `run_conditional_v3m.R` (units new or continued under the mirror rule),
    `merge_conditional_v3m.R` (backward step), and `run_conditional_v3c.R` with `merge_conditional_v3c.R` (two units refitted
-   on 2026-11-06; 14,800 signals). `fig5_delivery.R` and `fig5_delivery_v4.R` write the per-signal tables read downstream;
+   on 2026-11-06, job `cond_v3c.pbs`; 14,800 signals). `fig5_delivery.R` and `fig5_delivery_v4.R` write the per-signal tables read downstream;
    `fig5_proxies.R`, `fig5_pertype.R`, `fig5_pe_moments_v6.R`, `crosstype_conditional_v6.R` and `fig5_signals_partner.R`
    add the per-signal tables that the major/minor analysis reads (`../06_major_minor_promoters/`).
 5. `ld/`: `ld_tool.R` (the LD standard: PLINK 1.9 r on each tissue's donors) and `ld_v3.R` (donor lists, signal LD).
@@ -31,6 +32,16 @@ forward conditional selection with a backward step, giving the 14,800 independen
 stored inputs the per-SNP statistics, unit P values, q values, signal counts and lead variants agree with this pipeline
 (repository `workflow/parity/`, scripts 01–06). The subset test (`../test_subset/`) re-runs `run_final2.R` and
 `run_conditional_v3m.R` as they were run.
+
+**Tested promoters.** `prep_all.R` takes each tissue's promoters from the result files of the earlier GAMLSS scan
+(`QTL/new_v11_LRT`), which applied a rule: on every sample of the tissue whose donor has genotype PCs and (when k > 0)
+PEER factors, keep a chr1–22 promoter when its SD ≥ 0.005, its share of missing values < 0.4 and its gene's mean TPM ≥ 1
+in the tissue (`inputs/gamlss_QTL_optimized.R` lines 115–137); then skip it unless, on the samples with a value,
+n ≥ 20 and n ≥ 5 + k, the shares at 0 and at 1 are each < 0.95 and SD > 0.05 (the skip rules of the GAMLSS scan,
+`gamlss_functions_optimized.R` lines 548–557 in `../04_tissue_specificity_traits/tissue_specificity/`). The rule is
+written out in `inputs/promoter_sets_rule.R` (authored): on the paper's data it gives the same promoters in all 50
+tissues, all 131,361 tissue × promoter inputs. To run cis mapping on other activity data, build the sets with it and
+pass them to `prep_all.R` in place of lines 21–25. `prep_all.R` line 18 also asserts 50 tissues.
 
 **Paths.** `../02_bohr_model_and_simulation/engine/bohr2_data.R` sets the input paths (`BOHR2_GTEX`, `BOHR2_ROOT`,
 `BOHR2_VCF`); scripts source the engine from `BOHR2_CODE`, and write under `BOHR2_ROOT/results/` unless `FINAL_ROOT` or
@@ -48,6 +59,7 @@ stored inputs the per-SNP statistics, unit P values, q values, signal counts and
 | `inputs/peer/gamlss_QTL_peer_test.R` | Runs the earlier gamlss LRT scan for one tissue on chr22 (+-10 kb) with k PEER factors and 5 genotype PCs. | v11 matrix, Promoter_info_filter_5.txt, genes > 1 TPM, genotype PCs, PEER factors, chr22 VCF → <name>.<tissue>.chr22.factor_peer_<k>_pca_5.results.rds |
 | `inputs/peer/peer_plot.R` | Counts, per tissue and k, the promoters significant at q <= 0.05 after ACAT over their chr22 variants. | ../tissue_list_size20_table.txt; <tissue>/sensitivity_test_10k.*.rds → <tissue>_peer_test_count.txt, <tissue>_peer_test_count.pdf |
 | `inputs/gamlss_QTL_optimized.R` | Runs the published GAMLSS puQTL scan; its promoter filter (SD, NA share, TPM) sets the tested promoter set. | v11 activity, promoter info, PCs, PEER, TPM1_genes.txt, VCF → QTL/new_v11_LRT/<T>/chr<N>/*.results.rds |
+| `inputs/promoter_sets_rule.R` | Authored: the per-tissue promoter sets of cis mapping by the rule above (reproduces the paper's 131,361 inputs). Tissues from env `TISSUES` (a list file or a folder of input objects; default the lab copy of work/final/freeze). | GTEx root (best-PEER table, PCs, TPM genes), relative activity (.txt or .RData), PEER folder → tissue, promoter table |
 | `inputs/prep_all.R` | Builds per-tissue BOHR inputs (freeze samples, donors, promoter set, PEER cap K) and perm0 permutation maps. | v11 activity, sample attributes, PCs, PEER, best-PEER table, published promoter lists → work/final/<def>/<T>.rds, work/final/tissues.tsv, perm0 maps |
 | `inputs/config/tissue_list_size20_table.txt` | Lists the 57 GTEx v11 tissues with at least 20 samples and their sample counts. | hand-made → read by peer_plot.R line 9 |
 | `inputs/config/tissue_list_size20_table_add2.txt` | Lists the four small tissues of the last PEER-scan submission and their sample counts. | hand-made → read by submit_peer_jobs.sh line 4 |
@@ -87,6 +99,7 @@ stored inputs the per-SNP statistics, unit P values, q values, signal counts and
 | `conditional/run_conditional_v3m.R` | Runs forward conditional selection and leave-one-out scans for the 2,660 units re-run under mirror rule v3. | work/cond_v3m/units_to_run.tsv, final_nogate_v3m, results/final, work/final → results/conditional_v3m/<def>/<T>/real/<chr>.rds |
 | `conditional/merge_conditional_v3m.R` | Merges re-run and carried units, recomputes the backward step and writes the final signal tables. | results/conditional_v3m, results/conditional_final_v3, final_nogate_v3m → results/conditional_final_v3m/freeze_real_*.tsv.gz, loo/ |
 | `conditional/units_to_run_v3c.tsv` | Lists the two units re-run in the 2026-11-06 conditional refit. | read by run_conditional_v3c.R, merge_conditional_v3c.R, c1_analysis_set_pairs_v3c.R and cond_v3c.pbs |
+| `conditional/cond_v3c.pbs` | Job of the 2026-11-06 refit: runs run_conditional_v3c.R for each (tissue, chromosome) of the two units. | work/cond_v3c/units_to_run.tsv → results/conditional_v3c/ |
 | `conditional/run_conditional_v3c.R` | Re-runs forward selection and leave-one-out scans for the two units refitted on 2026-11-06 (Putamen 47842 p0, Aorta 38390 p1). | v3c/units_to_run.tsv, final_nogate_v3m, results/final, work/final → results/conditional_v3c/<def>/<T>/real/<chr>.rds |
 | `conditional/merge_conditional_v3c.R` | Replaces the two refitted units in the v3m conditional tables and keeps the v3m backward step, giving the 14,800 independent signals. | conditional_final_v3m, conditional_v3c, labels (env LABELS) → results/conditional_final_v3c/{freeze_real_units,signals,rounds}.tsv.gz, loo/ |
 | `conditional/fig5_delivery_v4.R` | Builds the per-signal table (signals.tsv.gz) that the Figure 4 data builders and Supplementary Tables 4-5 read. | env COND_FINAL, UNITS_DIR, FIG5_OUT; work/final, results/final → <FIG5_OUT>/{units,signals,genotype_pheno,crosstype_ld,boundary_only_partner_pheno}.tsv.gz |

@@ -20,7 +20,12 @@ this repository is the reusable form of the method; this folder is the code that
   folders from environment variables (for example `BOHR2_GTEX`, `BOHR2_ROOT`, `BOHR2_VCF` and `BOHR2_CODE`); the folder
   READMEs say which.
 - **`run.sh`** in each folder lists the commands in the order they were run, with the arguments of the original jobs.
-  These files were written for this repository; the original job scripts are not included.
+  These files were written for this repository. The original job scripts are included where they were kept (the NSCC
+  `.pbs` jobs of 03, 05 and 07); the others are not.
+- **Two helper scripts written for this repository**, for steps whose original code was not kept:
+  `01_promoter_quantification/export_txt.R` (the text exports of 0103 and the PEER input) and
+  `03_cis_mapping_conditional/inputs/promoter_sets_rule.R` (the per-tissue promoter sets of cis mapping, as a rule). Both
+  reproduce the paper's files or sets exactly; they are marked `(authored)` in `MANIFEST.tsv`.
 - **`run_paper.sh`** runs the whole chain, folder by folder, as a test: each step's as-run scripts are run again on a
   subset (two tissues, one chromosome, two donor characteristics, one simulated sample size), or, where that is not
   possible, the step's numbers are recomputed from the stored outputs; every result is compared with the stored results

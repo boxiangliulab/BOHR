@@ -20,6 +20,10 @@ analysis, which the paper no longer reports; it is kept because 101 reads its pa
 
 The analysis uses the BOHR results; it has no counterpart in the BOHR package.
 
+**Counts written into the scripts.** `stage_v6/71_A1_location.R` and `72_A2_eqtl_direction.R` (line 24) and
+`73b_B1v2_partner_conditional.R` (line 21) assert 14,823 per-signal rows, and `stage_v6c/101_K_overlap_multi_location.R`
+(line 37) 50 tissues. These hold for the paper's data; on other data they stop the script and must be changed.
+
 `run.sh` lists the commands in the order they were run (paths of the original runs).
 
 

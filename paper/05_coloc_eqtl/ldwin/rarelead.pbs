@@ -1,0 +1,29 @@
+#!/bin/bash
+#PBS -P 11003054
+#PBS -q normal
+#PBS -l walltime=03:00:00
+#PBS -l select=1:ncpus=22:mem=88GB
+#PBS -j oe
+#PBS -o /scratch/users/nus/e1327989/rerun_v2/ld_ref_v9/logs/rarelead.log
+# Figure 4, 2026-10-12 (author: "either the LD of the eQTL top variant directly, or the full VCF"). LD partners (r2 >= 0.1, 1 Mb)
+# of the 1,485 GTEx eGene top variants absent from the MAF >= 0.05 panel, computed from the unfiltered v9 VCF
+# (944-donor analysis freeze, --maf 0.005, same PLINK flags as ld_v3), tissue donors. The panel and its files are untouched.
+set -eo pipefail
+P=/home/users/nus/e1327989/bin/plink; R=/home/users/nus/e1327989/YuhaoDong/GTEx/LD_ref_v9_plink19; W=/scratch/users/nus/e1327989/rerun_v2/ld_ref_v9
+V=/data/projects/11003054/share/data/gtex/protect/v9_v8_DNA/phg001796.v1.GTEx_v9_WGS_phased.genotype-calls-vcf.c1/GTEx_Analysis_2021-02-11_v9_WholeGenomeSeq_944Indiv_Analysis_Freeze.SHAPEIT2_phased.vcf.gz
+mkdir -p $W/fullvcf/bfile $W/rarelead && cd $W/fullvcf
+one_chr() { c=$1; $P --vcf $V --chr $c --double-id --keep-allele-order --vcf-half-call m --maf 0.005 --make-bed --threads 1 --memory 3500 --out bfile/chr$c > bfile/chr$c.stdout 2>&1; }
+export -f one_chr; export P V
+seq 1 22 | xargs -P 22 -I{} bash -c 'one_chr {}'
+echo "bfiles: $(ls bfile/*.bed | wc -l); variants: $(cat bfile/*.bim | wc -l)"
+cd $W/rarelead
+one() { x=$1; C=${x##*.}; T=${x%.*}
+  [ -s $W/ldwin/out/$x.absent.txt ] || return 0
+  $P --bfile $W/fullvcf/bfile/$C --keep-allele-order --keep $R/donors/$T.txt --ld-snp-list $W/ldwin/out/$x.absent.txt --r2 --ld-window 99999 \
+     --ld-window-kb 1000 --ld-window-r2 0.1 --threads 1 --memory 3500 --out $x > $x.stdout 2>&1 || echo "FAIL $x"
+  grep -o "[0-9]* variants remaining" $x.log | tail -1 > /dev/null; }
+export -f one; export R W
+ls $W/ldwin/out/ | grep '\.absent\.txt$' | sed 's/\.absent\.txt$//' | xargs -P 22 -I{} bash -c 'one {}'
+echo "ld files: $(ls *.ld 2>/dev/null | wc -l)"
+tar czf $W/rarelead.tgz *.ld *.log
+echo "ALL DONE $(date)"

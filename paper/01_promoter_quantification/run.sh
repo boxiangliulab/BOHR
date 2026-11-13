@@ -14,6 +14,9 @@ Rscript 0102_run_proActiv_tissue.R
 Rscript 0103_proActiv_data_process_tissue.R
 # 4. rebuild the absolute-activity file of step 3 by sample name
 Rscript rebuild_tabs_att.R
+# 5. text exports read by later steps (relative activity, promoter table) and the PEER input of
+#    ../03_cis_mapping_conditional/inputs/peer/ (authored; the original exports were written outside these scripts)
+Rscript export_txt.R . . ../peer/v11
 # release comparison (Fig. 1A,B): annotations of GTEx v6p (GENCODE v19) and v8 (v26), then the comparison
 Rscript release_comparison/0102_run_proActiv_v6.R
 Rscript release_comparison/run_proActiv_tissue.R
