@@ -9,7 +9,7 @@ Its first application is alternative promoter usage, where p0 is the probability
 
 The repository holds the R package at its root, and:
 - `workflow/parity/`: scripts that compare the package with the stored results of the paper's original pipeline on the GTEx data;
-- `paper/` (to come): the analysis code of the accompanying manuscript, organised by Methods section.
+- `paper/`: the analysis code of the accompanying manuscript, organised by Methods section.
 
 Neither folder is part of the installed package.
 

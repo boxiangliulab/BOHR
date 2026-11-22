@@ -14,8 +14,13 @@ this repository is the reusable form of the method; this folder is the code that
   comments that referred to internal working notes were removed or corrected. In a few scripts the text of printed
   messages was cleaned the same way. Every edit keeps its line, so line numbers equal those of the original scripts, and
   the code of every edited file was verified identical to its source (R parse data; Python syntax tree and tokens; shell
-  lines other than comments). `MANIFEST.tsv` gives, for every file, its source path, the md5 of the source and of the copy,
-  the number of edited comment and string lines, and the Methods and Supplementary Methods sections it implements.
+  lines other than comments). One exception: in `05_coloc_eqtl/v3m/05_coloc_tissue_v3m.R` and
+  `05_coloc_eqtl/ldwin/clumped_leads/s5_coloc_tissue_v2.R`, one line was corrected after the runs. As run, it stored 0 in the
+  `n_int` column (variants in the intersection of the two LD windows) of clumped-lead pairs, because data.table resolved
+  `n_int = n_int` to the table's own column. The filter on that count used the local value, so no pair or call changes;
+  Supplementary Table 5a carries the recomputed counts. `MANIFEST.tsv` gives, for every file, its source path, the md5
+  of the source and of the copy, the number of edited comment and string lines, and the Methods and Supplementary Methods
+  sections it implements.
 - **Paths.** The scripts keep the absolute paths of the original runs (the lab cluster and NSCC). Many read their root
   folders from environment variables (for example `BOHR2_GTEX`, `BOHR2_ROOT`, `BOHR2_VCF` and `BOHR2_CODE`); the folder
   READMEs say which.
@@ -109,8 +114,8 @@ output folder (`checks/redirect.py` makes the copy, checks that no other line ch
 log). The inputs are read through symbolic links, never written. Each sub-step has its own log in `OUT/logs/`;
 `OUT/check.txt` is the report and `OUT/summary.tsv` has one row per check. Settings are in `config_lab.sh` (paths of the
 stored data, subset, PBS) and can be overridden on the command line (`STEPS`, `ONLY`, `KEEP_GOING`, `RESUME`,
-`TISSUES`, ...). The run needs
-access to the lab's copy of the GTEx data; delete `OUT` afterwards, since it holds per-sample values.
+`TISSUES`, ...). The run needs access to the lab's copy of the GTEx data; delete `OUT` afterwards, since it holds
+per-sample values.
 
 ## Data
 

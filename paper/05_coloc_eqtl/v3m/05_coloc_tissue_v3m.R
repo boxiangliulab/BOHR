@@ -79,7 +79,7 @@ run_cl <- function(z) { r <- z$r; xa <- z$x; if (!nrow(z$pr)) return(NULL)
     gw <- data.table(gwas_id = x$gwas_id[match(e$variant_id, x$snp)], BETA = e$slope, SE = e$slope_se, Pvalue = e$pval_nominal)[is.finite(BETA) & is.finite(SE) & SE > 0]
     sh <- intersect(x$gwas_id, gw$gwas_id); pos <- x$snp_pos[match(sh, x$gwas_id)]
     n_int <- if (pr$int_start > pr$int_end) 0L else sum(pos >= pr$int_start & pos <= pr$int_end)
-    b[, `:=`(n_snps = length(sh), n_int = n_int)]
+    ni <- n_int; b[, `:=`(n_snps = length(sh), n_int = ni)]   # 2026-11-21: was n_int = n_int, which data.table resolved to b's own 0L column; the filter below always used the local value
     if (n_int < MIN_INT) return(b[, status := "invalid (LD windows disjoint)"])
     o <- coloc_signal(r, x, gw, r$n_eqtl)
     if (is.null(o)) return(b[, status := if (length(sh) < 10) "not assessable (<10 shared SNPs)" else "coloc error"])
