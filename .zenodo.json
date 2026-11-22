@@ -1,0 +1,22 @@
+{
+  "title": "BOHR: beta one-zero hybrid regression",
+  "upload_type": "software",
+  "description": "<p>BOHR (beta one-zero hybrid regression) is an R package for regression of proportions in [0, 1] that contain exact zeros and ones. The response is modelled with a zero-and-one-inflated beta distribution, and a predictor's effect is tested separately on the probability of 0 (p0), the probability of 1 (p1) and the mean of the values in between (μ). The genomics layer maps genetic effects on these components (cis-QTL mapping). The repository also holds the analysis code of Dong et al., <em>Genetic regulation of alternative promoter usage with BOHR reveals distinct modes of transcription initiation</em>, in <code>paper/</code>.</p>",
+  "creators": [
+    {
+      "name": "Dong, Yuhao",
+      "affiliation": "Department of Pharmacy and Pharmaceutical Sciences, Faculty of Science, National University of Singapore, Singapore",
+      "orcid": "0000-0003-2510-4175"
+    },
+    {
+      "name": "Liu, Boxiang",
+      "affiliation": "Department of Pharmacy and Pharmaceutical Sciences, Faculty of Science, National University of Singapore, Singapore"
+    }
+  ],
+  "access_right": "open",
+  "license": "MIT",
+  "keywords": ["R package", "zero-and-one-inflated beta", "proportion data", "promoter usage", "alternative promoters", "puQTL", "QTL mapping", "BOHR"],
+  "related_identifiers": [
+    {"identifier": "10.5281/zenodo.24439350", "relation": "references", "resource_type": "dataset", "scheme": "doi"}
+  ]
+}
