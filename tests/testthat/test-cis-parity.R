@@ -99,7 +99,7 @@ test_that("single-tissue calls give the tables of the version before the tissue 
     args <- cfg[[nm]]; if (is.null(args$control)) args$control <- engine_control()      # ae071ae: the paper's engine
     r <- suppressWarnings(do.call(bohr_cis, args))
     for (k in c("snp", "units", "promoters", "mirror", "threshold")) {
-      if (identical(Sys.getenv("NOT_CRAN"), "true")) expect_identical(r[[k]], fx[[nm]][[k]], info = paste(nm, k))
+      if (exact_parity()) expect_identical(r[[k]], fx[[nm]][[k]], info = paste(nm, k))
       else expect_equal(r[[k]], fx[[nm]][[k]], tolerance = 1e-6, info = paste(nm, k))   # other platforms and BLAS libraries
     }
   }

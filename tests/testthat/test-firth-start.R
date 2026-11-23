@@ -41,9 +41,9 @@ test_that("firth_null_start = TRUE returns the higher of two restricted maxima",
   expect_lt(a$stat_p0, 5); expect_gt(a$p_p0, 0.01)
   expect_lt(abs(a$est_p0 / a$se_p0), 2)
   expect_equal(a$stat_p1, b$stat_p1, tolerance = 1e-8)                         # the p1 test has one maximum here
-  ## on this platform the paper's engine stops at the lower maximum (log P about -18 with |z| about 1, as in the paper's
-  ## Brain_Putamen refit); other platforms may reach the higher one, so this is checked locally only
-  if (identical(Sys.getenv("NOT_CRAN"), "true")) {
+  ## on the fixture machine the paper's engine stops at the lower maximum (log P about -18 with |z| about 1, as in the
+  ## paper's Brain_Putamen refit); other platforms may reach the higher one, so this is checked on that machine only
+  if (exact_parity()) {
     expect_gt(b$stat_p0, 25); expect_gt(llr(rT) - llr(rF), 10)
   }
 })

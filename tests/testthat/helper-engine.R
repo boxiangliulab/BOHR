@@ -45,6 +45,11 @@ expect_code_line <- function(file, text) {
 ## Every comparison with the original engine, or with frozen output of the original pipeline, uses it.
 engine_control <- function(...) bohr_control(firth_null_start = FALSE, ...)
 
+## Checks that hold only on the machine the fixtures were made on (same CPU, maths and BLAS libraries): bit-for-bit
+## equality with frozen output, and which local maximum the paper's engine reaches. They run when BOHR_EXACT_PARITY=true.
+## testthat::test_local() and devtools::test() set NOT_CRAN=true on every machine, so NOT_CRAN cannot tell them apart.
+exact_parity <- function() identical(Sys.getenv("BOHR_EXACT_PARITY"), "true")
+
 ## run expr with a fixed seed and restore the caller's RNG state
 with_seed <- function(seed, expr) {
   old <- if (exists(".Random.seed", globalenv())) get(".Random.seed", globalenv()) else NULL
