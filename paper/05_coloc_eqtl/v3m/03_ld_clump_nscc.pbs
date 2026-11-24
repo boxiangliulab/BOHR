@@ -1,13 +1,13 @@
 #!/bin/bash
 #PBS -P 11003054
 #PBS -q normal
-#PBS -l walltime=04:00:00
-#PBS -l select=1:ncpus=16:mem=64GB
+#PBS -l walltime=24:00:00
+#PBS -l select=1:ncpus=128:mem=300GB
 #PBS -j oe
 #PBS -o /scratch/users/nus/e1327989/rerun_v2/ld_ref_v9/v3m/logs/job.log
 # Mirror rule v3 coloc, step 3 (NSCC): (a) LD windows of the new leads, rule of coloc_eqtl_ldwin/01_ldwin_nscc.pbs
 # (PLINK 1.9, GTEx v9 panel bfile, tissue freeze donors, r2 >= 0.1 within 1 Mb); leads absent from the panel get option A'
-# (author 2026-10-12): typed in the unfiltered bfile (bfile_full_maf0.005), partners restricted to the panel.
+# (as in ldwin/04_pairs.R): typed in the unfiltered bfile (bfile_full_maf0.005), partners restricted to the panel.
 # (b) recursive clumping of the new eGenes with sens_clump/s2_clump_nscc.R (unchanged copy).
 module load miniforge3
 eval "$(conda shell.bash hook)"
@@ -31,6 +31,6 @@ for f in snps/*.txt; do x=$(basename $f .txt); T=${x%.chr*}; C=${x##*.}
   done
 done
 echo "windows: $(cat out/*.win.tsv | grep -v '^snp' | wc -l) leads (absent-from-panel leads: $(cat out/*.absent.txt | wc -l))"
-for T in $(ls sig | sed 's/\.tsv\.gz$//'); do Rscript $W/s2_clump_nscc.R "$T" $W/sig $W/clump_out 4 > logs/s2_$T.log 2>&1; done
+ls sig | sed 's/\.tsv\.gz$//' | xargs -P 32 -I{} bash -c "Rscript $W/s2_clump_nscc.R {} $W/sig $W/clump_out 4 > logs/s2_{}.log 2>&1"   # tissues in parallel
 echo "clumped tissues: $(ls clump_out/*/DONE 2>/dev/null | wc -l) of $(ls sig | wc -l)"
 echo "ALL DONE $(date)"

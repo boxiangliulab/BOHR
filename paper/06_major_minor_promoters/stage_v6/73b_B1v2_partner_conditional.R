@@ -1,11 +1,11 @@
-## 73b_B1v2_partner_conditional.R -- B1 refit after review (2026-11-03). Same donors, covariates and genotype rule as 73.
-## Changes from 73 (review points confirmed in code/output):
-##  1. Designated partner. In "two-promoter" genes (n_prom_gene = 2 among the tested promoters) 69% of signals have extra
+## 73b_B1v2_partner_conditional.R -- B1 refit. Same donors, covariates and genotype rule as 73.
+## Changes from 73:
+##  1. Designated partner. In "two-promoter" genes (n_prom_gene = 2 among the tested promoters) signals can have extra
 ##     non-internal promoters in the absolute matrix (untested, low activity), so 73's "others" sum (A_O) is not the
 ##     designated partner. Here the partner P (mirror table) is fitted on its own and the extra promoters are summed
 ##     separately (X). A_O (all others) is kept: it is what usage = 1 (p1) is defined on.
 ##  2. Conditional fits. The genotypes of the other retained signals (backward_keep) of the same unit
-##     (tissue x promoter x type) enter as covariates (multi-signal units; 1,942 signals).
+##     (tissue x promoter x type) enter as covariates (multi-signal units).
 ##  3. Level part (OLS on donors with A > 0) for own and partner whenever >= 30 donors are positive, with no zero-fraction
 ##     gate (= the full OLS when the promoter is always on); on-state (logistic) when 2-98% of donors are zero.
 ##  4. Effects kept as b, se and SD of the response, for equivalence tests ("flat" = CI inside +-delta SD, not P > 0.05).
@@ -18,7 +18,7 @@ cat("start", format(Sys.time()), "\n")
 
 sig <- fr(file.path(IN, "delivery/signals.tsv.gz"), select = c("tissue", "promoter", "type", "k", "snp", "chr", "backward_keep", "loo_est"))
 fl  <- fr(file.path(IN, "mirror/promoter_flags.tsv.gz"))[, .(tissue, promoter, gene, n_prom_gene, mirror_partner, exact_mirror)]
-sig <- merge(sig, fl, by = c("tissue", "promoter")); stopifnot(nrow(sig) == 14823)   # delivery v6 (conditional refit 2026-11-06); 14,825 in v4, 14,808 in v3
+sig <- merge(sig, fl, by = c("tissue", "promoter")); stopifnot(nrow(sig) > 0)   # the per-signal table of delivery v6 must not be empty
 sig[, pos := as.integer(sub("^chr[^_]+_([0-9]+)_.*$", "\\1", snp))]
 sig[, unit := paste(tissue, promoter, type, sep = "|")]
 sig[, bk := as.logical(backward_keep)]

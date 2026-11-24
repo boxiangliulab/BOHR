@@ -1,6 +1,6 @@
-## All-tissue BOHR vs QTLtools comparison (author approved 2026-10-01, deferred; started 2026-10-02).
+## Inputs of the all-tissue comparison of BOHR with QTLtools.
 ## QTLtools inputs are built from BOHR's own freeze tissue objects (rerun_v2/work/final/freeze/<T>.rds), so the donors,
-## the author's filtered promoters, the covariates and the perm0 permutation are exactly BOHR's:
+## the filtered promoters, the covariates and the perm0 permutation are exactly BOHR's:
 ##   real : phenotype = td$act[U, ]; covariates = genotype PC1-5 + PEER 1..K
 ##   perm0: slot s carries the phenotype AND PEER row of donor map[s]; genotype PCs stay with the slot (= run_final2.R)
 ## Phenotype rows: the tissue's promoters on chr1-22; NA mean-imputed and constant rows dropped (QTLtools needs complete

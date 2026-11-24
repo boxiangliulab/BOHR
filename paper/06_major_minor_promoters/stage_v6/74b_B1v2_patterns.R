@@ -1,4 +1,4 @@
-## 74b_B1v2_patterns.R -- patterns from the B1 refit (73b) after review, with the A1 / A2 aligned contrasts recomputed on
+## 74b_B1v2_patterns.R -- patterns from the B1 refit (73b), with the A1 / A2 aligned contrasts recomputed on
 ## the same signal sets. Changes from 74 / 82:
 ##  - aligned frame uses the designated partner promoter P (not the sum of all other promoters);
 ##  - direction: conditional (loo_est) for signals of multi-signal units, marginal otherwise (dir_c); the marginal one is
@@ -20,7 +20,7 @@ s0[, sid := paste(tissue, promoter, type, k, sep = "|")]
 s0[, unit := paste(tissue, promoter, type, sep = "|")][, n_unit := .N, by = unit]
 s0[, dir_loo := fifelse(is.na(loo_est), NA_real_, fifelse(type == "mu", sign(loo_est), fifelse(type == "p0", -sign(loo_est), sign(loo_est))))]
 X <- merge(F, sg, by = "sid"); X <- merge(X, s0[, .(sid, n_unit, dir_loo, bk = as.logical(backward_keep))], by = "sid")
-X <- X[bk == TRUE]   # v5: the signals retained (14,800 in delivery v6, 14,801 in v4) after the backward step only
+X <- X[bk == TRUE]   # v5: only the signals retained after the backward step
 fl <- fr(file.path(IN, "mirror/promoter_flags.tsv.gz"))[, .(tissue, promoter, exact_mirror)]
 X <- merge(X, fl, by = c("tissue", "promoter"))
 X[, dir_c := fifelse(n_unit > 1 & !is.na(dir_loo), dir_loo, dir)]

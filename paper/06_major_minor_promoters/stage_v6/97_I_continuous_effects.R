@@ -1,4 +1,4 @@
-## 97_I_continuous_effects.R -- follow-ups to a review (2026-11-03 evening).
+## 97_I_continuous_effects.R -- two follow-up read-outs (I1, I2).
 ## I1  F2 within-promoter pairs on continuous effects: standardised per-allele effects at S, N and gene output (b / SD of the
 ##     response, signed by the S-usage direction) for the boundary and the mu signal of each pair; paired mean / median
 ##     differences with a gene bootstrap; and "N opposite" split into strict reciprocal (S significant) vs N only.

@@ -1,6 +1,6 @@
-## fig5_pe_moments_v6.R (2026-11-06): copy of fig5_pe_moments_v5.R for Figure 5 delivery v6 (conditional refit v3c). Only the delivery path differs.
-## fig5_pe_moments_v5.R (2026-11-06): copy of fig5_pe_moments_v4.R for Figure 5 delivery v5 (abs-activity mirror labels, units v3a). Only the delivery path differs.
-## fig5_pe_moments_v4.R (2026-11-04): copy of fig5_pe_moments.R writing Figure 5 delivery v4 (mirror rule v3: exact switches = p0 on the silent TSS;
+## fig5_pe_moments_v6.R: copy of fig5_pe_moments_v5.R for Figure 5 delivery v6 (conditional refit v3c). Only the delivery path differs.
+## fig5_pe_moments_v5.R: copy of fig5_pe_moments_v4.R for Figure 5 delivery v5 (abs-activity mirror labels, units v3a). Only the delivery path differs.
+## fig5_pe_moments_v4.R: copy of fig5_pe_moments.R writing Figure 5 delivery v4 (mirror rule v3: exact switches = p0 on the silent TSS;
 ## in boundary_only_partner_pheno, columns canonical / partner mean the promoter holding the boundary unit / the other promoter).
 ## Items 1 and 6, units v3.
 ## For every signal of the v3 delivery (signals.tsv.gz: all k, including the 25 that failed backward), on the unit's

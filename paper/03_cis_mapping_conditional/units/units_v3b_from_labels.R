@@ -1,4 +1,4 @@
-## units_v3b_from_labels.R (2026-11-06): unit step on the SAVED absolute-activity mirror labels, OPTION B (author 2026-11-06, one
+## units_v3b_from_labels.R: unit step on the SAVED absolute-activity mirror labels, OPTION B (one
 ## rule with Figure 3): every boundary event of an exact pair is TESTED as p0 on the silent TSS S (results/final_nogate_v3m, its
 ## +-500 kb window) and BH is unchanged; the rule label (code/mirror_abs_labels.R -> results/mirror_abs_labels/labels_real.tsv.gz,
 ## label_applied == TRUE: significant units only) only NAMES the event. No fitting, no BH here.
@@ -8,7 +8,7 @@
 ##   p_own_window / leader_own_window. The p0(S) row is dropped as its duplicate (duplicate_of = O:p1).
 ## Every other unit is the v3m unit unchanged (same p and q). Permuted arms: copied unchanged.
 ## Output: results/final_nogate_v3b/freeze/<tissue>.<arm>.units.rds ; results/final_nogate_v3b/checks.txt. Env LABELS / UNITS_OUT choose the
-## label table and output (2026-11-06 refit: LABELS=results/mirror_abs_labels_v3c/labels_real.tsv.gz UNITS_OUT=results/final_nogate_v3c).
+## label table and output (final run: LABELS=results/mirror_abs_labels_v3c/labels_real.tsv.gz UNITS_OUT=results/final_nogate_v3c).
 suppressPackageStartupMessages(library(data.table))
 V2 <- "/projects/group/bliu/e1327989/GTEx/QTL_figure/rerun_v2"
 IN <- file.path(V2, "results/final_nogate_v3m/freeze"); OUT <- file.path(V2, Sys.getenv("UNITS_OUT", "results/final_nogate_v3b"), "freeze"); dir.create(OUT, recursive = TRUE, showWarnings = FALSE)

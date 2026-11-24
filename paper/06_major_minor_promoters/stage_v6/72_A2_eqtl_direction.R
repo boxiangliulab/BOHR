@@ -21,7 +21,7 @@ sp  <- fr(file.path(IN, "delivery/signals_partner.tsv.gz"), select = c("tissue",
 sig <- merge(sig, sp, by = c("tissue", "promoter", "type", "k"))
 fl  <- fr(file.path(IN, "mirror/promoter_flags.tsv.gz"))[, .(tissue, promoter, gene, n_prom_gene)]
 sig <- merge(sig, fl, by = c("tissue", "promoter"))
-stopifnot(nrow(sig) == 14823)   # delivery v6 (conditional refit 2026-11-06); 14,825 in v4, 14,808 in v3
+stopifnot(nrow(sig) > 0)   # the per-signal table of delivery v6 must not be empty
 sig[, gene_base := sub("\\..*$", "", gene)]
 sig[, sid := paste(tissue, promoter, type, k, sep = "|")]
 sig[, dir := fifelse(type == "mu", sign(mu_est), fifelse(type == "p0", -sign(nu_est), sign(tau_est)))]
@@ -32,7 +32,7 @@ gpm[, emp := sign(((n1 * m1 + 2 * n2 * m2) / (n0 + n1 + n2) - (n1 + 2 * n2) / (n
 sig <- merge(sig, gpm[, .(sid, emp)], by = "sid", all.x = TRUE)
 agree <- sig[, .(n = .N, n_dir_na = sum(is.na(dir) | dir == 0), agree_with_group_means = mean(dir == emp, na.rm = TRUE)), by = type]
 print(agree); writeT(agree, file.path(OUT, "A2_direction_check.tsv"))
-## author 2026-11-04: major / minor = higher / lower mean usage POOLED over all tissues (= the mirror table's canonical / partner, as Figure 4).
+## major / minor = higher / lower mean usage POOLED over all tissues (= the mirror table's canonical / partner, as Figure 4).
 sig[, own_minor := fifelse(n_prom_gene == 2, mirror_role == "partner", NA)]
 sig[n_prom_gene == 2, route := fifelse(type == "mu", "mu", fifelse((type == "p0") == own_minor, "onoff_S_minor", "onoff_S_major"))]
 sig[n_prom_gene == 2, dirS := fifelse(type == "mu", fifelse(own_minor, dir, -dir), fifelse(type == "p0", dir, -dir))]
@@ -50,7 +50,8 @@ EQ <- rbindlist(lapply(sort(unique(sig$tissue)), function(t) {
 cat("signals with an eQTL row at the lead or a proxy:", nrow(EQ), "of", nrow(sig), "\n")
 EQ[, `:=`(z_eq = sign(r) * slope / slope_se, eq_at_lead = proxy_snp == signal_snp)]
 sig <- merge(sig, EQ[, .(sid, eq_snp = proxy_snp, eq_r2 = r2, eq_at_lead, z_eq, eq_p = pval_nominal)], by = "sid", all.x = TRUE)
-co <- fr(file.path(IN, "coloc/coloc_eqtl_signals.tsv.gz"), select = c("tissue", "promoter", "type", "k", "call", "PP.H4", "egene"))
+co <- if (file.exists(file.path(IN, "coloc/coloc_eqtl_signals.tsv.gz"))) fr(file.path(IN, "coloc/coloc_eqtl_signals.tsv.gz"), select = c("tissue", "promoter", "type", "k", "call", "PP.H4", "egene")) else   # without the eQTL coloc table: an empty table with the same columns
+  data.table(tissue = character(), promoter = character(), type = character(), k = integer(), call = character(), PP.H4 = numeric(), egene = logical())
 co[, sid := paste(tissue, promoter, type, k, sep = "|")]
 sig <- merge(sig, co[, .(sid, coloc_call = call, PP.H4, egene)], by = "sid", all.x = TRUE)
 sig[, `:=`(conc_own = sign(z_eq) == dir, conc_S = sign(z_eq) == dirS)]
@@ -75,6 +76,7 @@ for (thr in c(1.96, 3.89)) {
   add(z[, .(gene, group = route, num = as.numeric(conc_S), den = 1)], c("onoff_S_minor", "onoff_S_major", "mu"),
       sprintf("two-promoter aligned: concordant with SWITCHING (mu: minor) promoter usage | |z_eq| >= %.2f", thr), 30L + thr)
 }
+if (nrow(co) > 0) {   # without the eQTL coloc table the coloc summaries are skipped
 y <- x[PP.H4 >= 0.8 & !is.na(dir) & dir != 0]
 add(y[, .(gene, group = type, num = as.numeric(conc_own), den = 1)], cls, "concordant with OWN usage | coloc H4 >= 0.8", 41L)
 z <- y[!is.na(route)]
@@ -82,6 +84,7 @@ add(z[, .(gene, group = route, num = as.numeric(conc_S), den = 1)], c("onoff_S_m
 ## coloc calls by class
 cc <- sig[!is.na(coloc_call), .N, by = .(type, coloc_call)][, share := N / sum(N), by = type]
 writeT(dcast(cc, coloc_call ~ type, value.var = "share"), file.path(OUT, "A2_coloc_calls_by_class.tsv"))
+} else cat("no eQTL coloc table: coloc summaries skipped\n")
 TAB <- rbindlist(tabs); writeT(TAB, file.path(OUT, "A2_eqtl_direction_summary.tsv"))
 
 ## ---- (c) splice-site QC

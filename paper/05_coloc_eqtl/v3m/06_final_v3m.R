@@ -1,4 +1,4 @@
-## Mirror rule v3 coloc, step 6: the final per-signal eQTL coloc table re-keyed to units v3m, with the rules of
+## Mirror rule v3 coloc, step 6: the final per-signal eQTL coloc table, with the rules of
 ## coloc_eqtl_ldwin/08_final_clump.R (unchanged):
 ##   carried rows: the final_clump row as it is (same unit, signal, scan and windows); unit_q updated to the v3m BH value
 ##   new rows    : eGene -> best call over its clumped eQTL-lead pairs (H4 > H3 > H1 > H2 > H0 > ambiguous; ties -> strongest

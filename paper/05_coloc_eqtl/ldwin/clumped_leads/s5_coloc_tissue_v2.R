@@ -1,4 +1,4 @@
-## v2 (2026-10-12, author: the clumped eQTL leads become the main analysis): identical to
+## v2 (2026-10-12; the clumped eQTL leads become the main analysis): identical to
 ## s5_coloc_tissue.R except that every coloc_signal() column is kept (pqtl_min_p, top_snp_H4, top_snp_PP for S5d) and the
 ## output goes to sens_clump/per_tissue_v2/. s5_coloc_tissue.R and its per_tissue/ outputs are unchanged.
 ## Figure 4 panel e, LD-window coloc, eQTL leads by recursive clumping, step s5: coloc for one tissue, one

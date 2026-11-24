@@ -5,7 +5,7 @@
 #PBS -l select=1:ncpus=22:mem=88GB
 #PBS -j oe
 #PBS -o /scratch/users/nus/e1327989/rerun_v2/ld_ref_v9/logs/rarelead.log
-# Figure 4, 2026-10-12 (author: "either the LD of the eQTL top variant directly, or the full VCF"). LD partners (r2 >= 0.1, 1 Mb)
+# Figure 4, 2026-10-12. LD partners (r2 >= 0.1, 1 Mb)
 # of the 1,485 GTEx eGene top variants absent from the MAF >= 0.05 panel, computed from the unfiltered v9 VCF
 # (944-donor analysis freeze, --maf 0.005, same PLINK flags as ld_v3), tissue donors. The panel and its files are untouched.
 set -eo pipefail

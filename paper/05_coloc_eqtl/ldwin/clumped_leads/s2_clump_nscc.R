@@ -1,9 +1,9 @@
-## Figure 4 panel e, LD-window coloc, sensitivity "eQTL leads by recursive clumping" (author 2026-10-12),
+## Figure 4 panel e, LD-window coloc, sensitivity "eQTL leads by recursive clumping" (2026-10-12),
 ## step s2 (NSCC, one tissue per call): for every eGene x tissue of the analysis set,
 ##   1. its GTEx significant eQTL variants (s1) typed in the unfiltered v9 bfile (bfile_full_maf0.005), tissue donors;
 ##   2. r2 among them with PLINK 1.9 --r2 (the estimator of every LD window; PLINK --clump uses a different, haplotype-EM
 ##      r2, so the clumping is done here on --r2 pairs), +-1 Mb, r2 >= 0.1;
-##   3. recursive clumping (author's rule for GWAS leads, 2026-10-12): sort by P, the most significant unassigned variant
+##   3. recursive clumping (the rule used for the GWAS leads): sort by P, the most significant unassigned variant
 ##      is a lead and takes every unassigned variant with r2 >= 0.1; repeat until all are assigned;
 ##   4. LD window of every lead as in the main analysis (option A'): r2 >= 0.1 partners restricted to the MAF >= 0.05
 ##      panel, +-1 Mb, tissue donors; window = farthest partner +/- 50 kb (computed locally in s3).

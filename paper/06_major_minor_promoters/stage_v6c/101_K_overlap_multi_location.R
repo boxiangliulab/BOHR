@@ -1,7 +1,7 @@
 ## v6c 2026-11-07: >= 3 promoters use the pooled major (see the v6c block below).
-## 101_K_overlap_multi_location.R -- author's questions after the figures (2026-11-03 night). Frame in plain terms: in the
+## 101_K_overlap_multi_location.R -- shared leads, genes with >= 3 promoters and lead location. Frame in plain terms: in the
 ## analysed groups the switching promoter is always the MINOR promoter and the other one is the MAJOR promoter
-## (p0 on the minor, p1 on the major = the minor switching, mu: minor by convention); the 284 signals where the major switches
+## (p0 on the minor, p1 on the major = the minor switching, mu: minor by convention); the signals where the major switches
 ## (p0 on the major, p1 on the minor) stay out, as before.
 ##  K1 overlap: drop signals whose lead is shared with a signal of the other kind (p0/p1 vs mu) in the same gene x tissue
 ##     (identical lead or lead inside the other signal's r2 >= 0.8 proxy set); also keep only gene x tissue with one kind only.
@@ -29,10 +29,10 @@ A2 <- X[two == TRUE & route %in% c("onoff_S_minor", "mu"), .(sid, gene, tissue, 
 pxl <- fr(file.path(IN, "delivery/genotype_pheno_proxies.tsv.gz"), select = c("tissue", "promoter", "type", "k", "signal_snp", "proxy_snp", "n0", "n1", "n2", "m0", "m1", "m2"))[signal_snp == proxy_snp]
 pxl[, sid := paste(tissue, promoter, type, k, sep = "|")]; pxl <- unique(pxl[, .(own_mean = (n0 * m0 + n1 * m1 + n2 * m2) / (n0 + n1 + n2)), by = sid], by = "sid")
 X <- merge(X, pxl, by = "sid", all.x = TRUE)
-## v6c (2026-11-07, author: the largest promoter must be major): >= 3 tested promoters use the same pooled definition as the
+## v6c (2026-11-07; the largest promoter is the major one): >= 3 tested promoters use the same pooled definition as the
 ## two-promoter genes (Figure 4's mirror canonical). Pooled usage of a promoter = its mean usage (freeze td$act) over all freeze
-## samples of the tissues where it is tested; this reproduces mirror_pairs pooled_mean exactly (8,156 promoters, max diff 7e-16,
-## script 174b). Major = the gene's tested promoter with the highest pooled usage; every other tested promoter is minor.
+## samples of the tissues where it is tested; this reproduces mirror_pairs pooled_mean exactly (checked below,
+## stopifnot). Major = the gene's tested promoter with the highest pooled usage; every other tested promoter is minor.
 ## Replaces "own mean usage in that tissue < 0.5" (v5/v6), which called every promoter minor when none had usage >= 0.5.
 TTf <- fr(file.path(IN, "freeze/tissues.tsv"))[def == "freeze"]; stopifnot(nrow(TTf) == 50)
 PS <- rbindlist(lapply(TTf$tissue, function(t) { a <- readRDS(file.path(IN, "freeze", paste0(t, ".rds")))$act
@@ -49,7 +49,7 @@ X <- merge(X, MJ[, .(gene, major_p)], by = "gene", all.x = TRUE)
 X[two == FALSE, own_minor_v6 := own_mean < 0.5]
 X[two == FALSE, own_minor := fifelse(is.na(major_p), NA, promoter != major_p)]
 cat("own_minor, old (tissue mean < 0.5) vs new (pooled major), >= 3 tested promoters:\n"); print(X[two == FALSE & n_prom_gene >= 3, .N, by = .(type, old_minor = own_minor_v6, new_minor = own_minor)][order(type, old_minor, new_minor)])
-T3 <- X[two == FALSE & !is.na(own_minor) & n_prom_gene >= 3]   # v5: genes with >= 3 TESTED promoters only (226 signals in one-promoter genes dropped)
+T3 <- X[two == FALSE & !is.na(own_minor) & n_prom_gene >= 3]   # v5: genes with >= 3 TESTED promoters only (signals in one-promoter genes dropped)
 T3[, minor_is_own := fifelse(type == "p0", TRUE, fifelse(type == "p1", FALSE, own_minor))]
 T3 <- T3[(type == "p0" & own_minor == TRUE) | (type == "p1" & own_minor == FALSE) | type == "mu"]
 T3[, sM := fifelse(minor_is_own, dir_c, -dir_c)]

@@ -1,4 +1,4 @@
-## Shared LD resource, units v3 (author 2026-10-03: Figures 4, 5 and 6 use ONE LD standard = PLINK 1.9; see code/ld_tool.R).
+## Shared LD resource, units v3: Figures 4, 5 and 6 use ONE LD standard = PLINK 1.9 (see code/ld_tool.R).
 ## Missing genotype calls stay missing and each pair uses the donors called at both SNPs (PLINK's rule), so the proxy
 ## table equals the PLINK run of work/plink_v3 (checked below). Version 1 (modal-filled genotypes) is archived in
 ## results/ld_v3/archive_modal_20261003/.
@@ -6,14 +6,14 @@
 ##   donors/<tissue>.txt, donors/ALL.txt     the donor set of each tissue (td$U = the model's donors) and their union
 ##   signal_proxies.tsv.gz                  every signal x every SNP the main run tested for that promoter with r2 >= 0.8
 ##                                          (signal itself included, r = 1): signed r and r2. Same rows as
-##                                          fig5_delivery_v3/genotype_pheno_proxies (checked).
+##                                          genotype_pheno_proxies of the per-signal delivery (checked).
 ##   signal_pairs.tsv.gz                    every pair of signals in the same tissue within 1 Mb (any promoter, any type):
 ##                                          signed r and r2. Includes all crosstype_ld pairs (checked).
 ## Usage: NC=16 Rscript code/ld_v3.R
 suppressPackageStartupMessages({ library(data.table); library(parallel) })
 CODE <- "/projects/group/bliu/e1327989/GTEx/QTL_figure/rerun_v2/code"; source(file.path(CODE, "bohr2_data.R")); source(file.path(CODE, "ld_tool.R"))
 NC <- as.integer(Sys.getenv("NC", "16")); R2MIN <- 0.8; PAIR_MAX <- 1e6
-D3 <- file.path(V2, "results/fig5_delivery_v3"); dir.create(file.path(LD_DIR, "donors"), recursive = TRUE, showWarnings = FALSE)
+D3 <- file.path(V2, "results/fig5_delivery_v6"); dir.create(file.path(LD_DIR, "donors"), recursive = TRUE, showWarnings = FALSE)
 SF <- fread(cmd = paste("zcat", file.path(D3, "signals.tsv.gz")))[, .(tissue, promoter, type, k, snp, chr, backward_keep)]
 TIS <- sort(unique(SF$tissue))
 one_tissue <- function(t) {
@@ -51,6 +51,7 @@ PP <- rbind(PP, SS, use.names = TRUE)[, same_promoter := promoter_a == promoter_
 setcolorder(PP, c("tissue", "promoter_a", "type_a", "k_a", "snp_a", "promoter_b", "type_b", "k_b", "snp_b", "dist", "r", "r2", "same_promoter", "keep_a", "keep_b"))
 setorder(PP, tissue, promoter_a, type_a, k_a, promoter_b, type_b, k_b); fwrite(PP, file.path(LD_DIR, "signal_pairs.tsv.gz"), sep = "\t")
 ## check against the PLINK run (results/ld_v3/plink/signal_proxies_plink.tsv.gz, from work/plink_v3 out2)
+if (!file.exists(file.path(LD_DIR, "plink/signal_proxies_plink.tsv.gz"))) { cat("no PLINK reference table: check skipped\n"); quit(save = "no") }   # the PLINK table of the earlier run is not rebuilt: every output above is already written
 PL <- fread(cmd = paste("zcat", file.path(LD_DIR, "plink/signal_proxies_plink.tsv.gz")))[, .(tissue, promoter, type, k, signal_snp, proxy_snp, r_plink = r)]
 cx <- merge(PX, PL, by = c("tissue", "promoter", "type", "k", "signal_snp", "proxy_snp"), all = TRUE)
 cat("proxies: rows", nrow(PX), "; PLINK rows", nrow(PL), "; only here", cx[is.na(r_plink), .N], "; only PLINK", cx[is.na(r), .N],

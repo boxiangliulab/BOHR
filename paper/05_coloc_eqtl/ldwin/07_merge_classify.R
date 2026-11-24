@@ -1,9 +1,9 @@
 ## Figure 4 panel e, LD-window coloc, step 7: merge the per-tissue coloc (step 6), classify, compare with the +-200 kb run.
 ## Signal call (PP >= 0.8, p12 = 1e-5, precedence H4 > H3 > H1 > H2 > H0, else ambiguous) as in coloc_eqtl_v3/03, plus
 ##   "different locus (LD windows disjoint)" (DL) for signals whose LD window and the eQTL lead's LD window share < 5 SNPs
-##   with statistics in both datasets (author 2026-10-12: not tested, counted under Distinct, count shown separately).
+##   with statistics in both datasets (not tested; counted under Distinct, with the count shown separately).
 ## Gene x tissue (Fig. 4e; the rule of coloc_eqtl_v3/04 class_main_anyd and figure_v3 panel_e_v3e.py), over the pair's
-## signals, DL treated like H3 ("any difference counts as different"):
+## signals, DL treated like H3 (any difference counts as different):
 ##   distinct      >= 1 H3 or DL, or H1 with no H3 / DL / H4   (shown separately: any H3 / DL, no H3 / H1 only)
 ##   no eQTL       gene not a GTEx v11 eGene in the tissue (q > 0.05)
 ##   shared, all   every tested signal H4

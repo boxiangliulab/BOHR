@@ -1,13 +1,14 @@
 #!/usr/bin/env Rscript
-### Author 2026-10-07: (1) null calibration of the BOHR p0 / p1 (Firth) tests: per-promoter FPR at 0.05
+### (1) Null calibration of the BOHR p0 / p1 (Firth) tests: per-promoter FPR at 0.05
 ### (seed 1, the figure's permutations) and QQ points; (2) null tail of a promoter-level
-### combined p over the promoter's existing tests (mu-F, p0, p1): ACAT (Cauchy combination) and Simes (the rule used for the
+### combined p over the promoter's existing tests (mu-F, p0, p1): ACAT (Cauchy combination) and Simes (an earlier rule of the
 ### real-data Fig 2e), against the mu test alone; five permutation seeds pooled, 95% CIs from 2,000 unit-level bootstraps.
 ### DATASET env (default nothr_realjunc). Outputs: data_v3_<DATASET>/diag_tail/{combined_p_*,p0p1_*}.csv
 suppressMessages(library(data.table))
 DS <- Sys.getenv("DATASET", "nothr_realjunc"); pd <- readLines("/projects/group/bliu/e1327989/GTEx/new_simulation/figures_bohr2/scripts/prepare_data_v3.R")
 OUTD <- sprintf("/projects/group/bliu/e1327989/GTEx/new_simulation/figures_bohr2/data_v3_%s/diag_tail", DS); dir.create(OUTD, showWarnings = FALSE)
 TAGS <- c("seed 1 (figure)" = "", "seed 2" = "_seed2", "seed 3" = "_seed3", "seed 4" = "_seed4", "seed 5" = "_seed5")
+if (startsWith(DS, "E80_")) TAGS <- TAGS[1]   # E80_* versions: the figure's permutations (seed 1) only
 acat <- function(P) {                                   # rows = tests, columns = mu, p0, p1 (NA = test absent)
   P <- pmin(pmax(P, 1e-300), 1 - 1e-15); T <- tan((0.5 - P) * pi); k <- rowSums(!is.na(P))
   0.5 - atan(rowSums(T, na.rm = TRUE) / k) / pi }

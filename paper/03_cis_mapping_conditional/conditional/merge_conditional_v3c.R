@@ -1,6 +1,6 @@
-## merge_conditional_v3c.R (2026-11-06, author "correction"): final conditional analysis with the two failed Firth conditional signals fixed.
-## Base: results/conditional_final_v3m (units v3m, v3m tissue thresholds). The units in work/cond_v3c/units_to_run.tsv were re-run in
-## full (forward from the leader, then backward), with the same code, by run_conditional_v3c.R -> results/conditional_v3c; their rows
+## merge_conditional_v3c.R: final conditional analysis; re-run units replace their v3m rows (two in the earlier run, none in the final run).
+## Base: results/conditional_final_v3m (units v3m, v3m tissue thresholds). The units in work/cond_v3c/units_to_run.tsv (if any) are re-run in
+## full (forward from the leader, then backward), with the same code (earlier run: run_conditional_v3c.R) -> results/conditional_v3c; their rows
 ## (units, signals, rounds, LOO) replace the v3m rows. Backward as merge_conditional_v3m.R: a signal of a multi-signal unit is kept if
 ## its leave-one-out window ACAT <= the tissue threshold; a single signal is kept. Thresholds are unchanged (units and q are v3m).
 ## Then the saved mirror labels (env LABELS, default results/mirror_abs_labels_v3c/labels_real.tsv.gz) are applied as names, exactly as

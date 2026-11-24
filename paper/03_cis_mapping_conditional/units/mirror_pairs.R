@@ -1,5 +1,5 @@
-## Authoritative mirror table (author decision 2026-10-01: de-duplicate EXACT mirror pairs only, keep the types).
-## v2 (2026-10-01 evening, after Figure 5's review): exactness is judged PER COMPONENT.
+## Authoritative mirror table (de-duplicate EXACT mirror pairs only, keep the types).
+## v2: exactness is judged PER COMPONENT.
 ##   boundary_exact: I(y_A = 0) == I(y_B = 1) and I(y_A = 1) == I(y_B = 0) in every observed donor (exact indicators)
 ##                   -> the categorical data are swapped exactly, so p0(A) == p1(B) and p1(A) == p0(B).
 ##   interior_exact: boundary_exact, same interior donor set, and |y_A + y_B - 1| <= 1e-6 on it -> mu(A) == mu(B).

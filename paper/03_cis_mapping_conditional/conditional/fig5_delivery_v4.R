@@ -1,8 +1,8 @@
-## fig5_delivery_v4.R (2026-11-04): copy of fig5_delivery.R for Figure 5 delivery v4 (mirror rule v3, author 2026-11-04 final:
+## fig5_delivery_v4.R: copy of fig5_delivery.R for Figure 5 delivery v4 (mirror rule v3, final:
 ## exact two-promoter switches are p0 on the silent TSS). Only change: the boundary-only partner table (see "mirror rule v3").
 ## Run with COND_FINAL=results/conditional_final_v3m FIG5_OUT=results/fig5_delivery_v4 UNITS_DIR=results/final_nogate_v3m.
 ## Figure 5 delivery from the FINAL conditional analysis (results/conditional_final, built by merge_conditional_ng.R).
-## Spec: Figure 5 (2026-10-01 "shape we need"). Freeze definition, real arm, unit level,
+## Spec: Figure 5. Freeze definition, real arm, unit level,
 ## ungated + mirror table v2 de-duplicated + mu estimable (n_mid >= 80).
 ## Output (results/fig5_delivery/):
 ##   units.tsv.gz        units with gate flags, mirror flags (merged_component, twin, eq_class, ...), minor_count, signal counts
@@ -14,7 +14,7 @@
 ##   boundary_only_partner_pheno.tsv.gz  boundary-only exact pairs where mu(partner) and the canonical's p0/p1 unit are
 ##                       both significant: partner's own raw-usage genotype stats at each canonical boundary-signal SNP,
 ##                       and r2 to each mu(partner) signal
-## Usage: NC=8 Rscript code/fig5_delivery.R [tissue ...]   (default: all tissues)
+## Usage: NC=8 Rscript code/fig5_delivery_v4.R [tissue ...]   (default: all tissues)
 suppressPackageStartupMessages({ library(data.table); library(parallel) })
 CODE <- "/projects/group/bliu/e1327989/GTEx/QTL_figure/rerun_v2/code"; source(file.path(CODE, "bohr2_data.R")); source(file.path(CODE, "ld_tool.R"))
 FIN <- Sys.getenv("COND_FINAL", file.path(V2, "results/conditional_final")); OUT <- Sys.getenv("FIG5_OUT", file.path(V2, "results/fig5_delivery"))
@@ -46,7 +46,7 @@ one_tissue <- function(t) {
   prom_snps <- s[, .(snps = list(unique(snp))), by = promoter]
   G_of <- function(p, extra = character(0)) { ids <- unique(c(prom_snps[promoter == p]$snps[[1]], extra)); ch <- as.character(td$info[p, "seqnames"])
     ps <- pos_of(ids); g <- read_geno(ch, min(ps), max(ps), td$U); if (is.null(g)) return(NULL); g$G[, intersect(ids, g$id), drop = FALSE] }
-  ## LD (2026-10-03, author: PLINK as the standard): raw calls, donors missing either SNP dropped per pair (ld_tool.R)
+  ## LD (PLINK as the standard): raw calls, donors missing either SNP dropped per pair (ld_tool.R)
   Graw_of <- function(p, extra = character(0)) { ids <- unique(c(prom_snps[promoter == p]$snps[[1]], extra)); ch <- as.character(td$info[p, "seqnames"])
     ps <- pos_of(ids); D <- ld_raw_region(ch, min(ps), max(ps), td$U); if (is.null(D)) return(NULL); D[, intersect(ids, colnames(D)), drop = FALSE] }
   GP <- list(); LD <- list(); BP <- list()

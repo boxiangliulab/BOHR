@@ -1,0 +1,25 @@
+#!/bin/bash
+#PBS -q large
+#PBS -l select=1:ncpus=16:mem=64gb
+#PBS -l walltime=24:00:00
+#PBS -N coloc_eur
+#PBS -j oe
+#PBS -o /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/logs/coloc_eur.pbs.log
+## Steps 12-20 of the GWAS colocalization, as in stage S6.3-S6.5 of the r5e80 run, with the GWAS loci and windows from the
+## ancestry-matched clumping (clump_EURmix); everything else linked read-only from the r5e80 run; output in /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/coloc_final_nogate_v3_r5e80_eur only.
+export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 UNITSET=v3c
+set -o pipefail
+## pre-check: the local ALL clumping must equal the NSCC outputs for all 51 traits, and all 51 EUR runs must be done
+bad=0; for t in $(cat /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/traits.txt); do
+  cmp -s /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/clump_ALL/$t/leads.tsv /projects/group/bliu/e1327989/GTEx/new_GWAS/coloc_final_nogate_v3/coloc_ldunion_20261012/nscc_out/clump/$t/leads.tsv && cmp -s /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/clump_ALL/$t/lead_partners.tsv /projects/group/bliu/e1327989/GTEx/new_GWAS/coloc_final_nogate_v3/coloc_ldunion_20261012/nscc_out/clump/$t/lead_partners.tsv || { echo "ALL differs: $t"; bad=$((bad+1)); }
+  [ -f /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/clump_EUR/$t/DONE ] || { echo "EUR not done: $t"; bad=$((bad+1)); }
+done > /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/logs/coloc_eur.precheck.log 2>&1
+if [ $bad -gt 0 ]; then echo 9 > /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/logs/coloc_eur.exit; exit 1; fi
+echo "precheck OK: 51 ALL outputs identical to NSCC, 51 EUR done" >> /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/logs/coloc_eur.precheck.log
+ln -sfn /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/clump_EURmix /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/coloc_final_nogate_v3_r5e80_eur/coloc_ldunion_20261012/nscc_out/clump
+{
+/home/e1327989/.local/share/mamba/envs/gtexfig/bin/Rscript /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/run_code_eur/coloc/gwas/12_pairs.R && seq 1 51 | xargs -P 8 -I{} /home/e1327989/.local/share/mamba/envs/gtexfig/bin/Rscript /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/run_code_eur/coloc/gwas/13_subset_gwas.R {} && \
+awk -F'\t' 'NR > 1 && $2 == "freeze" {print $1}' /projects/group/bliu/e1327989/GTEx/nofloor_full/GTEx/QTL_figure/rerun_r5e80/work/final/tissues.tsv | xargs -P 4 -I{} /home/e1327989/.local/share/mamba/envs/gtexfig/bin/Rscript /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/run_code_eur/coloc/gwas/14_coloc_tissue.R {} 4 && \
+/home/e1327989/.local/share/mamba/envs/gtexfig/bin/Rscript /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/run_code_eur/coloc/gwas/15_merge.R && TIER=1e-7 /home/e1327989/.local/share/mamba/envs/gtexfig/bin/Rscript /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/run_code_eur/coloc/gwas/16_make_canonical.R && TMAIN=1e-7 /home/e1327989/.local/share/mamba/envs/gtexfig/bin/Rscript /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/run_code_eur/coloc/gwas/20_mras_panel_ldwin.R
+} > /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/logs/coloc_eur.log 2>&1
+echo $? > /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/logs/coloc_eur.exit

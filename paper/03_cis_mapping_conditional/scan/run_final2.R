@@ -2,8 +2,8 @@
 ## Usage: Rscript run_final.R <def: freeze|pilot> <tissue> <arm: real|perm0> <chr> <ncores>
 ## Engine and scheduling as run_pilot.R (split likelihood, sigma ~ 1, two-phase promoter/SNP-chunk
 ## parallelism). For promoters eligible for p0 (f0 >= 0.35, BEINF/BEZI) or p1 (f1 >= 0.35, BEINF/BEOI) the
-## Firth penalised LRT for nu/tau is added (bohr2_addon3.R: alternating full/restricted search, review
-## 2026-10-01); these are the p-values
+## Firth penalised LRT for nu/tau is added (bohr2_addon3.R: alternating full/restricted search,
+## multi-start); these are the p-values
 ## used for p0/p1 discovery. Output (atomic): results/final/<def>/<tissue>/<arm>/<chr>.rds
 suppressPackageStartupMessages(library(parallel))
 CODE <- Sys.getenv("BOHR2_CODE", "/projects/group/bliu/e1327989/GTEx/QTL_figure/rerun_v2/code")

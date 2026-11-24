@@ -1,4 +1,4 @@
-## BOHR v2 add-on tests, version 3 (2026-10-01 review fixes: Firth alternating search, finite BFGS polish).
+## BOHR v2 add-on tests, version 3 (Firth alternating search, finite BFGS polish).
 ## Version 2 note: (multi-start Firth, see PILOT_PROTOCOL.md amendment 5):
 ## identical to bohr2_addon.R except the Firth part of addon_snp_tests(). Original header:
 ## variable-precision beta, sandwich SEs,
@@ -247,7 +247,7 @@ simulate_null <- function(C, nul, phi_mult = 1, y_obs = NULL) {
 ## current full solution (SNP coefficient set to 0) and from the intercept-only start; the full fit
 ## again from every restricted solution. At exit the full fit is at least as high as a full fit started
 ## at the restricted optimum, and the restricted fit at least as high as one started from the final full
-## solution (the review counter-example of 2026-10-01).
+## solution, which version 2 did not guarantee.
 firth_snp_tests <- function(y, C, g, nul, maxround = 6L) {
   fam <- nul$family; pC <- ncol(C); Cg <- cbind(C, g = g); gi <- pC + 1L; eps <- 1e-9
   r <- list(nu_firth_stat = NA_real_, nu_firth_logp = NA_real_, nu_firth_est = NA_real_, nu_firth_se = NA_real_, nu_firth_conv = NA,

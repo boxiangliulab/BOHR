@@ -41,7 +41,7 @@ prepare_y <- function(y, p_cov) {
   y <- y[!is.na(y)]
   if (length(y) < 20 || length(y) < p_cov) return(list(skip = "n"))
   p0 <- mean(y == 0); p1 <- mean(y == 1)
-  if (p0 >= 0.95 || p1 >= 0.95 || sd(y) <= 0.05) return(list(skip = "prop_or_sd"))
+  if (p0 >= 0.95 || p1 >= 0.95 || sd(y) < 0.005) return(list(skip = "prop_or_sd"))   # final rule: skip only SD < 0.005 (the old pipeline skipped SD <= 0.05)
   keep <- rep(TRUE, length(y))
   if (p0 <= 0.05) keep <- keep & y > 0
   if (p1 <= 0.05) keep <- keep & y < 1

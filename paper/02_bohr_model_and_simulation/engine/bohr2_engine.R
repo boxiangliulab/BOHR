@@ -207,7 +207,7 @@ snp_tests <- function(y, C, g, nul) {
     r$nu_sep <- sep_flag(r$nu_est, r$nu_se, r$nu_conv); r$tau_sep <- sep_flag(r$tau_est, r$tau_se, r$tau_conv)
     th <- full$coef; e0 <- drop(C %*% th[1:pC]); e1 <- drop(C %*% th[pC + 1 + 1:pC])
     a0 <- th[pC + 1]; a1 <- th[2 * (pC + 1)]
-    pr <- function(d) { l0 <- e0 + a0 * d; l1 <- e1 + a1 * d; m <- pmax(0, l0, l1)          # max-shifted softmax (review 2026-10-01)
+    pr <- function(d) { l0 <- e0 + a0 * d; l1 <- e1 + a1 * d; m <- pmax(0, l0, l1)          # max-shifted softmax
       den <- exp(-m) + exp(l0 - m) + exp(l1 - m); cbind(exp(l0 - m) / den, exp(l1 - m) / den) }
     P0 <- pr(0); P2 <- pr(2)
     r$p0_pe <- mean(P2[, 1] - P0[, 1]); r$p1_pe <- mean(P2[, 2] - P0[, 2])

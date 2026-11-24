@@ -13,7 +13,7 @@ suppressPackageStartupMessages({ library(data.table); library(coloc) })
 
 V2   <- "/home/e1327989/project/GTEx/QTL_figure/rerun_v2/results"
 NDIR <- "/projects/group/bliu/e1327989/GTEx/new_GWAS/coloc_final_nogate_v3"
-## 2026-11-04 mirror rule v3 (author; final_nogate_v3m): exact two-promoter switches are p0
+## 2026-11-04 mirror rule v3 (final_nogate_v3m): exact two-promoter switches are p0
 ## on the silent TSS. UNITSET = "v3" (default) reproduces the 2026-10-12 build and its paths exactly; "v3m" reads
 ## Figure 4's v3m units / conditional analysis and writes to parallel folders (results_v3m/, coloc_ldunion_20261012/run_v3m/).
 ## The GWAS side (significant SNPs, clumping, GWAS windows; LDU0) does not depend on the unit set and is shared.
@@ -58,7 +58,7 @@ gwas_N <- local({
 
 read_gwas <- function(tr) {
   gw <- fread(gwas_path(tr), select = c("SNPID_hg38", "BETA", "SE", "Pvalue"), showProgress = FALSE)
-  # 2026-10-09 (supp-table review, Finding 1): four files (Alzheimer IGAP 2013, dementia Bellenguez 2022, HDL/LDL GLGC
+  # 2026-10-09: four files (Alzheimer IGAP 2013, dementia Bellenguez 2022, HDL/LDL GLGC
   # 2013) carry P values below the double range (e.g. 1.15e-802), so fread reads the whole column as TEXT and min() then
   # returned the alphabetical minimum (gwas_min_p wrong in 155 of their 160 HC rows; posteriors and gwas_lead unaffected).
   # Always numeric: values below ~4.9e-324 become 0 (= underflow, P smaller than representable).
@@ -82,6 +82,7 @@ load_marginal <- function(tissue, cs, proms) {
     A <- readRDS(f("final_firth_addon"))
     if (NROW(A$snp)) { ad <- as.data.table(A$snp)[promoter %in% proms, c("promoter", "snp", FC), with = FALSE]; setnames(ad, FC, paste0("a_", FC))
       s <- merge(s, ad, by = c("promoter", "snp"), all.x = TRUE)
+      for (k in FC) set(s, j = k, value = as.numeric(s[[k]]))   # an all-NA Firth column of the main run is logical: make it numeric before filling it
       for (k in FC) s[is.na(get(k)) & !is.na(get(paste0("a_", k))), (k) := get(paste0("a_", k))]
       s[, paste0("a_", FC) := NULL] }
     rm(A) }

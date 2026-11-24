@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-### BOHR v2 (Figure 4 new method, 2026-10-01) applied to the simulations.
+### BOHR v2 (the engine of the real-data analysis) applied to the simulations.
 ### Engine files are Figure 4's, copied VERBATIM to ../code_copy (md5 in SOURCE_MD5.txt) and sourced
 ### unchanged: bohr2_engine.R (promoter_null, snp_tests) + bohr2_addon3.R (firth_snp_tests), i.e. the
 ### same engine as Figure 4's production run (run_final2.R). From bohr2_data.R only prepare_y() and
@@ -11,14 +11,15 @@
 ###   Linear  : (a) logit-normal mu-LRT exactly as the old Fig. 2 baseline (y_logit ~ gt, sigma ~ gt,
 ###                 mu-LRT drops gt from mu, gamlss NO) + its Wald
 ###             (b) QTLtools-style OLS: y ~ g, t-test on the slope (raw activity)
-### Promoter-level rules as production run_final2.R: prepare_y (sd <= 0.05 / >= 95% boundary skip,
+### Promoter-level rules as production run_final2.R: prepare_y (SD skip and boundary-share skip, see below;
 ### <= 5% boundary trimming, family by presence of 0/1), >= 1 interior value, >= 5 samples per genotype
 ### class, eligibility mid >= .70 (mu), n0/n >= .35 (p0), n1/n >= .35 (p1).
 ### Modes:
 ###   calib : fixed-50 promoters (PERM_IDS file), own genotype permuted K times (all permutations drawn
 ###           before any fitting, seed per promoter), one row per permutation
 ###   power : every promoter, its actual genotype, one row per promoter (with effect_type/effect_size)
-### Usage: Rscript bohr2_sim.R <calib|power> <M1|M2> <orig|realfloor|big> <N> <out_rds> [cores] [K] [chunk nchunk]
+### Env: SKIP_FRAC (default 0.95) and SD_SKIP (default 1), see prepare_y; the defaults reproduce the earlier runs.
+### Usage: Rscript bohr2_sim.R <calib|power> <M1|M2> <dataset, see load_sim()> <N> <out_rds> [cores] [K] [chunk nchunk]
 suppressPackageStartupMessages({ library(data.table); library(parallel); library(gamlss) })
 a <- commandArgs(trailingOnly = TRUE)
 mode <- a[1]; method <- a[2]; dataset <- a[3]; N <- as.integer(a[4]); out_rds <- a[5]
@@ -30,12 +31,16 @@ CAL <- file.path(ROOT, "calibration_perm1000")
 source(file.path(NM, "code_copy", "bohr2_engine.R")); source(file.path(NM, "code_copy", "bohr2_addon3.R"))
 MIN_GENO <- 5L
 PSEED <- as.integer(Sys.getenv("PERM_SEED_BASE", "20261001"))   # permutation seed base (default = all original runs)
-## ---- copied verbatim from code_copy/bohr2_data.R ----
+## ---- from code_copy/bohr2_data.R; prepare_y has two rule switches (SKIP_FRAC, SD_SKIP) ----
 prepare_y <- function(y, p_cov) {
   y <- y[!is.na(y)]
   if (length(y) < 20 || length(y) < p_cov) return(list(skip = "n"))
   p0 <- mean(y == 0); p1 <- mean(y == 1)
-  if (p0 >= 0.95 || p1 >= 0.95 || sd(y) <= 0.05) return(list(skip = "prop_or_sd"))
+  ## SKIP_FRAC: skip when the share of 0 or of 1 is >= SKIP_FRAC (default 0.95; the final runs used 0.80).
+  ## SD_SKIP = 1: skip SD <= 0.05 (earlier runs); 0: skip only SD < 0.005 (the final runs). The real data drop promoters with
+  ## SD < 0.005 when the promoter sets are built; the simulation has no such step, so the rule is applied here.
+  SKIP_FRAC <- as.numeric(Sys.getenv("SKIP_FRAC", "0.95")); SD_MIN <- if (Sys.getenv("SD_SKIP", "1") == "1") 0.05 else 0.005
+  if (p0 >= SKIP_FRAC || p1 >= SKIP_FRAC || (if (SD_MIN == 0.05) sd(y) <= 0.05 else sd(y) < 0.005)) return(list(skip = "prop_or_sd"))
   keep <- rep(TRUE, length(y))
   if (p0 <= 0.05) keep <- keep & y > 0
   if (p1 <= 0.05) keep <- keep & y < 1
@@ -74,7 +79,9 @@ load_sim <- function(method, dataset, N) {
                 nothr_b1 = file.path(NM, "m2_nothr", "b1", sprintf("sim_%d", N)),     # no-threshold generation, gene batch 1 (gene_seed 42)
                 nothr_b2 = file.path(NM, "m2_nothr", "b2", sprintf("sim_%d", N)),     # no-threshold generation, gene batch 2 (gene_seed 43)
                 rj_b1 = file.path(NM, "m2_nothr_realjunc", "b1", sprintf("sim_%d", N)),   # same as nothr_b1, junctions re-filtered with the
-                rj_b2 = file.path(NM, "m2_nothr_realjunc", "b2", sprintf("sim_%d", N)))   # real rule (unique reads >= 5), proActiv re-run (2026-10-06)
+                rj_b2 = file.path(NM, "m2_nothr_realjunc", "b2", sprintf("sim_%d", N)),   # real-data rule (unique reads >= 5), proActiv re-run
+                nf_b1 = file.path(NM, "m2_nofloor", "b1", sprintf("sim_%d", N)),          # same runs without a junction floor (all junctions),
+                nf_b2 = file.path(NM, "m2_nofloor", "b2", sprintf("sim_%d", N)))          # proActiv re-run (sim_proactiv_nofloor.R)
     load(file.path(d, "recal_att_f.RData"), envir = e); X <- as.data.frame(e$recal_att_f)
     dfile <- file.path(d, "merge.txt"); if (!file.exists(dfile)) dfile <- file.path(d, "test_output", "sim_tx_info_extended.txt")
     mg <- fread(dfile)[!is.na(promoter_id)]
@@ -115,7 +122,7 @@ ols_p <- function(y, g) { n <- length(y); gc <- g - mean(g); sxx <- sum(gc^2); i
 
 COLS <- c("mu_lrt_logp", "nu_lrt_logp", "tau_lrt_logp", "mu_wald_logp", "nu_wald_logp", "tau_wald_logp", "joint_logp",
           "mu_conv", "nu_conv", "tau_conv", "mu_sep", "nu_sep", "tau_sep", "cat_complete_sep",
-          "mu_est", "nu_est", "tau_est", "mu_pe", "p0_pe", "p1_pe")       # effects (added 2026-10-01 for effect recovery)
+          "mu_est", "nu_est", "tau_est", "mu_pe", "p0_pe", "p1_pe")       # effects (for effect recovery)
 FCOLS <- c("nu_firth_logp", "tau_firth_logp", "nu_firth_conv", "tau_firth_conv", "nu_firth_est", "tau_firth_est")
 test_one <- function(y, C, g, nul, yl) {
   r <- tryCatch(snp_tests(y, C, g, nul), error = function(e) NULL)

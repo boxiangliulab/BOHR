@@ -1,13 +1,13 @@
-## fig2e_deliver_freeze_v3m_pairs.R (2026-11-04): Fig 2e on the mirror rule v3 units (results/final_nogate_v3m; author 2026-11-04
-## final: exact switches are p0 on the silent TSS), with EXACT MIRROR PAIRS COUNTED ONCE (author 2026-11-04: count a mirror pair once).
+## fig2e_deliver_freeze_v3m_pairs.R: Fig. 2E on the mirror rule v3 units (results/final_nogate_v3m, in which
+## exact switches are p0 on the silent TSS), with exact mirror pairs counted once.
 ## Why: for an exact pair (boundary_exact & interior_exact) y_B = 1 - y_A in every donor, so QTLtools' linear test is identical for
-## the two promoters; under v3 both promoters carry primary units, and promoter-level counting would count one switch twice
-## (QTLtools 2,258 such pairs vs BOHR 892; code/fig2e_v3m_pair_collapse.R). Comparison unit = the exact pair, else the promoter:
+## the two promoters; under v3 both promoters carry primary units, and promoter-level counting would count one switch twice.
+## Comparison unit = the exact pair, else the promoter:
 ##   BOHR unit p = Simes over the primary units of the unit's promoters; QTLtools unit p = the smallest p of its promoters
 ##   (identical for exact pairs); BH over units; layer classes (Benjamini-Bogomolov) within the unit.
-## Everything else as fig2e_deliver_freeze.R. Output: results/fig2e_freeze_v3m/ (promoter-level reference in by_promoter_reference/).
-## Figure 2e delivery on the FREEZE definition (author 2026-10-02: one definition, the real data; plan B added perm1 +
-## perm2 for all 50 tissues). Same decisions and output layout as fig2e_deliver.R (version 2, pilot), which stays as is:
+## Everything else as in the freeze version of this comparison, described below. Output: results/fig2e_freeze_v3m/.
+## Fig. 2E on the freeze definition (one definition, the real data; perm1 and perm2 were added
+## for all 50 tissues). Same rules and output layout as the pilot version:
 ##   * BOHR promoter p = Simes over the promoter's PRIMARY units (dedup_drop == FALSE & estimable), BH over promoters;
 ##     layer classes from Benjamini-Bogomolov stage 2 (BH within the selected promoter at level q * R / m).
 ##   * units v3 (results/final_nogate_v3m/freeze): mu n_mid >= 80; p0/p1 minor class >= 10%; both before BH.
@@ -16,7 +16,7 @@
 ##     donors, promoters, covariates and permutation maps).
 ## Arms: real, perm0, perm1, perm2. Tissues: env FIG2E_TIS ("ALL" = every tissue complete in all arms and modes;
 ## default the three tissues of the current panel).
-## Output: results/fig2e_freeze/ (counts.tsv, counts_display.tsv, bohr/<T>.<arm>.tsv.gz, qtltools/<mode>/<T>.<arm>.tsv.gz)
+## Output files: counts.tsv, counts_display.tsv, bohr/<T>.<arm>.tsv.gz, qtltools/<mode>/<T>.<arm>.tsv.gz
 suppressPackageStartupMessages(library(data.table))
 V2 <- "/projects/group/bliu/e1327989/GTEx/QTL_figure/rerun_v2"; QA <- "/projects/group/bliu/e1327989/GTEx/QTL_figure/QTLtools_linear_compare/freeze_all/results"
 OUT <- file.path(V2, "results/fig2e_freeze_v3m"); MODES <- c(rintfirst = "rint", raw = "raw", normal = "normal")

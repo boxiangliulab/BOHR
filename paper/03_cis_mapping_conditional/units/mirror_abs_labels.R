@@ -1,9 +1,9 @@
-## mirror_abs_labels.R (2026-11-06): ONE-TIME step that decides the boundary label of every exact mirror pair by absolute
-## activity and SAVES it (author 2026-11-06: "only the mirror pairs need this judgement ...
-## in theory it only needs to run once, save the labels"; "when unclear, record as p0"). The unit step (units_v3b_from_labels.R) and every downstream
+## mirror_abs_labels.R: ONE-TIME step that decides the boundary label of every exact mirror pair by absolute
+## activity and SAVES it: only the mirror pairs need this judgement; it runs once and saves the labels, and an unclear
+## case is recorded as p0. The unit step (units_v3b_from_labels.R) and every downstream
 ## script read the saved table; nothing refits during routine runs.
 ## Scope: REAL arm only; ALL primary, estimable boundary units on boundary_exact pairs (v3m: p0 on the silent TSS S, O = its
-##   partner; p0(S) is the same per-SNP test as p1(O)), significant or not (30,118 units; two OLS per unit, genotypes read once
+##   partner; p0(S) is the same per-SNP test as p1(O)), significant or not (two OLS per unit, genotypes read once
 ##   per tissue x chromosome). Permuted arms are not fitted: no permuted count depends on the label.
 ## Fit (same as mirror_v3_abs_rule_check.R, which it reproduces): OLS of each TSS's absolute activity A (proActiv log2 normalised
 ##   count, v11/tabs_att_filter_In.rds $abs, all freeze donors, 0-read donors = 0) on the unit's leader dosage, with the discovery
@@ -12,15 +12,15 @@
 ##   SNPs are dropped (flag cond_dropped). Non-significant units have no conditional run: leader + covariates only.
 ##   regulated = |z| >= 1.96.
 ## Label: S only -> p0(S); O only -> p1(O); both or neither (or not estimable) -> p0(S).
-## Option B (author 2026-11-06, one rule with Figure 3): every boundary event of an exact pair is TESTED as p0(S) and BH is
+## Option B (one rule with Figure 3): every boundary event of an exact pair is TESTED as p0(S) and BH is
 ##   unchanged; the rule label is applied to SIGNIFICANT units only (q <= 0.05). Non-significant units keep p0(S); their fit
 ##   outcome is stored for reference only (column outcome). label_applied says which.
 ## Output: results/mirror_abs_labels/labels_real.tsv.gz (one row per judged unit), log.txt. Env COND_FINAL / LABEL_DIR choose the conditional
-## table and the output folder (2026-11-06 refit run: COND_FINAL=results/conditional_final_v3c LABEL_DIR=results/mirror_abs_labels_v3c).
+## table and the output folder (final run: COND_FINAL=results/conditional_final_v3c LABEL_DIR=results/mirror_abs_labels_v3c).
 suppressPackageStartupMessages({ library(data.table); library(parallel) })
 CODE <- "/projects/group/bliu/e1327989/GTEx/QTL_figure/rerun_v2/code"; source(file.path(CODE, "bohr2_data.R"))
 OUT <- file.path(V2, Sys.getenv("LABEL_DIR", "results/mirror_abs_labels")); dir.create(OUT, recursive = TRUE, showWarnings = FALSE)
-COND_FINAL <- Sys.getenv("COND_FINAL", "results/conditional_final_v3m")   # 2026-11-06 refit: results/conditional_final_v3c
+COND_FINAL <- Sys.getenv("COND_FINAL", "results/conditional_final_v3m")   # final run: results/conditional_final_v3c
 NC <- as.integer(Sys.getenv("NC", "16")); ZC <- 1.96; t0 <- proc.time()[3]
 z <- function(f) fread(cmd = paste("zcat", f))
 U <- rbindlist(lapply(Sys.glob(file.path(V2, "results/final_nogate_v3m/freeze/*.real.units.rds")), function(f) as.data.table(readRDS(f))[
@@ -83,11 +83,12 @@ cat("\noutcome by significance:\n"); print(dcast(X[, .N, by = .(sig, outcome)], 
 cat("\nlabel differences vs v3m (significant units, O only -> p1(O)):", X[changed == TRUE, .N], "; non-significant units with outcome O only (reference, label stays p0(S)):", X[sig == FALSE & outcome == "O only", .N], "\n")
 print(X[changed == TRUE & sig == TRUE, .(tissue, v3m_unit, label_unit, z_S, z_O, n_cond, cond_snps, p, p_p1_O)])
 cat("\nconditioning (significant units): with conditioning SNPs", X[sig == TRUE & n_cond > 0, .N], "; dropped for rank", X[cond_dropped == TRUE, .N], "\n")
-## reproduction check against the 2026-11-04 check (same rule, same conditioning, significant units)
+## reproduction check against the earlier check table (same rule, same conditioning, significant units)
+if (file.exists(file.path(V2, "results/mirror_v3/abs_rule_check/abs_rule_units.tsv"))) {   # only when that table exists (it does not in the final run)
 OLD <- fread(file.path(V2, "results/mirror_v3/abs_rule_check/abs_rule_units.tsv"))[, .(tissue, S, oz_S = z_S, oz_O = z_O)]
 M <- merge(X[sig == TRUE, .(tissue, S, z_S, z_O)], OLD, by = c("tissue", "S"))
 cat("\nreproduces mirror_v3_abs_rule_check.R: matched", nrow(M), "of", X[sig == TRUE, .N], "significant; max |dz|",
-    signif(M[, max(abs(c(z_S - oz_S, z_O - oz_O)), na.rm = TRUE)], 3), "\n")
+    signif(M[, max(abs(c(z_S - oz_S, z_O - oz_O)), na.rm = TRUE)], 3), "\n") } else cat("\nno abs-rule check table: comparison skipped\n")
 cat("elapsed:", round((proc.time()[3] - t0) / 60, 1), "min\n")
 sink()
 cat("DONE\n")

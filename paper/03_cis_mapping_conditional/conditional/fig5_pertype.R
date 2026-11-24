@@ -30,6 +30,7 @@ one_chr <- function(t, ch, proms) {   # = discovery_nogate.R one_chr, restricted
   s <- merge(s, as.data.table(F$snp)[promoter %in% proms, .(promoter, snp, mu_F_logp, mu_chi_logp)], by = c("promoter", "snp"), all.x = TRUE)
   if (NROW(A$snp)) { ad <- as.data.table(A$snp)[promoter %in% proms, c("promoter", "snp", FC), with = FALSE]; setnames(ad, FC, paste0("a_", FC))
     s <- merge(s, ad, by = c("promoter", "snp"), all.x = TRUE)
+    for (k in FC) set(s, j = k, value = as.numeric(s[[k]]))   # numeric first: an all-NA column is logical, and := would store the add-on's values as TRUE
     for (k in FC) s[is.na(get(k)) & !is.na(get(paste0("a_", k))), (k) := get(paste0("a_", k))]; s[, paste0("a_", FC) := NULL] }
   pr <- as.data.table(M$prom)[promoter %in% proms, .(promoter, family, n_mid = n - n0 - n1)]
   s <- merge(s, pr, by = "promoter")

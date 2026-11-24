@@ -1,5 +1,5 @@
-## 124b: i only, minor promoter on in >= 80% of donors (author asked for a clean 'major only' example). From 124_example_candidates_eqtl.R -- example loci for Fig. 5 h-j, re-chosen on v4 (author 2026-11-04): the gene-output column must
-## show its own test, and each example must say whether the lead SNP is a GTEx eQTL of the gene (nominal P and slope of the
+## 124b: rule i only, with the minor promoter on in >= 80% of donors (a clean 'major only' example). From 124_example_candidates_eqtl.R -- example loci for Fig. 5 h-j: the gene-output column has
+## its own test, and each example says whether the lead SNP is a GTEx eQTL of the gene (nominal P and slope of the
 ## lead, or the best r2 >= 0.8 proxy, from the GTEx v11 eQTL subset) -- not a coloc call. Fixed rules (two-promoter genes,
 ## shared leads removed, lead MAF >= 0.2, >= 10 donors per genotype group):
 ##   h  p0/p1, minor promoter only (pat minor_only); gene output changes (|z_gene| >= 4, covariate-adjusted, from B1v2);

@@ -1,4 +1,4 @@
-## Firth add-on (author, 2026-10-01): the type-proportion thresholds were a false-positive filter of the old pipeline,
+## Firth add-on: the type-proportion thresholds were a false-positive filter of the old pipeline,
 ## so every promoter with a zero and/or one part gets the Firth test and the thresholds become a summary-time choice.
 ## For each promoter of the main run's chromosome file that has a zero/one part (family BEINF/BEZI/BEOI, not skipped)
 ## but no Firth yet (neither elig_p0 nor elig_p1), the main run's inputs are rebuilt with the same code as run_final2.R

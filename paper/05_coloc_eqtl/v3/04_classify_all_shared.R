@@ -1,5 +1,5 @@
-## Figure 4 panel e, step 4: reclassify gene x tissue (and promoter x tissue) with the author's rule of 2026-10-07:
-##   "At the gene level, a gene counts as fully shared only when all its signals are shared; the supplementary figure can show the breakdown."
+## Figure 4 panel e, step 4: reclassify gene x tissue (and promoter x tissue) with the all-shared rule:
+##   at the gene level, a gene counts as fully shared only when all its signals are shared (the breakdown is tabulated).
 ## The signal-level coloc calls of step 3 are unchanged (PP >= 0.8, p12 = 1e-5). Only the aggregation changes:
 ##   step 3 took the highest-ranked call over a gene's signals (H4 > H3 > H1 > H2 > H0 > ambiguous), so one shared signal
 ##   made the whole gene "shared". Here, over the gene's TESTED signals (all promoters, all types, all kept signals):
@@ -9,8 +9,8 @@
 ##     H1 / H2 / H0          no H4 or H3; the highest of H1 > H2 > H0
 ##     ambiguous             every tested signal ambiguous
 ##     not assessable        no tested signal
-##   puQTL-only / eQTL-only as in step 3. The same rule is applied to promoter x tissue (question 1 of 2026-10-07).
-## Second rule for the MAIN figure (author 2026-10-07, later: "any difference counts as distinct"): any H3 signal makes the pair
+##   puQTL-only / eQTL-only as in step 3. The same rule is applied to promoter x tissue.
+## Second rule, for the main figure (any difference counts as distinct): any H3 signal makes the pair
 ## distinct, whatever the other signals are. class_main_anyd:
 ##     distinct (any H3)          >= 1 H3                      (detail: distinct only / + ambiguous or other / + shared)
 ##     shared, all signals         every tested signal is H4
@@ -78,7 +78,7 @@ cat("\nany-distinct rule (main figure):\n"); print(PM2); print(DET2)
 cat("\nold (highest-ranked call) vs new main class, puQTL & eGene:\n"); print(dcast(GT[puqtl & egene, .N, by = .(class_old, class_main)], class_main ~ class_old, value.var = "N", fill = 0))
 cat("\ndetail:\n"); print(DET)
 
-## ---- promoter x tissue (question 1: one promoter, several types) ----
+## ---- promoter x tissue (one promoter, several types) ----
 PT <- summ(S, c("tissue", "promoter", "gene_base", "egene"))
 PT[, class_main_anyd := fcase(n_H3 > 0, "distinct (any H3)", class_main == "shared, all signals", "shared, all signals",
                               class_main == "shared, some signals", "shared, rest unresolved", default = class_main)]

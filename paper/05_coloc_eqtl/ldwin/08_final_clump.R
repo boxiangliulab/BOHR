@@ -1,5 +1,5 @@
-## Figure 4 panel e, LD-window coloc, step 8 (FINAL; author 2026-10-12: "OK, use the clump lead throughout, switch"; "no overlap, the positions are far apart,
-## it should not be one causal variant, recording it as distinct is fine with me"). eQTL leads come from recursive clumping, as the GWAS leads of Figure 6.
+## Figure 4 panel e, LD-window coloc, step 8 (final table of this run): the clumped eQTL leads are used throughout, and a signal
+## whose LD window is disjoint from every lead's window counts as distinct. eQTL leads come from recursive clumping, as the GWAS leads of Figure 6.
 ##   eGene signals: paired with every clumped eQTL lead of the gene (sens_clump/ s1-s4, s5 v2). The signal takes the
 ##     highest-ranked call over its tested pairs (H4 > H3 > H1 > H2 > H0 > ambiguous). Its reported pair is the pair of
 ##     that call; ties go to the strongest eQTL lead (lowest rank). With no tested pair the signal is a different locus

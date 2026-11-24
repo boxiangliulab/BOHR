@@ -1,8 +1,8 @@
-### INDEPENDENT-GENOTYPE copy of m1_nothr/newsim_direct_nothreshold.R (2026-10-01, author confirmed): no-threshold baselines,
+### INDEPENDENT-GENOTYPE copy of m1_nothr/newsim_direct_nothreshold.R: no-threshold baselines,
 ### interior floor TRUNC_L (L = 0.005), and each gene with its own genotype vector (geno_mat); run with n_genes = 2000.
-### NO-THRESHOLD copy of m1_trunc/newsim_direct_realfloor_trunc.R (2026-10-01): baseline p0/p1 no longer depend on the
+### NO-THRESHOLD copy of m1_trunc/newsim_direct_realfloor_trunc.R: baseline p0/p1 no longer depend on the
 ### effect type (see the block marked NO-THRESHOLD); the interior measurement floor (TRUNC_L, adopted L = 0.005) is kept.
-### FLOOR copy of method1_direct/newsim_direct_realfloor.R (2026-10-01, newmethod_bohr2/m1_trunc).
+### FLOOR copy of method1_direct/newsim_direct_realfloor.R (newmethod_bohr2/m1_trunc).
 ### ONLY change: interior values (0<y<1) are put on a measurement floor [L, 1-L], L = env TRUNC_L (default 0 = identical
 ### to the original). Rationale: real relative promoter activity = A_p / sum A over the gene's promoters with
 ### A = log2(DESeq2-normalised junction count + 1) (proActiv), so an active promoter cannot have y below
@@ -94,7 +94,7 @@ for(g in 1:n_genes) {
   et <- effect_types[g]
 
   # Baseline parameters — IDENTICAL to v11
-  ## NO-THRESHOLD generation (author decision 2026-10-01): the baseline boundary proportions are drawn from ONE common
+  ## NO-THRESHOLD generation: the baseline boundary proportions are drawn from ONE common
   ## distribution for every gene, independent of its effect type -- total boundary share p0 + p1 ~ U(0, 0.9), split
   ## uniformly. Exactly two runif() draws per gene, as in every branch of the realfloor generator, so the effect-type
   ## assignment, effect sizes, middle means/sds, genotypes and all later draws follow the same random stream.
@@ -240,7 +240,7 @@ set.seed(data_seed + n_samples)
 # Fixed genotype proportions: 50:30:20 — IDENTICAL to v11
 gt_probs <- c(0.5, 0.3, 0.2)
 genotypes <- sample(c(0, 1, 2), n_samples, replace = TRUE, prob = gt_probs)   # kept for compatibility (not used below)
-## INDEPENDENT GENOTYPES (2026-10-01): every gene gets its OWN genotype vector, drawn from the same 50:30:20 frequencies,
+## INDEPENDENT GENOTYPES: every gene gets its OWN genotype vector, drawn from the same 50:30:20 frequencies,
 ## so promoters are independent replicates (the original design shared one genotype vector across all genes).
 geno_mat <- matrix(NA_real_, nrow = n_samples, ncol = n_genes, dimnames = list(sample_names <- sprintf("sample_%03d", 1:n_samples), sprintf("gene_%04d", 1:n_genes)))
 sample_names <- sprintf("sample_%03d", 1:n_samples)

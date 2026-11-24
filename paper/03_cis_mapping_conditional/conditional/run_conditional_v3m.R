@@ -1,15 +1,15 @@
-## run_conditional_v3m.R (2026-11-04): mirror rule v3 (exact boundary events labelled p0 on the silent promoter; author
-## 2026-11-04). Forward conditional + LOO, from the leader, for the units listed in work/cond_v3m/units_to_run.tsv
-## (code/cond_v3m_select.R: new p0(partner) units, plus units whose tissue threshold moved enough to continue/truncate),
+## run_conditional_v3m.R: mirror rule v3 (exact boundary events labelled p0 on the silent promoter).
+## Forward conditional + LOO, from the leader, for the units listed in work/cond_v3m/units_to_run.tsv
+## (final run: every significant unit, written by cond_fresh_list.R; earlier runs also continued or truncated units),
 ## with the tissue's v3m threshold (results/final_nogate_v3m). Everything else = run_conditional_twin.R = run_conditional_ng3.R.
 ## Output: results/conditional_v3m/<def>/<tissue>/real/<chr>.rds
-## run_conditional_twin.R (2026-10-02 evening): Runs the units-v3 conditional analysis on the
+## run_conditional_twin.R: Runs the units-v3 conditional analysis on the
 ## DROPPED exact mirror twins (dedup_drop units: mu(partner) for interior_exact, p1/p0(partner) for boundary_exact) of a
 ## selection of surviving canonical units (work/twin_units_v3_sel.tsv: all multi-signal ones + 500 random single-signal),
 ## with the tissue's v3 threshold, from the twin's own leader. Everything else is run_conditional_ng3.R.
 ## Output: results/conditional_twins_v3/<def>/<tissue>/real/<chr>.rds
-## run_conditional_ng3.R (2026-10-02 evening): SUPPLEMENT for units v3 (results/final_nogate_v3: p0/p1 minor class >= 10%,
-## i.e. 0.10 <= boundary share <= 0.90, on top of mu n_mid >= 80; author). The v3 BH thresholds are looser than v2 in 47
+## run_conditional_ng3.R: SUPPLEMENT for units v3 (results/final_nogate_v3: p0/p1 minor class >= 10%,
+## i.e. 0.10 <= boundary share <= 0.90, on top of mu n_mid >= 80). The v3 BH thresholds are looser than v2 in 47
 ## tissues and equal in 3 (none stricter), so the current forward sequences stay valid prefixes. This run handles:
 ##   new units (significant under v3, not under v2)            -> full forward run from the leader;
 ##   continuation units (current result stopped on "window ACAT above threshold" with last-round ACAT <= thr_v3)
@@ -18,14 +18,14 @@
 ## main run (conditional_nogate). Units unchanged keep that result; v2 units outside v3 are dropped at merge time.
 ## Also fixes the est-name bug of test_one() (unname the Firth estimate). Real arm only.
 ## Output: results/conditional_nogate_supp3/<def>/<tissue>/real/<chr>.rds (from_v1 = TRUE marks carried-over signals)
-## run_conditional_ng.R (2026-10-01): run_conditional.R applied to the UNGATED, mirror-de-duplicated discovery
-## (code/discovery_nogate.R -> results/final_nogate/<def>/<tissue>.<arm>.units.rds; author: no proportion gate;
+## run_conditional_ng.R: run_conditional.R applied to the UNGATED, mirror-de-duplicated discovery
+## (code/discovery_nogate.R -> results/final_nogate/<def>/<tissue>.<arm>.units.rds; no proportion gate;
 ## mirror table v2). Units = primary-set units (dedup_drop == FALSE) with q <= 0.05 (real) or a 25% sample (perm);
 ## thr = the tissue's primary BH threshold. Everything else is identical to run_conditional.R.
 ## Output: results/conditional_nogate/<def>/<tissue>/<arm>/<chr>.rds
 ## Stage 3: forward conditional analysis (independent signals) per significant unit (promoter x type) of one
-## (definition, tissue, arm, chromosome). Choices confirmed by the author on 2026-10-01:
-##   * own-type test as at discovery: mu -> mu LRT with the small-sample F correction (amendment 7, adopted 2026-10-01:
+## (definition, tissue, arm, chromosome). Choices:
+##   * own-type test as at discovery: mu -> mu LRT with the small-sample F correction (
 ##     F = (n_mid - p) * expm1(W / n_mid) ~ F(1, n_mid - p), p = rank of the interior-sample mean design incl. the SNP,
 ##     phi not counted; leaders raise p by one each when linearly independent); p0 -> nu Firth PLR; p1 -> tau Firth PLR;
 ##   * plan B: leaders are appended to the covariate matrix, so they enter the beta mean AND both the nu and tau

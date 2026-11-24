@@ -3,7 +3,7 @@
 ##           "GTEx-top" comparison) -> per_tissue_top/<T>.rds
 ##   clump : every clumped eQTL lead of an eGene (as coloc_eqtl_ldwin/sens_clump/s5_coloc_tissue_v2.R) -> per_tissue_clump/<T>.rds
 ## Figure 6's library sourced unchanged (load_marginal, coloc_signal; per-class P, priors, N, MAF). LOO scans from
-## conditional_final_v3m. eQTL rows: the existing subsets (coloc_eqtl_ldwin/eqtl_subset, sens_clump/eqtl_subset) plus the
+## conditional_final_v3c. eQTL rows: the existing subsets (coloc_eqtl_ldwin/eqtl_subset, sens_clump/eqtl_subset) plus the
 ## v3m subsets of the new genes (results/coloc_eqtl_v3m/eqtl_subset_{top,clump}).
 ## Usage: Rscript 05_coloc_tissue_v3m.R <tissue> [n_cores]   (idempotent)
 suppressPackageStartupMessages(library(parallel))
@@ -36,7 +36,7 @@ A <- merge(A, PT[, .(promoter, type, k, eqtl_top, e_rare, p_start, p_end, e_star
 SC <- PC[, .(span_start = min(uni_start), span_end = max(uni_end)), by = .(promoter, type, k)]
 A <- merge(A, SC, by = c("promoter", "type", "k"), all.x = TRUE)
 A[, `:=`(load_start = pmin(uni_start, span_start, na.rm = TRUE), load_end = pmax(uni_end, span_end, na.rm = TRUE))]
-loo <- if (any(A$stat == "loo")) { l <- readRDS(file.path(V2L, "conditional_final_v3m/loo", paste0(TIS, ".rds"))); setDT(l)
+loo <- if (any(A$stat == "loo")) { l <- readRDS(file.path(V2L, "conditional_final_v3c/loo", paste0(TIS, ".rds"))); setDT(l)
          l[paste(promoter, type) %in% A[stat == "loo", paste(promoter, type)], .(snp, logp, promoter, type, k)] } else NULL
 ET <- rdE(c(file.path(LW, "eqtl_subset", paste0(TIS, ".tsv.gz")), file.path(O, "eqtl_subset_top", paste0(TIS, ".tsv.gz"))))
 EC <- rdE(c(file.path(LW, "sens_clump/eqtl_subset", paste0(TIS, ".tsv.gz")), file.path(O, "eqtl_subset_clump", paste0(TIS, ".tsv.gz"))))

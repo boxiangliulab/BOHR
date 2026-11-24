@@ -1,8 +1,8 @@
-## 122a -- copy of Figure5_rerun_v3/scripts/28 rebuilt on the v3m unit set (mirror rule v3); inputs staged; outputs to out/PROMOTER_LEVEL_v4.
+## 122a -- copy of Figure5_rerun_v3/scripts/28 on the staged units (in/freeze_v3c, mirror rule v3); outputs to out/PROMOTER_LEVEL_v4.
 #!/usr/bin/env Rscript
-# 28_tissue_matched_tss_chromatin.R -- TSS chromatin in the QTL's OWN tissue (PI request 2026-10-03).
-# Unit level: (GTEx tissue, promoter). For every tested (tissue, promoter) of Figure 4's v3 freeze (estimable, not
-# dedup-dropped), the state of the cCRE covering the promoter's TSS (25a) is read in the ENCODE v4 core-collection
+# 28_tissue_matched_tss_chromatin.R -- TSS chromatin in the QTL's OWN tissue.
+# Unit level: (GTEx tissue, promoter). For every tested (tissue, promoter) of the staged units (estimable, not
+# dedup-dropped), the state of the cCRE covering the promoter's TSS (element table of 187a) is read in the ENCODE v4 core-collection
 # biosamples MATCHED to that GTEx tissue (mapping fixed below before any result was looked at):
 #   exact       = the same tissue or cell type;
 #   approximate = a related tissue of the same organ, or the main cell type (non-cortex brain -> dorsolateral

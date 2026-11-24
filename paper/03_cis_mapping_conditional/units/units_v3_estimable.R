@@ -1,9 +1,9 @@
-## Ungated units v3 (author 2026-10-02 evening): estimability rules applied BEFORE BH, as information-content rules:
+## Ungated units v3: estimability rules applied BEFORE BH, as information-content rules:
 ##   mu    : n_mid >= 80                                        (v2 rule, perm0 calibration)
 ##   p0/p1 : minor class >= 10%, i.e. 0.10 <= boundary share <= 0.90 (p0: f0; p1: f1)   (NEW; symmetric)
 ## Primary set = dedup_drop == FALSE & estimable; q = BH within tissue on it. q_v1 (no rule) and q_v2 (mu rule only) kept.
 ## The high display thresholds (e.g. mu mid >= 0.70, p0/p1 >= 0.35) are NOT applied here: they are a credibility filter
-## applied AFTER BH (author).
+## applied AFTER BH.
 ## Input : results/final_nogate/<def>/*.units.rds (v1, untouched)
 ## Output: results/final_nogate_v3/<def>/<tissue>.<arm>.units.rds
 suppressPackageStartupMessages(library(data.table))

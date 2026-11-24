@@ -1,4 +1,4 @@
-## 104_M_genotype_usage.R -- the second dimension (2026-11-03 night): fix ONE promoter and compare the usage
+## 104_M_genotype_usage.R -- the second dimension: fix ONE promoter and compare the usage
 ## distribution between genotype groups. No new statistics on the QTL itself; this shows what the three model parameters mean
 ## in donors.
 ##  M1 all signals, from the delivered tables: per genotype group g (n_g, mean usage m_g from genotype_pheno; interior

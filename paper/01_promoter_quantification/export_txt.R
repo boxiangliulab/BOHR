@@ -1,7 +1,4 @@
-## Authored for the repository (not an original script): the text exports of a 0103 output folder that later steps read
-## (prep_all.R, gamlss_QTL_optimized.R, the trait prep.R and data.R, make_freeze_beds.R, 25a, the Fig. 5 stage and PEER).
-## The original exports were written outside the scripts kept here. On the paper's 0103 outputs this script reproduces
-## the stored files: the two exports exactly, the PEER input to 1.1e-15.
+## Authored, not an original script (ran in the final run). The text exports of a 0103 output folder that later steps read:
 ##   filter_5_recal_att_filter.txt   relative activity, rows = samples (row names), columns sample (donor), SMTS, SMTSD, promoters
 ##   Promoter_info_filter_5.txt      promoter table (txId list joined by "|")
 ##   filter_5_recal_att_filter_SMTSD_mean.txt   PEER input: mean over a donor's samples within each tissue (na.rm), NA -> 0,

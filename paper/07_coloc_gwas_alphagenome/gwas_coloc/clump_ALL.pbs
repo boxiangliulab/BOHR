@@ -1,0 +1,12 @@
+#!/bin/bash
+#PBS -q long
+#PBS -l select=1:ncpus=8:mem=40gb
+#PBS -l walltime=12:00:00
+#PBS -N clump_ALL
+#PBS -j oe
+#PBS -o /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/logs/clump_ALL.pbs.log
+## Step 11 on the lab cluster for the 51 GWAS files, all 943 donors (/projects/group/bliu/e1327989/GTEx/Rawdata/LD_ref_v9_plink19/donors/ALL.txt). Traits with DONE are skipped (11_clump_local.R).
+export CLUMP_PLINK=/home/e1327989/.local/share/mamba/envs/gtexfig/bin/plink CLUMP_REF=/projects/group/bliu/e1327989/GTEx/Rawdata/LD_ref_v9_plink19 CLUMP_DONORS=/projects/group/bliu/e1327989/GTEx/Rawdata/LD_ref_v9_plink19/donors/ALL.txt
+mkdir -p /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/clump_ALL/logs
+cat /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/traits.txt | xargs -P 2 -I{} sh -c "/home/e1327989/.local/share/mamba/envs/gtexfig/bin/Rscript /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/11_clump_local.R {} /projects/group/bliu/e1327989/GTEx/new_GWAS/coloc_final_nogate_v3/coloc_ldunion_20261012/gwas_sig /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/clump_ALL 4 > /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/clump_ALL/logs/{}.log 2>&1"
+echo "ALL done: $(ls /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/gwas/clump_ALL/*/DONE | wc -l) traits" > /projects/group/bliu/e1327989/GTEx/nofloor_full/consult/freeze_ld_20261124/logs/clump_ALL.log

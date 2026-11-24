@@ -1,6 +1,6 @@
-## crosstype_conditional_v6.R (2026-11-06): copy of crosstype_conditional_v5.R for Figure 5 delivery v6 (conditional refit v3c). Only the delivery path differs.
-## crosstype_conditional_v5.R (2026-11-06): copy of crosstype_conditional_v4.R for Figure 5 delivery v5 (abs-activity mirror labels, units v3a). Only the delivery path differs.
-## crosstype_conditional_v4.R (2026-11-04): copy of crosstype_conditional.R writing Figure 5 delivery v4 (mirror rule v3: exact switches = p0 on the silent TSS;
+## crosstype_conditional_v6.R: copy of crosstype_conditional_v5.R for Figure 5 delivery v6 (conditional refit v3c). Only the delivery path differs.
+## crosstype_conditional_v5.R: copy of crosstype_conditional_v4.R for Figure 5 delivery v5 (abs-activity mirror labels, units v3a). Only the delivery path differs.
+## crosstype_conditional_v4.R: copy of crosstype_conditional.R writing Figure 5 delivery v4 (mirror rule v3: exact switches = p0 on the silent TSS;
 ## in boundary_only_partner_pheno, columns canonical / partner mean the promoter holding the boundary unit / the other promoter).
 ## CONDITIONAL cross-type tests for pairs of mu and boundary signals of the same promoter, units v3.
 ## Pair set = Figure 5's 738 pairs:

@@ -1,4 +1,4 @@
-### NO-THRESHOLD copy of v12_simulation_realfloor.R (2026-10-01; newmethod_bohr2/README)
+### NO-THRESHOLD copy of v12_simulation_realfloor.R (newmethod_bohr2/README)
 ### REALFLOOR copy of v12_simulation.R (built by calibration_perm1000/make_realfloor_generators.R)
 ### library ===============================================================
 library(Biostrings)
@@ -24,7 +24,7 @@ generate_random_params <- function(effect_type=NULL) {
         effect_type <- sample(c("zero_proportion", "one_proportion",
                                 "middle_value", "mixed_effect"), 1)
     }
-    ## NO-THRESHOLD generation (author decision 2026-10-01): baseline boundary proportions from ONE common distribution
+    ## NO-THRESHOLD generation: baseline boundary proportions from ONE common distribution
     ## for every effect type -- p0 + p1 ~ U(0, 0.9), split uniformly. Two runif() draws, as in every realfloor branch,
     ## so all later draws (null flag, effect size, middle mean/sd, genotypes) follow the same random stream.
     p01 <- runif(1, 0, 0.9)

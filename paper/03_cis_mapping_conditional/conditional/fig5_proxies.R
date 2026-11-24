@@ -8,7 +8,7 @@
 ## Usage: NC=16 Rscript code/fig5_proxies.R [tissue ...]
 suppressPackageStartupMessages({ library(data.table); library(parallel) })
 CODE <- "/projects/group/bliu/e1327989/GTEx/QTL_figure/rerun_v2/code"; source(file.path(CODE, "bohr2_data.R")); source(file.path(CODE, "ld_tool.R"))
-## 2026-10-03 (PLINK as the LD standard): proxies are selected by the PLINK rule (raw calls, donors missing either
+## PLINK as the LD standard: proxies are selected by the PLINK rule (raw calls, donors missing either
 ## SNP dropped per pair; ld_tool.R) and carry the signed r; the phenotype moments keep the model's genotypes.
 OUT <- Sys.getenv("FIG5_OUT", file.path(V2, "results/fig5_delivery")); NC <- as.integer(Sys.getenv("NC", "8")); R2MIN <- 0.8
 SF <- fread(cmd = paste("zcat", file.path(OUT, "signals.tsv.gz")))

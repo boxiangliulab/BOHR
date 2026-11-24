@@ -1,4 +1,4 @@
-### NO-THRESHOLD copy of v12_sim_run_realfloor_big.R (2026-10-01)
+### NO-THRESHOLD copy of v12_sim_run_realfloor_big.R
 ### BIG copy of v12_sim_run_realfloor.R (built by calibration_perm1000/make_big_M2_runner.R)
 ### REALFLOOR copy of v12_sim_run.R (built by calibration_perm1000/make_realfloor_generators.R)
 #!/usr/bin/env Rscript

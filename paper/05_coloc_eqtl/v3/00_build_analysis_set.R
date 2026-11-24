@@ -1,4 +1,4 @@
-## Figure 4 panel e: puQTL x eQTL coloc on units v3, with Figure 6's coloc machinery (author 2026-10-05: "keep coloc consistent with fig6").
+## Figure 4 panel e: puQTL x eQTL coloc on units v3, with Figure 6's coloc machinery (the same coloc as the GWAS analysis).
 ## Step 0: the analysis set = every significant primary unit x its backward-kept signals, built with Figure 6's rules
 ## (new_GWAS/coloc_final_nogate_v3/scripts/01_build_analysis_set.R, significant units only):
 ##   n_kept >= 2 -> LOO-conditional scan of each kept signal; n_kept == 1 -> marginal scan centred on that signal.

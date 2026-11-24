@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Copy an as-run script with some literal strings replaced (authored for the repository).
 
-Several as-run scripts write into fixed folders of the original runs. To re-run them without touching the stored
-results, run_paper.sh runs a copy in which only those folder strings point to a new folder under OUT. This tool makes
-the copy, checks that each string occurs in the script, and checks that every changed line is a line holding one of
+Several as-run scripts read and write fixed folders of the original runs. The final version of the analysis ran copies
+of them in which only those folder prefixes point to a separate data tree (see ../README.md, "Paths"). This tool makes
+such a copy, checks that each string occurs in the script, and checks that every changed line is a line holding one of
 the replaced strings, so that nothing else in the code changes. The list of changed lines is written next to the copy
 (<dst>.redirect.txt).
 

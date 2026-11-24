@@ -8,7 +8,7 @@
 ## Output: work/<tissue>.rds = list(tissue, U, row_id, act, info); work/meta.rds; work/tissues.tsv
 ## Usage: Rscript prep.R   (reads the 843 MB activity table; run it under PBS)
 ## =============================================================================
-source("/projects/group/bliu/e1327989/GTEx/tissue_regression/trait_regression_20261005/code/data.R")
+source("/projects/group/bliu/e1327989/GTEx/tissue_regression/trait_regression_20261007/code/data.R")
 setDTthreads(8)
 
 TIS  <- readLines(PATHS$tissues); TIS <- TIS[nzchar(TIS) & !grepl("^#", TIS)]

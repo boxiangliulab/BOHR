@@ -1,4 +1,4 @@
-## 132_marks_by_usage_role.R -- author 2026-11-04: show the three ENCODE signals separately (DNase, H3K27ac, H3K4me3) instead of the
+## 132_marks_by_usage_role.R -- the three ENCODE signals shown separately (DNase, H3K27ac, H3K4me3) instead of the
 ## mutually exclusive states, which hide H3K27ac (a TSS that is H3K27ac+ and H3K4me3+ is called promoter-like, so "enhancer-like" =
 ## H3K27ac+ without H3K4me3 is rare by construction). Same element, samples and threshold as 122a / 129: the ENCODE element covering
 ## the TSS, the QTL tissue's matched biosamples (exact + approximate), mark called when z > 1.64. Per (tissue, promoter) unit: the
@@ -13,7 +13,7 @@ MK <- rbindlist(lapply(split(TP, TP$tissue), function(x) { bs <- mp[gtex == x$ti
   x[, `:=`(n_bios = length(bs), DNase = rowMeans(D[acc, bs, drop = FALSE] > TH), H3K27ac = rowMeans(K[acc, bs, drop = FALSE] > TH),
            H3K4me3 = rowMeans(A[acc, bs, drop = FALSE] > TH))] }))
 MK <- grp(MK)
-MP <- fread(cmd = sprintf("zcat %s", file.path(F5S, "in/mirror/mirror_pairs.tsv.gz")), select = c("tissue", "canonical", "partner"))   # major = canonical = higher usage pooled over all tissues (author 2026-11-04: one definition, as Figure 4)
+MP <- fread(cmd = sprintf("zcat %s", file.path(F5S, "in/mirror/mirror_pairs.tsv.gz")), select = c("tissue", "canonical", "partner"))   # major = canonical = higher usage pooled over all tissues (one definition, as Figure 4)
 RO <- rbind(MP[, .(tissue, promoter = canonical, role = "major")], MP[, .(tissue, promoter = partner, role = "minor")])
 MK <- merge(MK, RO, by = c("tissue", "promoter"))
 res <- rbindlist(lapply(c("major", "minor"), function(r) rbindlist(lapply(GL, function(g) { d <- MK[role == r & group == g]

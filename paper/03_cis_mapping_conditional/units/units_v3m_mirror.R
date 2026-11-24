@@ -1,5 +1,5 @@
-## Mirror rule v3 (author 2026-11-04).
-## Reason (author): in exact two-promoter switches, the absolute activity that changes is the minor TSS's; the major TSS
+## Mirror rule v3.
+## Reason: in exact two-promoter switches, the absolute activity that changes is the minor TSS's; the major TSS
 ## stays. The zeros identify the switching promoter, so an exact boundary event is labelled p0 on the promoter that goes
 ## silent (whichever it is), instead of v2's "label on the canonical promoter" (which made most of them p1(canonical)).
 ## Rule (only the boundary choice changes; pair definitions = mirror table v2, results/mirror/README.txt):
@@ -16,6 +16,9 @@ suppressPackageStartupMessages(library(data.table))
 V2 <- "/projects/group/bliu/e1327989/GTEx/QTL_figure/rerun_v2"
 IN <- file.path(V2, "results/final_nogate_v3/freeze"); OUT <- file.path(V2, "results/final_nogate_v3m/freeze")
 MV3 <- file.path(V2, "results/mirror_v3"); dir.create(OUT, recursive = TRUE, showWarnings = FALSE); dir.create(MV3, showWarnings = FALSE)
+## Units of the promoters added by the final promoter rules (the v4 delta) enter BH only for the types admitted by a
+## pre-specified permutation calibration (diag_v4_calibration.R): mu and p0 admitted, p1 not. File from v4_strata_sizes.R.
+V4ADD <- fread(file.path(V2, "work/v4_admission/delta_promoter_features.tsv"))[, paste(tissue, promoter)]; V4_NOT_ADMITTED <- "p1"   # delta (tissue, promoter) pairs; the type not admitted
 
 ## ---- mirror table v3: promoter flags with the dropped boundary member named ----
 FL <- fread(cmd = paste("zcat", file.path(V2, "results/mirror/promoter_flags.tsv.gz")))
@@ -41,6 +44,8 @@ res <- rbindlist(lapply(files, function(f) {
   U[, eq_class := fifelse(!is.na(merged_component) | dedup_drop, paste0(mirror_pair_id, "|", fifelse(type == "mu", "interior",
                    fifelse((mirror_role == "canonical" & type == "p0") | (mirror_role == "partner" & type == "p1"), "canonical_off", "canonical_full"))), NA_character_)]
   U[, q_v2 := NA_real_]; U[dedup_drop == FALSE & estimable_mu_rule == TRUE, q_v2 := p.adjust(p, "BH")]
+  U[, v4_added := paste(tissue, promoter) %in% V4ADD]; U[, v4_not_admitted := v4_added & type %in% V4_NOT_ADMITTED]   # delta units of a type that was not admitted
+  U[v4_not_admitted == TRUE, estimable := FALSE]   # are not tested (they do not enter BH)
   U[, q := NA_real_]; U[dedup_drop == FALSE & estimable == TRUE, q := p.adjust(p, "BH")]
   U[, mirror_rule := "v3"]
   tmp <- file.path(OUT, paste0(basename(f), ".tmp")); saveRDS(U, tmp); file.rename(tmp, file.path(OUT, basename(f)))

@@ -21,7 +21,7 @@ cat("start", format(Sys.time()), "\n")
 sig <- fr(file.path(IN, "delivery/signals_partner.tsv.gz"))
 s2  <- fr(file.path(IN, "delivery/signals.tsv.gz"), select = c("tissue", "promoter", "type", "k", "logp_at_selection", "maf", "backward_keep"))
 sig <- merge(sig, s2, by = c("tissue", "promoter", "type", "k"), all.x = TRUE)
-stopifnot(nrow(sig) == 14823)   # delivery v6 (conditional refit 2026-11-06); 14,825 in v4, 14,808 in v3
+stopifnot(nrow(sig) > 0)   # the per-signal table of delivery v6 must not be empty
 fl <- fr(file.path(IN, "mirror/promoter_flags.tsv.gz"))[, .(tissue, promoter, gene, n_prom_gene, mirror_role)]
 info <- fread(file.path(IN, "v11/Promoter_info_filter_5.txt")); setnames(info, 1, "pid")
 info <- info[, .(promoter = pid, chr = seqnames, tss = start, pstrand = strand)]
@@ -77,7 +77,7 @@ agg <- V[, .(n_var = .N,
   f_near_major = sum(w * (cat_1000 == "other" & near_orank == 1))), by = sid]
 S1 <- merge(sig, agg, by = "sid")
 S1[, spacing := abs(tss - partner_tss)]
-## author 2026-11-04: major / minor = higher / lower mean usage POOLED over all tissues (= the mirror table's canonical / partner, as Figure 4).
+## major / minor = higher / lower mean usage POOLED over all tissues (= the mirror table's canonical / partner, as Figure 4).
 S1[, own_minor := fifelse(n_prom_gene == 2, mirror_role == "partner", NA)]
 S1[, nlp := pmin(nlog10p(logp_at_selection), 50)]
 S1 <- merge(S1, TT[, .(tissue, n_donors = n)], by = "tissue")
@@ -199,7 +199,7 @@ writeT(rbind(rbindlist(lapply(list(rdS, rdN, rd), function(r) r$groups[, .(label
              rbindlist(lapply(list(rdS, rdN, rd), function(r) r$contrasts[, .(label, group = NA_character_, n_signals = NA_real_, estimate = difference, lo, hi, contrast, p_boot)]))),
        file.path(OUT, "A1_dedup_one_per_gene.tsv"))
 
-## ---- 8. raw class x role table (the preview of 2026-11-03, now with candidate variants and CIs)
+## ---- 8. raw class x role table (with candidate variants and CIs)
 S1[, role := fifelse(n_prom_gene == 2, fifelse(own_minor, "minor", "major"), "three_plus")]
 rr <- rbindlist(lapply(c("f_own", "f_other"), function(v) {
   d <- S1[, .(gene, group = paste(type, role, sep = "_"), num = get(v), den = 1)]

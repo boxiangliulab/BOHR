@@ -1,5 +1,5 @@
-## Mirror rule v3 (author 2026-11-04 final: exact switches are p0 on the silent TSS): eQTL coloc re-keyed to units v3m.
-## Step 1: the v3m analysis set (rules of coloc_eqtl_v3/00_build_analysis_set.R, unchanged: every significant primary unit x its
+## Mirror rule v3 (exact switches are p0 on the silent TSS): eQTL coloc on the final units (v3c) and their signals.
+## Step 1: the analysis set (rules of coloc_eqtl_v3/00_build_analysis_set.R, unchanged: every significant primary unit x its
 ## backward-kept signals; n_kept >= 2 -> LOO scan, else marginal) and the rows that need a new coloc run.
 ##   carried : unit not re-run in the v3m conditional analysis, same (tissue, promoter, type, k, signal_snp, stat) as before
 ##             -> its final_clump result is reused unchanged (same SNPs, same statistics, same windows)
@@ -11,10 +11,10 @@
 source("/projects/group/bliu/e1327989/GTEx/new_GWAS/coloc_final_nogate_v3/scripts/coloc_final_lib.R")
 R2 <- "/projects/group/bliu/e1327989/GTEx/QTL_figure/rerun_v2"; OUT <- file.path(R2, "results/coloc_eqtl_v3m"); LW <- file.path(R2, "results/coloc_eqtl_ldwin")
 EQ <- "/home/e1327989/project/GTEx/Rawdata/gtex_v11/GTEx_Analysis_v11_eQTL"
-U <- rbindlist(lapply(Sys.glob(file.path(R2, "results/final_nogate_v3m/freeze/*.real.units.rds")), function(f) { a <- readRDS(f); setDT(a)
+U <- rbindlist(lapply(Sys.glob(file.path(R2, "results/final_nogate_v3c/freeze/*.real.units.rds")), function(f) { a <- readRDS(f); setDT(a)
   a[, .(tissue, promoter, type, gene, q, leader, n, n0, n1, n_mid, dedup_drop, estimable, n_prom_gene, mirror_role, mirror_partner, twin, eq_class, merged_component)] }))
 U[, primary := dedup_drop == FALSE & estimable == TRUE]; U[, sig := primary & !is.na(q) & q <= 0.05]
-S <- fread(cmd = paste("zcat", file.path(R2, "results/conditional_final_v3m/freeze_real_signals.tsv.gz")))[, .(tissue, promoter, type, k, snp, backward_keep)]
+S <- fread(cmd = paste("zcat", file.path(R2, "results/conditional_final_v3c/freeze_real_signals.tsv.gz")))[, .(tissue, promoter, type, k, snp, backward_keep)]
 A <- merge(U[sig == TRUE], S, by = c("tissue", "promoter", "type")); stopifnot(uniqueN(A[, .(tissue, promoter, type)]) == U[sig == TRUE, .N])
 A[, n_signals := .N, by = .(tissue, promoter, type)]; A[, n_kept := sum(backward_keep), by = .(tissue, promoter, type)]
 A <- A[backward_keep == TRUE]

@@ -1,8 +1,8 @@
-## Extra permutation maps for the freeze definition (author 2026-10-02, plan B: 50 tissues x 2 more permutations, BOHR and
-## QTLtools). Same construction as prep_all.R's freeze perm0 (slot = genotype owner, donor = whose phenotype + PEER row the
+## Extra permutation maps for the freeze definition: two more permutations (perm1, perm2) of the 50 tissues, for BOHR and
+## QTLtools. Same construction as prep_all.R's freeze perm0 (slot = genotype owner, donor = whose phenotype + PEER row the
 ## slot receives; sample(U) without replacement), seed 20261002 + 1000 * k + i (k = permutation index, i = tissue index in
 ## the sorted tissue list). Existing map files are NEVER overwritten: Adipose_Subcutaneous and Whole_Blood already have
-## perm1-3 maps (the 2026-10-01 extra mu permutations) and are reused as they are.
+## perm1-3 maps (from an earlier set of extra mu permutations) and are reused as they are.
 ## Output: perm_maps/final/freeze/<T>.perm{1,2}.perm_map.tsv; rows appended to perm_maps/MANIFEST.tsv
 suppressPackageStartupMessages(library(data.table))
 V2 <- "/projects/group/bliu/e1327989/GTEx/QTL_figure/rerun_v2"; OUTM <- file.path(V2, "perm_maps/final/freeze")

@@ -1,6 +1,6 @@
-## 101_K_overlap_multi_location.R -- author's questions after the figures (2026-11-03 night). Frame in plain terms: in the
+## 101_K_overlap_multi_location.R -- shared leads, genes with >= 3 promoters and lead location. Frame in plain terms: in the
 ## analysed groups the switching promoter is always the MINOR promoter and the other one is the MAJOR promoter
-## (p0 on the minor, p1 on the major = the minor switching, mu: minor by convention); the 284 signals where the major switches
+## (p0 on the minor, p1 on the major = the minor switching, mu: minor by convention); the signals where the major switches
 ## (p0 on the major, p1 on the minor) stay out, as before.
 ##  K1 overlap: drop signals whose lead is shared with a signal of the other kind (p0/p1 vs mu) in the same gene x tissue
 ##     (identical lead or lead inside the other signal's r2 >= 0.8 proxy set); also keep only gene x tissue with one kind only.
@@ -29,7 +29,7 @@ pxl <- fr(file.path(IN, "delivery/genotype_pheno_proxies.tsv.gz"), select = c("t
 pxl[, sid := paste(tissue, promoter, type, k, sep = "|")]; pxl <- unique(pxl[, .(own_mean = (n0 * m0 + n1 * m1 + n2 * m2) / (n0 + n1 + n2)), by = sid], by = "sid")
 X <- merge(X, pxl, by = "sid", all.x = TRUE)
 X[two == FALSE, own_minor := own_mean < 0.5]
-T3 <- X[two == FALSE & !is.na(own_minor) & n_prom_gene >= 3]   # v5: genes with >= 3 TESTED promoters only (226 signals in one-promoter genes dropped)
+T3 <- X[two == FALSE & !is.na(own_minor) & n_prom_gene >= 3]   # v5: genes with >= 3 TESTED promoters only (signals in one-promoter genes dropped)
 T3[, minor_is_own := fifelse(type == "p0", TRUE, fifelse(type == "p1", FALSE, own_minor))]
 T3 <- T3[(type == "p0" & own_minor == TRUE) | (type == "p1" & own_minor == FALSE) | type == "mu"]
 T3[, sM := fifelse(minor_is_own, dir_c, -dir_c)]

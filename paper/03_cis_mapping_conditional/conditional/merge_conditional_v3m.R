@@ -1,8 +1,8 @@
-## merge_conditional_v3m.R — final conditional analysis under mirror rule v3 (author 2026-11-04: exact boundary events are
+## merge_conditional_v3m.R — final conditional analysis under mirror rule v3 (exact boundary events are
 ## labelled p0 on the silent promoter; results/final_nogate_v3m). Sources:
-##   results/conditional_v3m (run_conditional_v3m.R; units in work/cond_v3m/units_to_run.tsv: new p0(partner) units, and
-##     units whose tissue threshold moved enough to continue / truncate; all re-run from the leader)   -> used for those units
-##   results/conditional_final_v3 (units v3, mirror v2; merge_conditional_ng3.R)                        -> every other unit
+##   results/conditional_v3m (run_conditional_v3m.R; units in work/cond_v3m/units_to_run.tsv: in the final run every significant
+##     unit; in the earlier runs new p0(partner) units and continued / truncated units; all from the leader)   -> used for those units
+##   results/conditional_final_v3 (earlier runs: units v3, mirror v2; final run: the stub of cond_fresh_list.R) -> every other unit
 ## Units = the v3m primary significant set (q <= 0.05). v3 units outside it (mostly v2 p1(canonical) of exact pairs, now
 ## held as p0(partner)) are dropped.
 ## Backward (single pass, as before): keep a signal of a multi-signal unit if its leave-one-out window ACAT <= thr_v3m. It is

@@ -1,4 +1,4 @@
-## 134_major_minor_pooled_chromatin.R -- author 2026-11-04: the main panel only compares the major and the minor promoter (no QTL-class split;
+## 134_major_minor_pooled_chromatin.R -- the main panel compares only the major and the minor promoter (no QTL-class split;
 ## the class-split tables 129 / 132 are kept as tables). Every tested (tissue, promoter) of a two-promoter gene counted once; role =
 ## usage-defined major / minor (mirror_pairs tissue means). Read-outs, gene-clustered bootstrap B = 2000:
 ##   marks: mean share of the tissue's matched ENCODE samples with DNase / H3K27ac / H3K4me3 called at the TSS element (z > 1.64);
@@ -15,7 +15,7 @@ MK <- rbindlist(lapply(split(U1, U1$tissue), function(x) { bs <- mp[gtex == x$ti
   k27 <- K[x$acc, bs, drop = FALSE] > TH; k4 <- A[x$acc, bs, drop = FALSE] > TH
   x[, `:=`(DNase = rowMeans(D[acc, bs, drop = FALSE] > TH), H3K27ac = rowMeans(k27), H3K4me3 = rowMeans(k4),
            k27_balance = ifelse(rowSums(k27 | k4) > 0, rowSums(k27 & !k4) / rowSums(k27 | k4), NA_real_))] }))
-MP <- fread(cmd = sprintf("zcat %s", file.path(F5S, "in/mirror/mirror_pairs.tsv.gz")), select = c("tissue", "canonical", "partner"))   # major = canonical = higher usage pooled over all tissues (author 2026-11-04: one definition, as Figure 4)
+MP <- fread(cmd = sprintf("zcat %s", file.path(F5S, "in/mirror/mirror_pairs.tsv.gz")), select = c("tissue", "canonical", "partner"))   # major = canonical = higher usage pooled over all tissues (one definition, as Figure 4)
 RO <- rbind(MP[, .(tissue, promoter = canonical, role = "major")], MP[, .(tissue, promoter = partner, role = "minor")])
 ST <- merge(ST, RO, by = c("tissue", "promoter")); MK <- merge(MK, RO, by = c("tissue", "promoter"))
 bt <- function(d, f) { b <- gboot(d, f); c(est = f(d), lo = unname(quantile(b, .025, na.rm = TRUE)), hi = unname(quantile(b, .975, na.rm = TRUE))) }

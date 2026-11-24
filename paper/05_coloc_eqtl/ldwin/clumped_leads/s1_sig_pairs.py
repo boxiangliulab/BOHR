@@ -1,4 +1,4 @@
-"""Figure 4 panel e, LD-window coloc, sensitivity "eQTL leads by recursive clumping" (author 2026-10-12),
+"""Figure 4 panel e, LD-window coloc, sensitivity "eQTL leads by recursive clumping" (2026-10-12),
 step s1: the GTEx v11 significant eQTL variants (eQTLs.signif_pairs: p below the gene's nominal threshold) of every eGene
 x tissue of the Fig. 4e analysis set (gene_base matched on the version-stripped ID).
 Output: results/coloc_eqtl_ldwin/sens_clump/sig/<tissue>.tsv.gz (gene_base, chr, variant_id, pval_nominal).

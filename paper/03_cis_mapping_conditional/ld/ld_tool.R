@@ -1,4 +1,4 @@
-## LD standard shared by Figures 4, 5 and 6 = PLINK 1.9 (author 2026-10-03: the PLINK approach is the unified standard).
+## LD standard shared by Figures 4, 5 and 6 = PLINK 1.9 (the PLINK approach is the unified standard).
 ##   genotypes : the model's VCF (GTEx v9 WGS, MAF >= 0.05); GT -> ALT-allele dosage 0/1/2; missing calls stay MISSING
 ##   per pair  : donors missing either SNP are dropped from that pair (PLINK 1.9 --r / --r2). Verified identical to PLINK
 ##               (work/plink_v3: 477,984 shared proxy pairs, signs 100% equal with --keep-allele-order)

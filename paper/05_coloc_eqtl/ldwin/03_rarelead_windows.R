@@ -2,9 +2,9 @@
 ## MAF >= 0.05 panel. Their r2 >= 0.1 partners were computed on
 ## NSCC from the unfiltered v9 VCF (944-donor freeze, --maf 0.005, tissue donors; job rarelead.pbs). Three windows per
 ## rare lead, all = [min(lead, partners) - 50 kb, max(lead, partners) + 50 kb]:
-##   A    : partners of any frequency (MAF >= 0.005) -- the author's "top variant LD" with the full VCF;
+##   A    : partners of any frequency (MAF >= 0.005) -- the LD of the eQTL top variant computed with the full VCF;
 ##   Apan : partners restricted to the panel (MAF >= 0.05) -- the same partner universe as every other lead;
-##   C    : no partner, lead +/- 50 kb (my first suggestion).
+##   C    : no partner, lead +/- 50 kb.
 ## Validity proxy per puQTL signal x eQTL pair: panel SNPs inside the intersection of the two windows (>= 5). The real
 ## rule counts SNPs with statistics in both datasets; panel SNPs are an upper bound.
 suppressPackageStartupMessages(library(data.table))

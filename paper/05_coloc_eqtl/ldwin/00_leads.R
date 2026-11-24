@@ -1,5 +1,5 @@
-## Figure 4 panel e, LD-window coloc (author 2026-10-12), step 0: the lead SNPs whose LD windows are needed.
-## Lab rule (author 2026-10-12): each lead's LD partners at r2 >= 0.1 (PLINK 1.9, GTEx v9), window = farthest partner
+## Figure 4 panel e, LD-window coloc, step 0: the lead SNPs whose LD windows are needed.
+## Lab rule: each lead's LD partners at r2 >= 0.1 (PLINK 1.9, GTEx v9), window = farthest partner
 ## +/- 50 kb; the two windows of a pair are valid when their intersection holds >= 5 SNPs with statistics in both
 ## datasets; coloc input = the union of the two windows (>= 10 shared SNPs kept). Leads:
 ##   puQTL: every analysis signal of coloc_eqtl_v3 (14,783; the LOO/marginal scan of each signal is unchanged);

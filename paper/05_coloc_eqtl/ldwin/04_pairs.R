@@ -1,9 +1,9 @@
-## Figure 4 panel e, LD-window coloc, step 4: the final signal x eQTL pairs and their regions (author 2026-10-12).
+## Figure 4 panel e, LD-window coloc, step 4: the final signal x eQTL pairs and their regions.
 ## Every analysis signal of coloc_eqtl_v3 (14,783; analysis_set.rds, read-only) is paired with the eQTL lead of its gene in
 ## that tissue (the GTEx v11 eGenes-file top variant; eqtl_leads.tsv). Windows (lab rule): r2 >= 0.1 partners (PLINK 1.9,
 ## tissue donors, +-1 Mb), farthest partner +/- 50 kb; a lead without a partner gets +/- 50 kb.
 ##   puQTL lead and eQTL leads in the MAF >= 0.05 panel: lead_windows.tsv (step 2);
-##   eQTL leads absent from the panel (1,485, all MAF < 0.05): option A' (author 2026-10-12 "OK, use A'") -- the lead is
+##   eQTL leads absent from the panel (1,485, all MAF < 0.05): option A' -- the lead is
 ##   typed in the unfiltered v9 VCF and its partners are restricted to the panel (rarelead_windows.tsv, sAp/eAp; step 3).
 ## Intersection = [max start, min end] (empty when start > end); union = [min start, max end]. The validity (>= 5 SNPs with
 ## statistics in both datasets inside the intersection) and the >= 10 shared SNPs in the union are applied in step 6.

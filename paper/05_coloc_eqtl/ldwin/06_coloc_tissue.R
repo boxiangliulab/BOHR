@@ -1,11 +1,11 @@
-## Figure 4 panel e, LD-window coloc, step 6: puQTL x eQTL coloc for one tissue under the lab LD-window rule (author
-## 2026-10-12). Identical to coloc_eqtl_v3/02_coloc_tissue.R (Figure 6's library sourced unchanged: load_marginal(),
+## Figure 4 panel e, LD-window coloc, step 6: puQTL x eQTL coloc for one tissue under the lab LD-window rule.
+## Identical to coloc_eqtl_v3/02_coloc_tissue.R (Figure 6's library sourced unchanged: load_marginal(),
 ## coloc_signal(); per-class P, priors, N, MAF unchanged) except the region:
 ##   puQTL statistics: signal_snps() of the library, but over the pair's union [uni_start, uni_end] (step 4) instead of
 ##     signal +-200 kb -- copied below as signal_snps_region(); everything else in it is unchanged (finite P, MAF in
 ##     (0, 1), folded MAF, min-p row per position).
 ##   validity: SNPs with statistics in both datasets inside the intersection [int_start, int_end] >= 5; otherwise the
-##     signal is not tested and gets status "different locus (LD windows disjoint)" (author 2026-10-12, provisional).
+##     signal is not tested and gets status "different locus (LD windows disjoint)".
 ##   coloc input: SNPs with statistics in both datasets inside the union; >= 10 required (coloc_signal()).
 ## Diagnostic only, never used for a call: for "different locus" signals coloc is still run on the union and stored in
 ## the diag_* columns.
